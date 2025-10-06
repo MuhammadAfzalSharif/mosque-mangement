@@ -21,7 +21,7 @@ import ApprovedMosques from '../components/superadmin/ApprovedMosques.tsx';
 import RejectedAdmins from '../components/superadmin/RejectedAdmins.tsx';
 import MosqueRegistrationSelector from '../components/superadmin/MosqueRegistrationSelector.tsx';
 import DeleteMosques from '../components/superadmin/DeleteMosques.tsx';
-import MosquesWithoutAdmin from '../components/superadmin/MosquesWithoutAdmin.tsx';
+import AdminManagement from '../components/superadmin/AdminManagement.tsx';
 import AuditLogs from '../components/superadmin/AuditLogs.tsx';
 
 type TabType = 'dashboard' | 'pending' | 'approved' | 'rejected' | 'registration' | 'delete' | 'no-admin' | 'audit';
@@ -142,6 +142,7 @@ const SuperAdminDashboard: React.FC = () => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [toast, setToast] = useState<ToastState>({ show: false, type: 'success', message: '' });
+    const [refreshApprovedMosques, setRefreshApprovedMosques] = useState(0); // Trigger for refreshing approved mosques
     const [editFormData, setEditFormData] = useState({
         name: '',
         location: '',
@@ -261,10 +262,21 @@ const SuperAdminDashboard: React.FC = () => {
                     mosqueData: response.data
                 });
                 setShowDetailsModal(true);
+            } else {
+                setToast({
+                    show: true,
+                    type: 'error',
+                    message: '⚠ No mosque ID found for this record.'
+                });
             }
         } catch (err) {
             console.error('Failed to fetch mosque details:', err);
-            alert('Failed to load mosque details. Please try again.');
+            const errorMessage = getErrorMessage(err);
+            setToast({
+                show: true,
+                type: 'error',
+                message: `✗ Failed to load mosque details: ${errorMessage}`
+            });
         }
     };
 
@@ -304,11 +316,20 @@ const SuperAdminDashboard: React.FC = () => {
                 setEditFormData(formData);
                 setShowEditModal(true);
             } else {
-                alert('No mosque ID found for this record. Cannot edit.');
+                setToast({
+                    show: true,
+                    type: 'error',
+                    message: '⚠ No mosque ID found. Cannot edit this record.'
+                });
             }
         } catch (err) {
             console.error('Failed to fetch mosque details for editing:', err);
-            alert('Failed to load mosque details for editing. Please try again.');
+            const errorMessage = getErrorMessage(err);
+            setToast({
+                show: true,
+                type: 'error',
+                message: `✗ Failed to load mosque details: ${errorMessage}`
+            });
         }
     };
 
@@ -321,7 +342,11 @@ const SuperAdminDashboard: React.FC = () => {
     const handleConfirmMosqueEdit = async () => {
         try {
             if (!selectedMosqueForEdit || !selectedMosqueForEdit.mosque_id) {
-                alert('No mosque selected for editing.');
+                setToast({
+                    show: true,
+                    type: 'error',
+                    message: '⚠ No mosque selected for editing.'
+                });
                 return;
             }
 
@@ -349,16 +374,37 @@ const SuperAdminDashboard: React.FC = () => {
 
             console.log('Updating mosque with data:', updateData);
 
-            await superAdminApi.updateMosque(selectedMosqueForEdit.mosque_id, updateData);
+            const response = await superAdminApi.updateMosque(selectedMosqueForEdit.mosque_id, updateData);
 
             // Close confirmation modal and show success modal
             setShowConfirmModal(false);
             setShowSuccessModal(true);
 
+            // Show success toast
+            const mosqueName = editFormData.name || selectedMosqueForEdit.mosque_name || 'Mosque';
+            setToast({
+                show: true,
+                type: 'success',
+                message: `✓ ${mosqueName} details updated successfully!`
+            });
+
+            console.log('Mosque updated successfully:', response.data);
+
+            // Trigger refresh of approved mosques list
+            setRefreshApprovedMosques(prev => prev + 1);
+
         } catch (err) {
             console.error('Failed to update mosque:', err);
+            const errorMessage = getErrorMessage(err);
+
             setShowConfirmModal(false);
-            alert('Failed to update mosque details. Please try again.');
+
+            // Show error toast with server message
+            setToast({
+                show: true,
+                type: 'error',
+                message: `✗ Failed to update mosque: ${errorMessage}`
+            });
         }
     };
 
@@ -444,6 +490,7 @@ const SuperAdminDashboard: React.FC = () => {
                     <ApprovedMosques
                         onViewDetails={handleViewApprovedMosque}
                         onEdit={handleEditApprovedMosque}
+                        refreshTrigger={refreshApprovedMosques}
                     />
                 );
             case 'rejected':
@@ -538,19 +585,13 @@ const SuperAdminDashboard: React.FC = () => {
                 return <DeleteMosques />;
             case 'no-admin':
                 return (
-                    <MosquesWithoutAdmin
-                        onAssignAdmin={(id: string) => console.log('Assign Admin:', id)}
+                    <AdminManagement
                         onDelete={(id: string, reason: string) => console.log('Delete:', id, reason)}
                         onSendReminder={(id: string) => console.log('Send Reminder:', id)}
                     />
                 );
             case 'audit':
-                return (
-                    <AuditLogs
-                        onViewDetails={(log) => console.log('View Log:', log)}
-                        onExportLogs={(filters) => console.log('Export:', filters)}
-                    />
-                );
+                return <AuditLogs />;
             default:
                 return <DashboardOverview stats={stats} onRefresh={fetchStats} />;
         }

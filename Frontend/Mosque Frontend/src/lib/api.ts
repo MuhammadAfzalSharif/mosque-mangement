@@ -249,6 +249,10 @@ export const superAdminApi = {
   regenerateMosqueCode: (id: string, data?: { expiry_days?: number }) =>
     api.put(`/superadmin/mosque/${id}/regenerate-code`, data),
 
+  // Remove admin from mosque
+  removeAdmin: (id: string, data: { removal_reason: string }) =>
+    api.put(`/superadmin/admin/${id}/remove`, data),
+
   // Get mosque verification details
   getMosqueVerificationDetails: (id: string) =>
     api.get(`/superadmin/mosque/${id}/verification`),
@@ -277,6 +281,56 @@ export const superAdminApi = {
     contact_email?: string;
     admin_instructions?: string;
   }) => api.post("/mosques", data),
+
+  // Assign admin to existing mosque
+  assignAdminToMosque: (
+    mosqueId: string,
+    data: {
+      admin_name: string;
+      admin_email: string;
+      admin_phone: string;
+      admin_password: string;
+      super_admin_notes?: string;
+    }
+  ) => api.post(`/superadmin/mosques/${mosqueId}/assign-admin`, data),
+
+  // Audit Logs
+  getAuditLogs: (params?: {
+    page?: number;
+    limit?: number;
+    action_type?: string;
+    user_type?: string;
+    target_type?: string;
+    search?: string;
+    start_date?: string;
+    end_date?: string;
+  }) => api.get("/superadmin/audit-logs", { params }),
+
+  // Get audit log statistics
+  getAuditStats: () => api.get("/superadmin/audit-stats"),
+
+  // Get action types summary for dashboard cards
+  getActionTypesSummary: () => api.get("/superadmin/action-types-summary"),
+
+  // Get specific audit log details
+  getAuditLogDetails: (id: string) => api.get(`/superadmin/audit-logs/${id}`),
+
+  // Export audit logs as CSV
+  exportAuditLogs: (params?: {
+    action_type?: string;
+    user_type?: string;
+    target_type?: string;
+    start_date?: string;
+    end_date?: string;
+  }) =>
+    api.get("/superadmin/audit-logs/export/csv", {
+      params,
+      responseType: "blob",
+    }),
+
+  // Cleanup old audit logs
+  cleanupAuditLogs: (days_old: number = 90) =>
+    api.delete("/superadmin/audit-logs/cleanup", { params: { days_old } }),
 };
 
 export default api;

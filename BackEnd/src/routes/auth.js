@@ -126,6 +126,41 @@ router.post('/admin/login', async (req, res) => {
             });
         }
 
+        if (admin.status === 'admin_removed') {
+            // Issue a limited token for status page access only
+            const limitedToken = jwt.sign(
+                { userId: admin._id.toString(), role: 'admin', status: 'admin_removed', limited: true },
+                process.env.JWT_SECRET,
+                { expiresIn: '30d' } // 30 days to allow reapplication
+            );
+
+            console.log('ADMIN REMOVED LOGIN - Admin ID:', admin._id.toString());
+            console.log('ADMIN REMOVED LOGIN - Token generated for userId:', admin._id.toString());
+
+            return res.status(403).json({
+                error: 'You have been removed from your mosque',
+                code: 'ADMIN_REMOVED',
+                status: 'admin_removed',
+                token: limitedToken, // Provide token for status page access
+                admin: {
+                    _id: admin._id.toString(),
+                    name: admin.name,
+                    email: admin.email,
+                    phone: admin.phone,
+                    status: admin.status,
+                    mosque_id: admin.mosque_id
+                },
+                admin_removal_reason: admin.admin_removal_reason || 'No reason provided',
+                admin_removal_date: admin.admin_removal_date,
+                removed_from_mosque_name: admin.removed_from_mosque_name,
+                removed_from_mosque_location: admin.removed_from_mosque_location,
+                can_reapply: admin.can_reapply,
+                message: admin.can_reapply
+                    ? 'You have been removed from your mosque by the Super Admin. You can reapply for a different mosque or the same mosque.'
+                    : 'You have been removed from your mosque. Please contact the Super Admin for assistance.'
+            });
+        }
+
         if (admin.status === 'pending') {
             // Issue a limited token for status page access only
             const limitedToken = jwt.sign(
@@ -771,6 +806,13 @@ router.get('/admin/me', auth, async (req, res) => {
                     mosque_deletion_date: admin.mosque_deletion_date,
                     deleted_mosque_name: admin.deleted_mosque_name,
                     deleted_mosque_location: admin.deleted_mosque_location,
+                    can_reapply: admin.can_reapply
+                } : null,
+                admin_removal_info: admin.status === 'admin_removed' ? {
+                    admin_removal_reason: admin.admin_removal_reason,
+                    admin_removal_date: admin.admin_removal_date,
+                    removed_from_mosque_name: admin.removed_from_mosque_name,
+                    removed_from_mosque_location: admin.removed_from_mosque_location,
                     can_reapply: admin.can_reapply
                 } : null,
                 created_at: admin.createdAt

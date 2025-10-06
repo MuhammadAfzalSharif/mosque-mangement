@@ -12,6 +12,7 @@ const auditLogSchema = new mongoose.Schema({
             'admin_registered',
             'admin_approved',
             'admin_rejected',
+            'admin_removed',
             'admin_login',
             'superadmin_login',
             'verification_code_generated',
@@ -114,23 +115,68 @@ auditLogSchema.statics.logAction = async function (actionData) {
     }
 };
 
-// Instance method to get formatted action description
+// Instance method to get formatted action description in simple English
 auditLogSchema.methods.getActionDescription = function () {
     const { action_type, performed_by, target, action_details } = this;
+    const userName = performed_by.user_name || 'Unknown User';
 
     switch (action_type) {
         case 'mosque_created':
-            return `${performed_by.user_name} created mosque "${action_details.mosque_data.name}" at ${action_details.mosque_data.location}`;
+            const mosqueName = action_details?.mosque_data?.name || 'a mosque';
+            const mosqueLocation = action_details?.mosque_data?.location || 'unknown location';
+            return `${userName} created a new mosque called "${mosqueName}" located at ${mosqueLocation}`;
+
         case 'mosque_deleted':
-            return `${performed_by.user_name} deleted mosque "${action_details.mosque_data.name}" at ${action_details.mosque_data.location}`;
+            const deletedMosqueName = action_details?.mosque_data?.name || 'a mosque';
+            const deletedMosqueLocation = action_details?.mosque_data?.location || 'unknown location';
+            return `${userName} permanently deleted the mosque "${deletedMosqueName}" from ${deletedMosqueLocation}`;
+
+        case 'mosque_details_updated':
+            const updatedMosqueName = action_details?.mosque_data?.name || target.target_name || 'a mosque';
+            return `${userName} updated the details of "${updatedMosqueName}" mosque`;
+
+        case 'admin_registered':
+            const registeredAdminName = action_details?.admin_data?.name || 'An admin';
+            const registeredMosqueName = action_details?.admin_data?.mosque_name || 'a mosque';
+            return `${registeredAdminName} applied to become admin for "${registeredMosqueName}"`;
+
         case 'admin_approved':
-            return `${performed_by.user_name} approved admin "${action_details.admin_data.name}" for mosque "${action_details.admin_data.mosque_name}"`;
+            const approvedAdminName = action_details?.admin_data?.name || 'an admin';
+            const approvedMosqueName = action_details?.admin_data?.mosque_name || 'a mosque';
+            return `${userName} approved ${approvedAdminName} as the admin for "${approvedMosqueName}"`;
+
         case 'admin_rejected':
-            return `${performed_by.user_name} rejected admin application for "${action_details.admin_data.name}" for mosque "${action_details.admin_data.mosque_name}"`;
+            const rejectedAdminName = action_details?.admin_data?.name || 'an admin';
+            const rejectedMosqueName = action_details?.admin_data?.mosque_name || 'a mosque';
+            const rejectionReason = action_details?.reason || 'no reason provided';
+            return `${userName} rejected ${rejectedAdminName}'s application for "${rejectedMosqueName}". Reason: ${rejectionReason}`;
+
+        case 'admin_removed':
+            const removedAdminName = action_details?.admin_data?.name || 'an admin';
+            const removedFromMosque = action_details?.mosque_data?.mosque_name || action_details?.admin_data?.mosque_name || 'a mosque';
+            const removalReason = action_details?.admin_data?.removal_reason || action_details?.reason || 'no reason provided';
+            return `${userName} removed ${removedAdminName} from "${removedFromMosque}". Reason: ${removalReason}`;
+
         case 'verification_code_regenerated':
-            return `${performed_by.user_name} regenerated verification code for mosque "${action_details.mosque_data.name}"`;
+            const codeRegeneratedMosque = action_details?.mosque_data?.name || target.target_name || 'a mosque';
+            const oldCode = action_details?.before_data?.verification_code || 'old code';
+            const newCode = action_details?.after_data?.verification_code || action_details?.mosque_data?.verification_code || 'new code';
+            return `${userName} generated a new verification code for "${codeRegeneratedMosque}" (changed from ${oldCode} to ${newCode})`;
+
+        case 'prayer_times_updated':
+            const prayerMosqueName = action_details?.mosque_data?.name || target.target_name || 'a mosque';
+            return `${userName} updated the prayer times for "${prayerMosqueName}"`;
+
+        case 'admin_login':
+            return `${userName} successfully logged in as Admin`;
+
+        case 'superadmin_login':
+            return `${userName} successfully logged in as Super Admin`;
+
         default:
-            return `${performed_by.user_name} performed ${action_type} on ${target.target_type}`;
+            const targetName = target?.target_name || 'an item';
+            const actionName = action_type.replace(/_/g, ' ');
+            return `${userName} performed "${actionName}" on ${targetName}`;
     }
 };
 

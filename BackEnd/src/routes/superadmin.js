@@ -6,6 +6,15 @@ const { auth, requireSuperAdmin } = require('../middleware/auth');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const AuditLogger = require('../utils/auditLogger');
+const {
+    validateEmail,
+    validatePhone,
+    validatePassword,
+    validateName,
+    validateApplicationNotes,
+    sanitizeEmail,
+    sanitizeString
+} = require('../utils/validators');
 
 const router = express.Router();
 
@@ -181,6 +190,110 @@ router.put('/:id/reject', auth, requireSuperAdmin, async (req, res) => {
         console.error('Error rejecting admin:', error);
         res.status(500).json({
             error: 'Server error during rejection process',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Remove Admin from Mosque - UPDATED (Don't delete, just update status to admin_removed)
+router.put('/admin/:id/remove', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { removal_reason } = req.body;
+
+        // Validation
+        if (!removal_reason || removal_reason.trim().length < 10) {
+            return res.status(400).json({
+                error: 'Removal reason must be at least 10 characters long',
+                code: 'INVALID_REASON'
+            });
+        }
+
+        // Find admin with populated mosque data
+        const admin = await Admin.findById(req.params.id).populate('mosque_id');
+
+        if (!admin) {
+            return res.status(404).json({
+                error: 'Admin not found',
+                code: 'ADMIN_NOT_FOUND'
+            });
+        }
+
+        // Check if admin is approved (only approved admins can be removed)
+        if (admin.status !== 'approved') {
+            return res.status(400).json({
+                error: 'Only approved admins can be removed from their mosques',
+                code: 'NOT_APPROVED'
+            });
+        }
+
+        // Store mosque details before modification
+        const mosqueDetails = admin.mosque_id ? {
+            id: admin.mosque_id._id,
+            name: admin.mosque_id.name,
+            location: admin.mosque_id.location
+        } : null;
+
+        if (!mosqueDetails) {
+            return res.status(400).json({
+                error: 'Admin has no associated mosque',
+                code: 'NO_MOSQUE'
+            });
+        }
+
+        // Update admin status to admin_removed (DON'T DELETE)
+        admin.status = 'admin_removed';
+        admin.admin_removal_reason = removal_reason.trim();
+        admin.admin_removal_date = new Date();
+        admin.removed_from_mosque_name = mosqueDetails.name;
+        admin.removed_from_mosque_location = mosqueDetails.location;
+        admin.removed_by = req.user.id;
+        admin.mosque_id = null; // Remove mosque association
+        admin.can_reapply = true; // Allow reapplication
+
+        await admin.save();
+
+        // Regenerate mosque verification code so someone else can apply
+        const newVerificationCode = crypto.randomBytes(8).toString('hex').toUpperCase();
+        const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+        await Mosque.findByIdAndUpdate(
+            mosqueDetails.id,
+            {
+                verification_code: newVerificationCode,
+                verification_code_expires: expiryDate
+            }
+        );
+
+        // Audit log
+        const auditLogger = new AuditLogger(req);
+        await auditLogger.logAdminRemoved(admin, mosqueDetails, removal_reason.trim());
+
+        res.json({
+            success: true,
+            message: 'Admin removed from mosque successfully. Admin account retained with admin_removed status.',
+            admin: {
+                id: admin._id,
+                name: admin.name,
+                email: admin.email,
+                phone: admin.phone,
+                status: admin.status,
+                admin_removal_reason: admin.admin_removal_reason,
+                admin_removal_date: admin.admin_removal_date,
+                removed_from_mosque_name: admin.removed_from_mosque_name,
+                removed_from_mosque_location: admin.removed_from_mosque_location,
+                can_reapply: admin.can_reapply
+            },
+            mosque: {
+                ...mosqueDetails,
+                new_verification_code: newVerificationCode,
+                message: 'Mosque verification code has been regenerated'
+            }
+        });
+
+    } catch (error) {
+        console.error('Error removing admin:', error);
+        res.status(500).json({
+            error: 'Server error during admin removal process',
             code: 'SERVER_ERROR'
         });
     }
@@ -809,7 +922,31 @@ router.get('/audit-stats', auth, requireSuperAdmin, async (req, res) => {
     try {
         const AuditLog = require('../models/AuditLog');
 
-        const stats = await AuditLog.aggregate([
+        // Get total actions count
+        const totalActions = await AuditLog.countDocuments();
+
+        // Get status-based stats
+        const statusStats = await AuditLog.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Calculate successful and failed actions
+        const successCount = statusStats.find(s => s._id === 'success')?.count || 0;
+        const failureCount = statusStats.find(s => s._id === 'failure')?.count || 0;
+
+        // Get recent activity (last 24 hours)
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const recentActivityCount = await AuditLog.countDocuments({
+            timestamp: { $gte: twentyFourHoursAgo }
+        });
+
+        // Get action type breakdown
+        const actionStats = await AuditLog.aggregate([
             {
                 $group: {
                     _id: '$action_type',
@@ -822,6 +959,7 @@ router.get('/audit-stats', auth, requireSuperAdmin, async (req, res) => {
             }
         ]);
 
+        // Get user type breakdown
         const userStats = await AuditLog.aggregate([
             {
                 $group: {
@@ -831,14 +969,343 @@ router.get('/audit-stats', auth, requireSuperAdmin, async (req, res) => {
             }
         ]);
 
+        // Get target type breakdown
+        const targetStats = await AuditLog.aggregate([
+            {
+                $group: {
+                    _id: '$target.target_type',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
         res.json({
-            action_stats: stats,
+            total_actions: totalActions,
+            successful_actions: successCount,
+            failed_actions: failureCount,
+            last_24h: recentActivityCount,
+            action_stats: actionStats,
             user_stats: userStats,
+            status_stats: statusStats,
+            target_stats: targetStats,
             generated_at: new Date()
         });
     } catch (err) {
         console.error('Audit stats error:', err);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get action types summary for dashboard cards
+router.get('/action-types-summary', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const AuditLog = require('../models/AuditLog');
+
+        // Define action type metadata with colors and icons
+        const actionTypeMetadata = {
+            'mosque_created': {
+                label: 'Mosques Created',
+                color: 'blue',
+                icon: 'building',
+                category: 'mosque'
+            },
+            'mosque_deleted': {
+                label: 'Mosques Deleted',
+                color: 'orange',
+                icon: 'trash',
+                category: 'mosque'
+            },
+            'mosque_updated': {
+                label: 'Mosques Updated',
+                color: 'indigo',
+                icon: 'edit',
+                category: 'mosque'
+            },
+            'admin_approved': {
+                label: 'Admins Approved',
+                color: 'green',
+                icon: 'user-check',
+                category: 'admin'
+            },
+            'admin_rejected': {
+                label: 'Admins Rejected',
+                color: 'red',
+                icon: 'user-times',
+                category: 'admin'
+            },
+            'admin_registered': {
+                label: 'Admins Registered',
+                color: 'purple',
+                icon: 'user-plus',
+                category: 'admin'
+            },
+            'admin_removed': {
+                label: 'Admins Removed',
+                color: 'gray',
+                icon: 'user-minus',
+                category: 'admin'
+            },
+            'verification_code_regenerated': {
+                label: 'Codes Regenerated',
+                color: 'yellow',
+                icon: 'refresh',
+                category: 'verification'
+            },
+            'prayer_times_updated': {
+                label: 'Prayer Times Updated',
+                color: 'teal',
+                icon: 'clock',
+                category: 'prayer'
+            },
+            'mosque_details_updated': {
+                label: 'Mosque Details Updated',
+                color: 'cyan',
+                icon: 'info',
+                category: 'mosque'
+            },
+            'admin_login': {
+                label: 'Admin Logins',
+                color: 'pink',
+                icon: 'sign-in',
+                category: 'auth'
+            },
+            'superadmin_login': {
+                label: 'Super Admin Logins',
+                color: 'violet',
+                icon: 'shield',
+                category: 'auth'
+            }
+        };
+
+        // Get counts for all action types
+        const actionTypeCounts = await AuditLog.aggregate([
+            {
+                $group: {
+                    _id: '$action_type',
+                    total_count: { $sum: 1 },
+                    success_count: {
+                        $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] }
+                    },
+                    failure_count: {
+                        $sum: { $cond: [{ $eq: ['$status', 'failure'] }, 1, 0] }
+                    },
+                    latest_timestamp: { $max: '$timestamp' },
+                    earliest_timestamp: { $min: '$timestamp' }
+                }
+            }
+        ]);
+
+        // Get last 24 hours count for each action type
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const last24hCounts = await AuditLog.aggregate([
+            {
+                $match: {
+                    timestamp: { $gte: twentyFourHoursAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: '$action_type',
+                    count_24h: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Get today's count for each action type
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayCounts = await AuditLog.aggregate([
+            {
+                $match: {
+                    timestamp: { $gte: todayStart }
+                }
+            },
+            {
+                $group: {
+                    _id: '$action_type',
+                    count_today: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Create a map of existing counts
+        const existingCounts = {};
+        actionTypeCounts.forEach(item => {
+            existingCounts[item._id] = item;
+        });
+
+        // Ensure ALL action types are included (even with zero count)
+        const actionTypesData = Object.keys(actionTypeMetadata).map(actionType => {
+            const metadata = actionTypeMetadata[actionType];
+            const existingData = existingCounts[actionType];
+            const last24h = last24hCounts.find(c => c._id === actionType)?.count_24h || 0;
+            const today = todayCounts.find(c => c._id === actionType)?.count_today || 0;
+
+            return {
+                action_type: actionType,
+                label: metadata.label,
+                color: metadata.color,
+                icon: metadata.icon,
+                category: metadata.category,
+                total_count: existingData?.total_count || 0,
+                success_count: existingData?.success_count || 0,
+                failure_count: existingData?.failure_count || 0,
+                count_24h: last24h,
+                count_today: today,
+                latest_timestamp: existingData?.latest_timestamp || null,
+                earliest_timestamp: existingData?.earliest_timestamp || null,
+                success_rate: existingData && existingData.total_count > 0
+                    ? Math.round((existingData.success_count / existingData.total_count) * 100)
+                    : 0
+            };
+        });
+
+        // Sort by total count descending
+        actionTypesData.sort((a, b) => b.total_count - a.total_count);
+
+        // Get summary by category
+        const categorySummary = actionTypesData.reduce((acc, item) => {
+            if (!acc[item.category]) {
+                acc[item.category] = {
+                    category: item.category,
+                    total_count: 0,
+                    count_today: 0,
+                    count_24h: 0,
+                    action_types: []
+                };
+            }
+            acc[item.category].total_count += item.total_count;
+            acc[item.category].count_today += item.count_today;
+            acc[item.category].count_24h += item.count_24h;
+            acc[item.category].action_types.push(item.action_type);
+            return acc;
+        }, {});
+
+        res.json({
+            action_types: actionTypesData,
+            category_summary: Object.values(categorySummary),
+            total_action_types: actionTypesData.length,
+            total_actions: actionTypesData.reduce((sum, item) => sum + item.total_count, 0),
+            generated_at: new Date()
+        });
+    } catch (err) {
+        console.error('Action types summary error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get specific audit log details
+router.get('/audit-logs/:id', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const AuditLog = require('../models/AuditLog');
+        const log = await AuditLog.findById(req.params.id);
+
+        if (!log) {
+            return res.status(404).json({ error: 'Audit log not found' });
+        }
+
+        res.json({
+            audit_log: {
+                ...log.toObject(),
+                description: log.getActionDescription()
+            }
+        });
+    } catch (err) {
+        console.error('Audit log details error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Export audit logs (CSV format)
+router.get('/audit-logs/export/csv', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const {
+            action_type,
+            user_type,
+            target_type,
+            start_date,
+            end_date
+        } = req.query;
+
+        const AuditLog = require('../models/AuditLog');
+        const query = {};
+
+        // Apply filters
+        if (action_type) query.action_type = action_type;
+        if (user_type) query['performed_by.user_type'] = user_type;
+        if (target_type) query['target.target_type'] = target_type;
+
+        if (start_date || end_date) {
+            query.timestamp = {};
+            if (start_date) query.timestamp.$gte = new Date(start_date);
+            if (end_date) query.timestamp.$lte = new Date(end_date);
+        }
+
+        const logs = await AuditLog.find(query).sort({ timestamp: -1 });
+
+        // Create CSV content
+        const csvHeader = 'Timestamp,Action Type,Performed By,User Type,Target Type,Target Name,Status,Description\n';
+        const csvRows = logs.map(log => {
+            const timestamp = new Date(log.timestamp).toISOString();
+            const actionType = log.action_type || '';
+            const performedBy = log.performed_by?.user_name || 'Unknown';
+            const userType = log.performed_by?.user_type || '';
+            const targetType = log.target?.target_type || '';
+            const targetName = log.target?.target_name || '';
+            const status = log.status || '';
+            const description = log.getActionDescription().replace(/,/g, ';'); // Replace commas to avoid CSV issues
+
+            return `"${timestamp}","${actionType}","${performedBy}","${userType}","${targetType}","${targetName}","${status}","${description}"`;
+        }).join('\n');
+
+        const csvContent = csvHeader + csvRows;
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=audit-logs-${Date.now()}.csv`);
+        res.send(csvContent);
+    } catch (err) {
+        console.error('Audit logs export error:', err);
+        res.status(500).json({ error: 'Server error during export' });
+    }
+});
+
+// Delete old audit logs (cleanup)
+router.delete('/audit-logs/cleanup', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { days_old = 90 } = req.query;
+        const AuditLog = require('../models/AuditLog');
+
+        const cutoffDate = new Date(Date.now() - days_old * 24 * 60 * 60 * 1000);
+
+        const result = await AuditLog.deleteMany({
+            timestamp: { $lt: cutoffDate }
+        });
+
+        // Log the cleanup action
+        const auditLogger = new AuditLogger(req);
+        await AuditLog.logAction({
+            action_type: 'mosque_created', // Reusing existing type for system action
+            performed_by: auditLogger.getUserInfo(),
+            target: {
+                target_type: 'mosque',
+                target_id: null,
+                target_name: 'System Cleanup'
+            },
+            action_details: {
+                notes: `Deleted ${result.deletedCount} audit logs older than ${days_old} days`,
+                ip_address: auditLogger.ip_address,
+                user_agent: auditLogger.user_agent
+            }
+        });
+
+        res.json({
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} audit logs older than ${days_old} days`,
+            deleted_count: result.deletedCount
+        });
+    } catch (err) {
+        console.error('Audit logs cleanup error:', err);
+        res.status(500).json({ error: 'Server error during cleanup' });
     }
 });
 
@@ -1569,6 +2036,316 @@ router.get('/rejected-admins', auth, requireSuperAdmin, async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching rejected admins:', error);
+        res.status(500).json({
+            error: 'Server error',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Assign Admin to Existing Mosque
+router.post('/assign-admin/:mosqueId', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { mosqueId } = req.params;
+        const {
+            admin_name,
+            admin_email,
+            admin_phone,
+            admin_password,
+            super_admin_notes
+        } = req.body;
+
+        // Validation
+        if (!admin_name || !admin_email || !admin_password || !admin_phone) {
+            return res.status(400).json({
+                error: 'Admin name, email, phone, and password are required',
+                code: 'MISSING_REQUIRED_FIELDS'
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(admin_email)) {
+            return res.status(400).json({
+                error: 'Invalid email format',
+                code: 'INVALID_EMAIL'
+            });
+        }
+
+        // Validate phone format
+        const phoneRegex = /^\+?[0-9]{10,15}$/;
+        if (!phoneRegex.test(admin_phone.replace(/[\s-]/g, ''))) {
+            return res.status(400).json({
+                error: 'Invalid phone number format',
+                code: 'INVALID_PHONE'
+            });
+        }
+
+        // Validate password
+        if (admin_password.length < 6) {
+            return res.status(400).json({
+                error: 'Password must be at least 6 characters long',
+                code: 'INVALID_PASSWORD_LENGTH'
+            });
+        }
+
+        // Check if mosque exists
+        const mosque = await Mosque.findById(mosqueId);
+        if (!mosque) {
+            return res.status(404).json({
+                error: 'Mosque not found',
+                code: 'MOSQUE_NOT_FOUND'
+            });
+        }
+
+        // Check if mosque already has an approved admin
+        const existingApprovedAdmin = await Admin.findOne({
+            mosque_id: mosqueId,
+            status: 'approved'
+        });
+
+        if (existingApprovedAdmin) {
+            return res.status(400).json({
+                error: 'This mosque already has an approved admin',
+                code: 'ADMIN_ALREADY_EXISTS',
+                existing_admin: {
+                    name: existingApprovedAdmin.name,
+                    email: existingApprovedAdmin.email
+                }
+            });
+        }
+
+        // Check if email is already registered
+        const existingAdmin = await Admin.findOne({ email: admin_email });
+        if (existingAdmin) {
+            return res.status(400).json({
+                error: 'Admin with this email already exists',
+                code: 'EMAIL_ALREADY_EXISTS'
+            });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(admin_password, 10);
+
+        // Create new admin with approved status
+        const newAdmin = new Admin({
+            name: admin_name,
+            email: admin_email,
+            phone: admin_phone,
+            password: hashedPassword,
+            mosque_id: mosqueId,
+            status: 'approved',
+            super_admin_notes: super_admin_notes || 'Admin assigned by super admin',
+            approved_at: new Date(),
+            registration_code_used: mosque.verification_code
+        });
+
+        await newAdmin.save();
+
+        // Log the admin assignment
+        const auditLogger = new AuditLogger(req);
+        await auditLogger.logAdminApproved(newAdmin, mosque, super_admin_notes || 'Admin assigned by super admin');
+
+        res.status(201).json({
+            message: 'Admin successfully assigned to mosque',
+            admin: {
+                id: newAdmin._id,
+                name: newAdmin.name,
+                email: newAdmin.email,
+                phone: newAdmin.phone,
+                status: newAdmin.status,
+                mosque: {
+                    id: mosque._id,
+                    name: mosque.name,
+                    location: mosque.location,
+                    verification_code: mosque.verification_code
+                },
+                approved_at: newAdmin.approved_at
+            }
+        });
+    } catch (error) {
+        console.error('Error assigning admin:', error);
+        res.status(500).json({
+            error: 'Server error',
+            code: 'SERVER_ERROR',
+            details: error.message
+        });
+    }
+});
+
+// Assign Admin to Existing Mosque
+router.post('/mosques/:mosqueId/assign-admin', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { mosqueId } = req.params;
+        const {
+            admin_name,
+            admin_email,
+            admin_phone,
+            admin_password,
+            super_admin_notes
+        } = req.body;
+
+        // Validate required fields
+        if (!admin_name || !admin_email || !admin_phone || !admin_password) {
+            return res.status(400).json({
+                error: 'Admin name, email, phone, and password are required',
+                code: 'MISSING_REQUIRED_FIELDS'
+            });
+        }
+
+        // Validate admin name using validators
+        const nameValidation = validateName(admin_name, 'Admin name');
+        if (!nameValidation.valid) {
+            return res.status(400).json({
+                error: nameValidation.error,
+                code: 'INVALID_NAME'
+            });
+        }
+
+        // Validate email using validators
+        const emailValidation = validateEmail(admin_email);
+        if (!emailValidation.valid) {
+            return res.status(400).json({
+                error: emailValidation.error,
+                code: 'INVALID_EMAIL'
+            });
+        }
+
+        // Validate phone using validators
+        const phoneValidation = validatePhone(admin_phone, true);
+        if (!phoneValidation.valid) {
+            return res.status(400).json({
+                error: phoneValidation.error,
+                code: 'INVALID_PHONE'
+            });
+        }
+
+        // Validate password using validators
+        const passwordValidation = validatePassword(admin_password);
+        if (!passwordValidation.valid) {
+            return res.status(400).json({
+                error: passwordValidation.error,
+                code: 'INVALID_PASSWORD'
+            });
+        }
+
+        // Validate super admin notes if provided
+        if (super_admin_notes) {
+            const notesValidation = validateApplicationNotes(super_admin_notes);
+            if (!notesValidation.valid) {
+                return res.status(400).json({
+                    error: notesValidation.error,
+                    code: 'INVALID_NOTES'
+                });
+            }
+        }
+
+        // Sanitize inputs
+        const sanitizedName = sanitizeString(admin_name);
+        const sanitizedEmail = sanitizeEmail(admin_email);
+        const sanitizedPhone = sanitizeString(admin_phone);
+        const sanitizedNotes = super_admin_notes ? sanitizeString(super_admin_notes) : '';
+
+        // Check if mosque exists
+        const mosque = await Mosque.findById(mosqueId);
+        if (!mosque) {
+            return res.status(404).json({
+                error: 'Mosque not found',
+                code: 'MOSQUE_NOT_FOUND'
+            });
+        }
+
+        // Check if mosque already has an approved admin
+        const existingApprovedAdmin = await Admin.findOne({
+            mosque_id: mosqueId,
+            status: 'approved'
+        });
+
+        if (existingApprovedAdmin) {
+            return res.status(400).json({
+                error: 'This mosque already has an approved admin',
+                code: 'ADMIN_ALREADY_EXISTS',
+                admin: {
+                    name: existingApprovedAdmin.name,
+                    email: existingApprovedAdmin.email,
+                    phone: existingApprovedAdmin.phone
+                }
+            });
+        }
+
+        // Check if email is already in use
+        const existingAdminByEmail = await Admin.findOne({ email: sanitizedEmail });
+        if (existingAdminByEmail) {
+            return res.status(400).json({
+                error: 'An admin with this email already exists',
+                code: 'EMAIL_ALREADY_EXISTS',
+                existing_admin: {
+                    name: existingAdminByEmail.name,
+                    status: existingAdminByEmail.status
+                }
+            });
+        }
+
+        // Check if phone is already in use
+        const existingAdminByPhone = await Admin.findOne({ phone: sanitizedPhone });
+        if (existingAdminByPhone) {
+            return res.status(400).json({
+                error: 'An admin with this phone number already exists',
+                code: 'PHONE_ALREADY_EXISTS',
+                existing_admin: {
+                    name: existingAdminByPhone.name,
+                    email: existingAdminByPhone.email,
+                    status: existingAdminByPhone.status
+                }
+            });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(admin_password, 10);
+
+        // Create the new admin with approved status
+        const newAdmin = new Admin({
+            name: sanitizedName,
+            email: sanitizedEmail,
+            phone: sanitizedPhone,
+            password: hashedPassword,
+            mosque_id: mosqueId,
+            status: 'approved',
+            approved_at: new Date(),
+            super_admin_notes: sanitizedNotes || 'Admin assigned by super admin',
+            verification_code_used: mosque.verification_code
+        });
+
+        await newAdmin.save();
+
+        // Populate mosque details for response
+        await newAdmin.populate('mosque_id', 'name location');
+
+        // Log the admin assignment
+        const auditLogger = new AuditLogger(req);
+        await auditLogger.logAdminApproved(newAdmin, mosque, sanitizedNotes || 'Admin assigned by super admin');
+
+        res.status(201).json({
+            message: 'Admin assigned to mosque successfully',
+            admin: {
+                id: newAdmin._id,
+                name: newAdmin.name,
+                email: newAdmin.email,
+                phone: newAdmin.phone,
+                status: newAdmin.status,
+                mosque: {
+                    id: mosque._id,
+                    name: mosque.name,
+                    location: mosque.location,
+                    verification_code: mosque.verification_code
+                },
+                approved_at: newAdmin.approved_at,
+                super_admin_notes: newAdmin.super_admin_notes
+            }
+        });
+
+    } catch (error) {
+        console.error('Error assigning admin:', error);
         res.status(500).json({
             error: 'Server error',
             code: 'SERVER_ERROR'

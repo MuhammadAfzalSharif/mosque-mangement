@@ -87,7 +87,8 @@ export type AdminStatus =
   | "pending"
   | "approved"
   | "rejected"
-  | "mosque_deleted";
+  | "mosque_deleted"
+  | "admin_removed";
 
 // Admin profile interface
 export interface AdminProfile {
@@ -112,6 +113,13 @@ export interface AdminProfile {
     mosque_deletion_date: string;
     deleted_mosque_name: string;
     deleted_mosque_location: string;
+    can_reapply: boolean;
+  };
+  admin_removal_info?: {
+    admin_removal_reason: string;
+    admin_removal_date: string;
+    removed_from_mosque_name: string;
+    removed_from_mosque_location: string;
     can_reapply: boolean;
   };
   created_at: string;

@@ -31,9 +31,10 @@ import {
 interface Props {
     onViewDetails: (mosque: ApprovedMosque) => void;
     onEdit: (mosque: ApprovedMosque) => void;
+    refreshTrigger?: number; // Used to trigger data refresh
 }
 
-const ApprovedMosques: React.FC<Props> = ({ onViewDetails, onEdit }) => {
+const ApprovedMosques: React.FC<Props> = ({ onViewDetails, onEdit, refreshTrigger }) => {
     const [mosques, setMosques] = useState<ApprovedMosque[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +43,7 @@ const ApprovedMosques: React.FC<Props> = ({ onViewDetails, onEdit }) => {
 
     useEffect(() => {
         fetchApprovedMosques();
-    }, []);
+    }, [refreshTrigger]); // Re-fetch when refreshTrigger changes
 
     const fetchApprovedMosques = async () => {
         try {
@@ -101,8 +102,6 @@ const ApprovedMosques: React.FC<Props> = ({ onViewDetails, onEdit }) => {
             setLoading(false);
         }
     };
-
-
 
     const filteredAndSortedMosques = mosques
         .filter(mosque =>

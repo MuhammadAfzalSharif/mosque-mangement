@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { superAdminApi } from '../../lib/api';
 import { getErrorMessage } from '../../lib/types';
+import Toast from '../Toast';
 import {
     FaTrash,
     FaBuilding,
@@ -62,8 +63,11 @@ const DeleteMosques: React.FC = () => {
     const [mosqueToDelete, setMosqueToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-
+    const [toast, setToast] = useState<{ show: boolean; type: 'success' | 'error' | 'warning'; message: string }>({
+        show: false,
+        type: 'success',
+        message: ''
+    });
 
     useEffect(() => {
         fetchMosquesForDeletion();
@@ -134,7 +138,20 @@ const DeleteMosques: React.FC = () => {
 
     const confirmDelete = async () => {
         if (!deletionReason.trim()) {
-            alert('Please provide a reason for deletion');
+            setToast({
+                show: true,
+                type: 'warning',
+                message: '⚠ Please provide a reason for deletion'
+            });
+            return;
+        }
+
+        if (deletionReason.trim().length < 10) {
+            setToast({
+                show: true,
+                type: 'warning',
+                message: '⚠ Deletion reason must be at least 10 characters long'
+            });
             return;
         }
 
@@ -143,21 +160,52 @@ const DeleteMosques: React.FC = () => {
 
             if (mosqueToDelete) {
                 // Single deletion
+                const mosqueToDeleteData = mosques.find(m => m._id === mosqueToDelete);
+                const mosqueName = mosqueToDeleteData?.mosque_name || 'Mosque';
+
                 await superAdminApi.deleteMosque(mosqueToDelete, deletionReason);
-                setMosques(prev => prev.filter(m => m._id !== mosqueToDelete));
+
+                // Show success toast
+                setToast({
+                    show: true,
+                    type: 'success',
+                    message: `✓ ${mosqueName} deleted successfully!`
+                });
+
+                console.log('Mosque deleted successfully:', mosqueName);
             } else {
                 // Bulk deletion
                 await superAdminApi.bulkDeleteMosques(selectedMosques, deletionReason);
-                setMosques(prev => prev.filter(m => !selectedMosques.includes(m._id)));
-                setSelectedMosques([]);
+
+                // Show success toast
+                setToast({
+                    show: true,
+                    type: 'success',
+                    message: `✓ ${selectedMosques.length} mosque(s) deleted successfully!`
+                });
+
+                console.log(`${selectedMosques.length} mosques deleted successfully`);
             }
 
+            // Close modal and reset
             setShowDeleteModal(false);
             setDeletionReason('');
             setMosqueToDelete(null);
+            setSelectedMosques([]);
+
+            // Refresh the mosques list to get updated data
+            await fetchMosquesForDeletion();
+
         } catch (error) {
             console.error('Deletion failed:', error);
-            alert('Failed to delete mosque(s). Please try again.');
+            const errorMessage = getErrorMessage(error);
+
+            // Show error toast with server message
+            setToast({
+                show: true,
+                type: 'error',
+                message: `✗ Failed to delete mosque(s): ${errorMessage}`
+            });
         } finally {
             setIsDeleting(false);
         }
@@ -469,6 +517,15 @@ const DeleteMosques: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Toast Notifications */}
+            {toast.show && (
+                <Toast
+                    type={toast.type}
+                    message={toast.message}
+                    onClose={() => setToast({ ...toast, show: false })}
+                />
             )}
         </div>
     );

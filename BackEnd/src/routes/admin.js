@@ -58,11 +58,11 @@ router.post('/reapply', auth, async (req, res) => {
 
         console.log('Admin found:', { id: admin._id, status: admin.status, can_reapply: admin.can_reapply });
 
-        // Check if admin is rejected or mosque_deleted
-        if (admin.status !== 'rejected' && admin.status !== 'mosque_deleted') {
+        // Check if admin is rejected, mosque_deleted, or admin_removed
+        if (admin.status !== 'rejected' && admin.status !== 'mosque_deleted' && admin.status !== 'admin_removed') {
             return res.status(400).json({
                 success: false,
-                error: `Only rejected or mosque_deleted admins can reapply. Your current status is: ${admin.status}`,
+                error: `Only rejected, mosque_deleted, or admin_removed admins can reapply. Your current status is: ${admin.status}`,
                 code: 'INVALID_STATUS',
                 current_status: admin.status
             });
@@ -227,6 +227,13 @@ router.post('/reapply', auth, async (req, res) => {
         admin.mosque_deletion_date = null;
         admin.deleted_mosque_name = null;
         admin.deleted_mosque_location = null;
+
+        // Clear admin removal fields if coming from admin_removed status
+        admin.admin_removal_reason = null;
+        admin.admin_removal_date = null;
+        admin.removed_from_mosque_name = null;
+        admin.removed_from_mosque_location = null;
+        admin.removed_by = null;
 
         await admin.save();
         console.log('Admin updated successfully:', {

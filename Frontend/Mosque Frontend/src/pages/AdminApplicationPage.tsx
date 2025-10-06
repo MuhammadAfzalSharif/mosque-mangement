@@ -187,6 +187,29 @@ const AdminApplicationPage: React.FC = () => {
                 return;
             }
 
+            if (errorResponse.response?.data?.code === 'ADMIN_REMOVED') {
+                const data = errorResponse.response.data;
+
+                // CRITICAL: Clear ALL storage first to remove old tokens
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Store token and user info for status page access
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    console.log('Saved admin_removed admin token:', data.token);
+                }
+                if (data.admin) {
+                    localStorage.setItem('user', JSON.stringify(data.admin));
+                    console.log('Saved admin_removed admin user:', data.admin);
+                }
+                localStorage.setItem('user_type', 'admin');
+
+                // Redirect to status page where full profile will be loaded
+                window.location.href = '/admin/status';
+                return;
+            }
+
             if (errorResponse.response?.data?.code === 'PENDING_APPROVAL') {
                 const data = errorResponse.response.data;
 

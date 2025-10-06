@@ -283,6 +283,35 @@ class AuditLogger {
         });
     }
 
+    // Log admin removal
+    async logAdminRemoved(adminData, mosqueData, reason = '') {
+        return await AuditLog.logAction({
+            action_type: 'admin_removed',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'admin',
+                target_id: adminData._id,
+                target_name: adminData.name
+            },
+            action_details: {
+                admin_data: {
+                    name: adminData.name,
+                    email: adminData.email,
+                    phone: adminData.phone,
+                    status: adminData.status,
+                    removal_reason: reason
+                },
+                mosque_data: {
+                    mosque_id: mosqueData.id,
+                    mosque_name: mosqueData.name,
+                    mosque_location: mosqueData.location
+                },
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            }
+        });
+    }
+
     // Log login attempts
     async logLogin(userData, loginType = 'admin') {
         return await AuditLog.logAction({

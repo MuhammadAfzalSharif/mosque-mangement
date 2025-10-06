@@ -21,18 +21,24 @@ router.get('/', async (req, res) => {
         }
 
         const mosques = await Mosque.find(query)
-            .select('name location description prayer_times')
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
         const total = await Mosque.countDocuments(query);
 
-        // Transform the response to match API spec
+        // Transform the response to match API spec - return ALL fields
         const transformedMosques = mosques.map(mosque => ({
             id: mosque._id,
             name: mosque.name,
             location: mosque.location,
             description: mosque.description || '',
+            verification_code: mosque.verification_code || '',
+            verification_code_expires: mosque.verification_code_expires || null,
+            contact_email: mosque.contact_email || '',
+            contact_phone: mosque.contact_phone || '',
+            admin_instructions: mosque.admin_instructions || '',
+            createdAt: mosque.createdAt,
+            updatedAt: mosque.updatedAt,
             prayer_times: mosque.prayer_times || {
                 fajr: null,
                 dhuhr: null,
@@ -69,6 +75,12 @@ router.get('/:id', async (req, res) => {
                 location: mosque.location,
                 description: mosque.description || '',
                 verification_code: mosque.verification_code || '',
+                verification_code_expires: mosque.verification_code_expires || null,
+                contact_email: mosque.contact_email || '',
+                contact_phone: mosque.contact_phone || '',
+                admin_instructions: mosque.admin_instructions || '',
+                createdAt: mosque.createdAt,
+                updatedAt: mosque.updatedAt,
                 prayer_times: mosque.prayer_times || {
                     fajr: null,
                     dhuhr: null,
