@@ -12,6 +12,7 @@ const registerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(7, 'Password must be at least 7 characters'),
+    phone: z.string().regex(/^\+923[0-9]{9}$/, 'Phone number must be in format +923xxxxxxxxx'),
     mosque_verification_code: z.string().min(1, 'Verification code is required'),
     application_notes: z.string().optional(),
 });
@@ -74,6 +75,7 @@ const AdminApplicationPage: React.FC = () => {
                 name: data.name,
                 email: data.email,
                 password: data.password,
+                phone: data.phone,
                 mosque_id: id,
                 verification_code: data.mosque_verification_code,
                 application_notes: data.application_notes,
@@ -97,16 +99,96 @@ const AdminApplicationPage: React.FC = () => {
         try {
             const response = await authApi.loginAdmin(data);
 
-            // Store user info
+            // Store token and user info
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+            }
             localStorage.setItem('user', JSON.stringify(response.data.admin));
+            localStorage.setItem('user_type', 'admin');
 
-            // Redirect to admin dashboard
-            window.location.href = '/admin/dashboard';
+            // Check status and redirect accordingly
+            if (response.data.admin.status === 'approved') {
+                window.location.href = '/admin/dashboard';
+            } else {
+                // Redirect to status page for pending/rejected
+                window.location.href = '/admin/status';
+            }
         } catch (err) {
             console.log('Login error:', err);
+
+            // Check if it's a status-related error (rejected/pending)
+            const errorResponse = err as {
+                response?: {
+                    data?: {
+                        code?: string;
+                        status?: string;
+                        error?: string;
+                        token?: string;
+                        admin?: {
+                            _id: string;
+                            name: string;
+                            email: string;
+                            phone: string;
+                            status: string;
+                            mosque_id?: string;
+                        };
+                        rejection_reason?: string;
+                        rejection_date?: string;
+                        rejection_count?: number;
+                        can_reapply?: boolean;
+                    };
+                    status?: number;
+                }
+            };
+
+            if (errorResponse.response?.data?.code === 'ACCOUNT_REJECTED') {
+                const data = errorResponse.response.data;
+
+                // CRITICAL: Clear ALL storage first to remove old tokens
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Store token and user info for status page access
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    console.log('Saved rejected admin token:', data.token);
+                }
+                if (data.admin) {
+                    localStorage.setItem('user', JSON.stringify(data.admin));
+                    console.log('Saved rejected admin user:', data.admin);
+                }
+                localStorage.setItem('user_type', 'admin');
+
+                // Redirect to status page where full profile will be loaded
+                window.location.href = '/admin/status';
+                return;
+            }
+
+            if (errorResponse.response?.data?.code === 'PENDING_APPROVAL') {
+                const data = errorResponse.response.data;
+
+                // CRITICAL: Clear ALL storage first to remove old tokens
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Store token and user info for status page access
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    console.log('Saved pending admin token:', data.token);
+                }
+                if (data.admin) {
+                    localStorage.setItem('user', JSON.stringify(data.admin));
+                    console.log('Saved pending admin user:', data.admin);
+                }
+                localStorage.setItem('user_type', 'admin');
+
+                // Redirect to status page where full profile will be loaded
+                window.location.href = '/admin/status';
+                return;
+            }
+
             const errorMessage = getErrorMessage(err);
             setError(errorMessage);
-            // Don't redirect - stay on the form to show error
         } finally {
             setLoading(false);
         }
@@ -314,6 +396,24 @@ const AdminApplicationPage: React.FC = () => {
                                         {registerForm.formState.errors.password && (
                                             <p className="text-red-500 text-sm mt-2 font-medium">
                                                 {registerForm.formState.errors.password.message}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                            <Phone className="w-4 h-4 mr-2 text-blue-600" />
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            {...registerForm.register('phone')}
+                                            type="tel"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                            placeholder="+923001234567"
+                                        />
+                                        {registerForm.formState.errors.phone && (
+                                            <p className="text-red-500 text-sm mt-2 font-medium">
+                                                {registerForm.formState.errors.phone.message}
                                             </p>
                                         )}
                                     </div>

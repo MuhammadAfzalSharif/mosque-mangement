@@ -97,6 +97,7 @@ export const authApi = {
     name: string;
     email: string;
     password: string;
+    phone: string;
     mosque_id: string;
     verification_code: string;
     application_notes?: string;
@@ -106,12 +107,176 @@ export const authApi = {
   loginAdmin: (data: { email: string; password: string }) =>
     api.post("/admin/login", data),
 
+  // Get admin profile and status
+  getAdminProfile: () => api.get("/admin/me"),
+
+  // Request reapplication (for rejected admins)
+  requestReapplication: (data: {
+    mosque_verification_code: string;
+    application_notes?: string;
+  }) => api.post("/admin/reapply", data),
+
+  // Super admin registration
+  registerSuperAdmin: (data: { email: string; password: string }) =>
+    api.post("/superadmin/register", data),
+
   // Super admin login
   loginSuperAdmin: (data: { email: string; password: string }) =>
     api.post("/superadmin/login", data),
 
   // Logout
   logout: () => api.post("/logout"),
+};
+
+export const superAdminApi = {
+  // Dashboard stats
+  getDashboardStats: () =>
+    api.get("/superadmin/dashboard/stats").catch(() => ({
+      data: {
+        stats: {
+          total_mosques: 0,
+          approved_mosques: 0,
+          pending_requests: 0,
+          rejected_requests: 0,
+        },
+      },
+    })),
+
+  // Pending requests
+  getPendingRequests: () =>
+    api.get("/superadmin/pending").catch(() => ({
+      data: { pending_admins: [] },
+    })),
+
+  // Approved requests
+  getApprovedRequests: () =>
+    api.get("/superadmin/approved").catch(() => ({
+      data: { approved_admins: [] },
+    })),
+
+  // Request history with filtering
+  getRequestHistory: (params?: {
+    status?: string;
+    search?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  }) =>
+    api.get("/superadmin/requests/history", { params }).catch(() => ({
+      data: { requests: [] },
+    })),
+
+  // Get all mosques with registration details
+  getMosquesForManagement: () =>
+    api.get("/superadmin/mosques/registration").catch(() => ({
+      data: { mosques: [] },
+    })),
+
+  // Get all mosques with admin details (for deletion management)
+  getAllMosques: (params?: {
+    search?: string;
+    status?: string;
+    sort?: string;
+    order?: string;
+  }) =>
+    api.get("/superadmin/mosques/all", { params }).catch(() => ({
+      data: { mosques: [] },
+    })),
+
+  // Delete mosque
+  deleteMosque: (id: string, reason: string) =>
+    api.delete(`/superadmin/mosque/${id}`, {
+      data: { reason },
+    }),
+
+  // Bulk delete mosques
+  bulkDeleteMosques: (mosque_ids: string[], reason: string) =>
+    api.post("/superadmin/mosques/bulk-delete", {
+      mosque_ids,
+      reason,
+    }),
+
+  // Mosque registrations
+  getMosqueRegistrations: (params?: {
+    search?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  }) => api.get("/superadmin/mosques/registration", { params }),
+
+  // Approve admin
+  approveAdmin: (id: string, data: { super_admin_notes?: string }) =>
+    api.put(`/superadmin/${id}/approve`, data),
+
+  // Reject admin
+  rejectAdmin: (id: string, data: { reason: string }) =>
+    api.put(`/superadmin/${id}/reject`, data),
+
+  // Allow rejected admin to reapply
+  allowReapplication: (id: string, data?: { notes?: string }) =>
+    api.put(`/superadmin/${id}/allow-reapplication`, data),
+
+  // Get rejected admins list
+  getRejectedAdmins: (params?: {
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort_by?: string;
+  }) => api.get("/superadmin/rejected-admins", { params }),
+
+  // Update mosque details
+  updateMosque: (
+    id: string,
+    mosqueData: {
+      name?: string;
+      location?: string;
+      description?: string;
+      contact_phone?: string;
+      contact_email?: string;
+      admin_instructions?: string;
+      prayer_times?: {
+        fajr?: string;
+        dhuhr?: string;
+        asr?: string;
+        maghrib?: string;
+        isha?: string;
+        jummah?: string;
+      };
+    }
+  ) => api.put(`/superadmin/mosque/${id}`, mosqueData),
+
+  // Regenerate mosque verification code
+  regenerateMosqueCode: (id: string, data?: { expiry_days?: number }) =>
+    api.put(`/superadmin/mosque/${id}/regenerate-code`, data),
+
+  // Get mosque verification details
+  getMosqueVerificationDetails: (id: string) =>
+    api.get(`/superadmin/mosque/${id}/verification`),
+
+  // Complete mosque registration with admin (new method)
+  registerMosqueWithAdmin: (data: {
+    mosque_name: string;
+    location: string;
+    description?: string;
+    contact_phone?: string;
+    contact_email?: string;
+    admin_instructions?: string;
+    admin_name: string;
+    admin_email: string;
+    admin_phone?: string;
+    admin_password: string;
+    registration_code?: string;
+  }) => api.post("/superadmin/mosque-registration", data),
+
+  // Simple mosque registration (mosque only)
+  registerSimpleMosque: (data: {
+    name: string;
+    location: string;
+    description?: string;
+    contact_phone?: string;
+    contact_email?: string;
+    admin_instructions?: string;
+  }) => api.post("/mosques", data),
 };
 
 export default api;

@@ -3,13 +3,14 @@ const Mosque = require('../models/Mosque');
 const Admin = require('../models/Admin');
 const { auth, requireAdmin, requireSuperAdmin } = require('../middleware/auth');
 const crypto = require('crypto'); // Add this import for verification code generation
+const AuditLogger = require('../utils/auditLogger');
 
 const router = express.Router();
 
 // List All Mosques (Public)
 router.get('/', async (req, res) => {
     try {
-        const { search, page = 1, limit = 10 } = req.query;
+        const { search, page = 1, limit = 9 } = req.query;
         const query = {};
 
         if (search) {
@@ -114,9 +115,21 @@ router.get('/:id/prayer-times', async (req, res) => {
 router.put('/:id/prayer-times', auth, requireAdmin, async (req, res) => {
     try {
         if (req.user.mosque_id.toString() !== req.params.id) return res.status(403).json({ error: 'Not authorized to update this mosque' });
+
+        // Get current mosque data for audit logging
+        const currentMosque = await Mosque.findById(req.params.id);
+        if (!currentMosque) return res.status(404).json({ error: 'Mosque not found' });
+
+        const oldPrayerTimes = currentMosque.prayer_times;
         const { fajr, dhuhr, asr, maghrib, isha, jummah } = req.body;
-        const mosque = await Mosque.findByIdAndUpdate(req.params.id, { prayer_times: { fajr, dhuhr, asr, maghrib, isha, jummah } }, { new: true });
-        if (!mosque) return res.status(404).json({ error: 'Mosque not found' });
+        const newPrayerTimes = { fajr, dhuhr, asr, maghrib, isha, jummah };
+
+        const mosque = await Mosque.findByIdAndUpdate(req.params.id, { prayer_times: newPrayerTimes }, { new: true });
+
+        // Log the prayer times update
+        const auditLogger = new AuditLogger(req);
+        await auditLogger.logPrayerTimesUpdated(mosque, oldPrayerTimes, newPrayerTimes);
+
         res.json({ message: 'Prayer times updated', prayer_times: mosque.prayer_times });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -127,9 +140,26 @@ router.put('/:id/prayer-times', auth, requireAdmin, async (req, res) => {
 router.put('/:id', auth, requireAdmin, async (req, res) => {
     try {
         if (req.user.mosque_id.toString() !== req.params.id) return res.status(403).json({ error: 'Not authorized to update this mosque' });
+
+        // Get current mosque data for audit logging
+        const currentMosque = await Mosque.findById(req.params.id);
+        if (!currentMosque) return res.status(404).json({ error: 'Mosque not found' });
+
+        const beforeData = {
+            name: currentMosque.name,
+            location: currentMosque.location,
+            description: currentMosque.description
+        };
+
         const { name, location, description } = req.body;
-        const mosque = await Mosque.findByIdAndUpdate(req.params.id, { name, location, description }, { new: true });
-        if (!mosque) return res.status(404).json({ error: 'Mosque not found' });
+        const afterData = { name, location, description };
+
+        const mosque = await Mosque.findByIdAndUpdate(req.params.id, afterData, { new: true });
+
+        // Log the mosque details update
+        const auditLogger = new AuditLogger(req);
+        await auditLogger.logMosqueDetailsUpdated(mosque, beforeData, afterData);
+
         res.json({ message: 'Mosque details updated', mosque });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -148,11 +178,104 @@ router.post('/', auth, requireSuperAdmin, async (req, res) => {
             admin_instructions
         } = req.body;
 
-        // Validate required fields
+        // Comprehensive validation for required fields
         if (!name || !location) {
             return res.status(400).json({
-                error: 'Name and location are required'
+                error: 'Name and location are required',
+                code: 'MISSING_REQUIRED_FIELDS'
             });
+        }
+
+        // Validate name
+        if (name.trim().length < 3) {
+            return res.status(400).json({
+                error: 'Mosque name must be at least 3 characters long',
+                code: 'INVALID_NAME_LENGTH'
+            });
+        }
+
+        if (name.trim().length > 100) {
+            return res.status(400).json({
+                error: 'Mosque name must not exceed 100 characters',
+                code: 'INVALID_NAME_LENGTH'
+            });
+        }
+
+        // Validate name format - only letters, numbers, spaces, hyphens, and apostrophes
+        const nameRegex = /^[a-zA-Z0-9\s\-']+$/;
+        if (!nameRegex.test(name.trim())) {
+            return res.status(400).json({
+                error: 'Mosque name can only contain letters, numbers, spaces, hyphens and apostrophes',
+                code: 'INVALID_NAME_FORMAT'
+            });
+        }
+
+        // Validate location
+        if (location.trim().length < 5) {
+            return res.status(400).json({
+                error: 'Location must be at least 5 characters long',
+                code: 'INVALID_LOCATION_LENGTH'
+            });
+        }
+
+        if (location.trim().length > 200) {
+            return res.status(400).json({
+                error: 'Location must not exceed 200 characters',
+                code: 'INVALID_LOCATION_LENGTH'
+            });
+        }
+
+        // Validate description length if provided
+        if (description && description.trim().length > 1000) {
+            return res.status(400).json({
+                error: 'Description must not exceed 1000 characters',
+                code: 'INVALID_DESCRIPTION_LENGTH'
+            });
+        }
+
+        // Validate admin instructions length if provided
+        if (admin_instructions && admin_instructions.trim().length > 500) {
+            return res.status(400).json({
+                error: 'Admin instructions must not exceed 500 characters',
+                code: 'INVALID_INSTRUCTIONS_LENGTH'
+            });
+        }
+
+        // Check for duplicate mosque name in same location
+        const existingMosque = await Mosque.findOne({
+            name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
+            location: { $regex: new RegExp(`^${location.trim()}$`, 'i') }
+        });
+
+        if (existingMosque) {
+            return res.status(409).json({
+                error: 'A mosque with this name already exists at this location',
+                code: 'DUPLICATE_MOSQUE'
+            });
+        }
+
+        // Validate contact email if provided - only allow specific domains
+        if (contact_email && contact_email.trim()) {
+            const allowedEmailDomains = ['gmail.com', 'outlook.com', 'yahoo.com', 'hotmail.com', 'icloud.com', 'protonmail.com'];
+            const emailDomainRegex = new RegExp(`^[a-zA-Z0-9._%+-]+@(${allowedEmailDomains.join('|').replace(/\./g, '\\.')})$`, 'i');
+
+            if (!emailDomainRegex.test(contact_email.trim())) {
+                return res.status(400).json({
+                    error: `Email must be from one of these providers: ${allowedEmailDomains.join(', ')}`,
+                    code: 'INVALID_EMAIL_DOMAIN'
+                });
+            }
+        }
+
+        // Validate contact phone if provided
+        if (contact_phone && contact_phone.trim()) {
+            const phoneRegex = /^\+923[0-9]{9}$/;
+            if (!phoneRegex.test(contact_phone.trim())) {
+                return res.status(400).json({
+                    error: 'Phone number must be in format +923xxxxxxxxx (e.g., +923001234567)',
+                    code: 'INVALID_PHONE_FORMAT'
+                });
+            }
         }
 
         // Generate unique verification code
@@ -167,14 +290,14 @@ router.post('/', auth, requireSuperAdmin, async (req, res) => {
             : `To become an admin of ${name}, you need the mosque verification code. Contact the mosque management to get the code.`;
 
         const mosque = new Mosque({
-            name,
-            location,
-            description: description || '',
+            name: name.trim(),
+            location: location.trim(),
+            description: description ? description.trim() : '',
             verification_code,
             verification_code_expires,
-            contact_phone: contact_phone || '',
-            contact_email: contact_email || '',
-            admin_instructions: admin_instructions || defaultInstructions,
+            contact_phone: contact_phone ? contact_phone.trim() : '',
+            contact_email: contact_email ? contact_email.trim().toLowerCase() : '',
+            admin_instructions: admin_instructions ? admin_instructions.trim() : defaultInstructions,
             prayer_times: {
                 fajr: '',
                 dhuhr: '',
@@ -186,6 +309,10 @@ router.post('/', auth, requireSuperAdmin, async (req, res) => {
         });
 
         await mosque.save();
+
+        // Log the mosque creation
+        const auditLogger = new AuditLogger(req);
+        await auditLogger.logMosqueCreated(mosque);
 
         // Return mosque details with verification info for super admin
         res.status(201).json({
@@ -214,19 +341,64 @@ router.post('/', auth, requireSuperAdmin, async (req, res) => {
         });
     } catch (err) {
         console.error('Mosque creation error:', err);
-        res.status(500).json({ error: 'Server error' });
+
+        // Handle duplicate key errors
+        if (err.code === 11000) {
+            return res.status(409).json({
+                error: 'A mosque with this information already exists',
+                code: 'DUPLICATE_ENTRY'
+            });
+        }
+
+        // Handle validation errors
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({
+                error: err.message,
+                code: 'VALIDATION_ERROR'
+            });
+        }
+
+        res.status(500).json({
+            error: 'Server error while creating mosque',
+            code: 'SERVER_ERROR'
+        });
     }
 });
 
 // Delete Mosque (Super Admin)
-router.delete('/:id', auth, requireSuperAdmin, async (req, res) => {
-    try {
-        await Mosque.findByIdAndDelete(req.params.id);
-        await Admin.deleteMany({ mosque_id: req.params.id });
-        res.json({ message: 'Mosque deleted' });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
+// router.delete('/:id', auth, requireSuperAdmin, async (req, res) => {
+//     try {
+//         // Get mosque and admin data before deletion for audit logging
+//         const mosque = await Mosque.findById(req.params.id);
+//         if (!mosque) {
+//             return res.status(404).json({ error: 'Mosque not found' });
+//         }
+
+//         const admin = await Admin.findOne({ mosque_id: req.params.id });
+
+//         // Log the mosque deletion with admin details if exists
+//         const auditLogger = new AuditLogger(req);
+//         await auditLogger.logMosqueDeleted(mosque, admin);
+
+//         // Now delete the mosque and associated admins
+//         await Mosque.findByIdAndDelete(req.params.id);
+//         await Admin.deleteMany({ mosque_id: req.params.id });
+
+//         res.json({
+//             message: 'Mosque deleted successfully',
+//             deleted_mosque: {
+//                 name: mosque.name,
+//                 location: mosque.location
+//             },
+//             deleted_admin: admin ? {
+//                 name: admin.name,
+//                 email: admin.email,
+//                 phone: admin.phone
+//             } : null
+//         });
+//     } catch (err) {
+//         res.status(500).json({ error: 'Server error' });
+//     }
+// });
 
 module.exports = router;

@@ -36,7 +36,7 @@ const MosqueFinderPage: React.FC = () => {
             const response = await mosqueApi.getMosques({
                 search: search || undefined,
                 page,
-                limit: 10
+                limit: 6
             });
 
             setMosques(response.data.mosques);

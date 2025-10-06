@@ -81,3 +81,55 @@ export const getErrorMessage = (error: unknown): string => {
   }
   return "An unexpected error occurred";
 };
+
+// Admin status types
+export type AdminStatus = "pending" | "approved" | "rejected";
+
+// Admin profile interface
+export interface AdminProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: AdminStatus;
+  mosque: {
+    id: string;
+    name: string;
+    location: string;
+  } | null;
+  rejection_info?: {
+    rejection_reason: string;
+    rejection_date: string;
+    rejection_count: number;
+    can_reapply: boolean;
+  };
+  created_at: string;
+}
+
+// Rejected admin interface
+export interface RejectedAdmin {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: AdminStatus;
+  rejection_reason: string;
+  rejection_date: string;
+  rejection_count: number;
+  can_reapply: boolean;
+  rejected_by: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  previous_mosques: Array<{
+    mosque: {
+      id: string;
+      name: string;
+      location: string;
+    } | null;
+    rejected_at: string;
+    rejection_reason: string;
+  }>;
+  created_at: string;
+}

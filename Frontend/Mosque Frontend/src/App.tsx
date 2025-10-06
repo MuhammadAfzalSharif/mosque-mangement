@@ -7,6 +7,11 @@ import MosqueFinderPage from './pages/MosqueFinderPage';
 import MosqueDetailPage from './pages/MosqueDetailPage';
 import AdminApplicationPage from './pages/AdminApplicationPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminStatusPage from './pages/AdminStatusPage';
+import AdminReapplicationPage from './pages/AdminReapplicationPage';
+import SuperAdminLoginPage from './pages/SuperAdminLoginPage';
+import SuperAdminRegisterPage from './pages/SuperAdminRegisterPage';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 
 function App() {
   return (
@@ -21,6 +26,13 @@ function App() {
 
           {/* Protected Admin Route */}
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/status" element={<AdminStatusPage />} />
+          <Route path="/admin/reapply" element={<AdminReapplicationPage />} />
+
+          {/* Super Admin Routes */}
+          <Route path="/superadmin/register" element={<SuperAdminRegisterPage />} />
+          <Route path="/superadmin/login" element={<SuperAdminLoginPage />} />
+          <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
           {/* Catch all route - redirect to home */}
           <Route path="*" element={<WelcomePage />} />

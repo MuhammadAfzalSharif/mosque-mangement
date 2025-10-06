@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Test - Pending Requests</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        border-bottom: 3px solid #4caf50;
+        padding-bottom: 10px;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px 5px;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      #result {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        border-left: 4px solid #4caf50;
+        white-space: pre-wrap;
+        font-family: monospace;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+      .error {
+        border-left-color: #f44336;
+        background: #ffebee;
+        color: #c62828;
+      }
+      .success {
+        border-left-color: #4caf50;
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .input-group {
+        margin: 20px 0;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+      .info {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        border-left: 4px solid #2196f3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Pending Requests API Test</h1>
+
+      <div class="info">
+        <strong>📌 Instructions:</strong><br />
+        1. Login as Super Admin first to get a token<br />
+        2. The token will be stored automatically<br />
+        3. Then test the pending requests endpoint<br />
+        4. Check the results below
+      </div>
+
+      <div class="input-group">
+        <label for="email">Super Admin Email:</label>
+        <input type="email" id="email" placeholder="superadmin@example.com" />
+      </div>
+
+      <div class="input-group">
+        <label for="password">Super Admin Password:</label>
+        <input type="password" id="password" placeholder="Enter password" />
+      </div>
+
+      <button onclick="loginSuperAdmin()">🔐 1. Login as Super Admin</button>
+      <button onclick="testPendingRequests()">
+        📋 2. Test Pending Requests
+      </button>
+      <button onclick="testDashboardStats()">📊 3. Test Dashboard Stats</button>
+      <button onclick="clearResults()">🗑️ Clear Results</button>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:3000/api";
+      const resultDiv = document.getElementById("result");
+
+      function showResult(message, isError = false) {
+        resultDiv.className = isError ? "error" : "success";
+        resultDiv.textContent = message;
+      }
+
+      async function loginSuperAdmin() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+          showResult("❌ Please enter email and password", true);
+          return;
+        }
+
+        try {
+          showResult("🔄 Logging in...");
+          const response = await fetch(`${API_BASE}/superadmin/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("superadmin", JSON.stringify(data.superadmin));
+            localStorage.setItem("user_type", "superadmin");
+
+            showResult(
+              `✅ Login Successful!\n\n` +
+                `Token: ${data.token.substring(0, 30)}...\n\n` +
+                `Super Admin:\n${JSON.stringify(data.superadmin, null, 2)}`
+            );
+          } else {
+            showResult(
+              `❌ Login Failed\n\n${JSON.stringify(data, null, 2)}`,
+              true
+            );
+          }
+        } catch (error) {
+          showResult(`❌ Error: ${error.message}\n\n${error.stack}`, true);
+        }
+      }
+
+      async function testPendingRequests() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          showResult("❌ No token found. Please login first.", true);
+          return;
+        }
+
+        try {
+          showResult("🔄 Fetching pending requests...");
+
+          const response = await fetch(`${API_BASE}/superadmin/pending`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showResult(
+              `✅ Pending Requests Fetched Successfully!\n\n` +
+                `Total Pending: ${data.pending_admins?.length || 0}\n\n` +
+                `Data:\n${JSON.stringify(data, null, 2)}`
+            );
+          } else {
+            showResult(
+              `❌ Failed to Fetch Pending Requests\n\n` +
+                `Status: ${response.status}\n` +
+                `Response:\n${JSON.stringify(data, null, 2)}`,
+              true
+            );
+          }
+        } catch (error) {
+          showResult(`❌ Error: ${error.message}\n\n${error.stack}`, true);
+        }
+      }
+
+      async function testDashboardStats() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          showResult("❌ No token found. Please login first.", true);
+          return;
+        }
+
+        try {
+          showResult("🔄 Fetching dashboard stats...");
+
+          const response = await fetch(
+            `${API_BASE}/superadmin/dashboard/stats`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showResult(
+              `✅ Dashboard Stats Fetched Successfully!\n\n` +
+                `Stats:\n${JSON.stringify(data, null, 2)}`
+            );
+          } else {
+            showResult(
+              `❌ Failed to Fetch Dashboard Stats\n\n` +
+                `Status: ${response.status}\n` +
+                `Response:\n${JSON.stringify(data, null, 2)}`,
+              true
+            );
+          }
+        } catch (error) {
+          showResult(`❌ Error: ${error.message}\n\n${error.stack}`, true);
+        }
+      }
+
+      function clearResults() {
+        resultDiv.textContent = "";
+        resultDiv.className = "";
+      }
+
+      // Display current token status on load
+      window.onload = () => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          showResult(
+            `ℹ️ Token Found in Storage!\n\n` +
+              `Token: ${token.substring(0, 30)}...\n\n` +
+              `You can directly test the endpoints.`
+          );
+        } else {
+          showResult(
+            `ℹ️ No Token Found\n\n` + `Please login first to get a token.`
+          );
+        }
+      };
+    </script>
+  </body>
+</html>

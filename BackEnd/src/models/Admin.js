@@ -4,11 +4,27 @@ const adminSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    mosque_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Mosque' },
+    phone: { type: String, required: true, unique: true }, // Pakistani phone number format +923xxxxxxxxx
+    mosque_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Mosque', default: null }, // Nullable when rejected
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
-    verification_code_used: String, // Track which verification code was used
+    verification_code_used: { type: String, default: null }, // Track which verification code was used, null when rejected
     application_notes: String, // Additional notes from applicant
     super_admin_notes: String, // Notes from super admin during review
+    approved_at: { type: Date }, // When the admin was approved
+    rejected_at: { type: Date }, // When the admin was rejected
+
+    // Rejection handling fields
+    rejection_reason: { type: String, default: null }, // Detailed reason for rejection
+    rejection_date: { type: Date, default: null }, // When the admin was rejected
+    rejected_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null }, // Super admin who rejected
+    rejection_count: { type: Number, default: 0 }, // How many times this admin has been rejected
+    can_reapply: { type: Boolean, default: false }, // Whether admin is allowed to reapply
+    previous_mosque_ids: [{
+        mosque_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Mosque' },
+        rejected_at: { type: Date },
+        rejection_reason: String
+    }], // Track all mosques this admin was rejected from
+
     createdAt: { type: Date, default: Date.now }
 });
 

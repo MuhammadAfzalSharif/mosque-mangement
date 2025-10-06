@@ -19,7 +19,7 @@ app.use(cors(
 // Routes
 app.use('/api', authRoutes);
 app.use('/api/mosques', mosqueRoutes);
-app.use('/api/superadmin/admins', superadminRoutes);
+app.use('/api/superadmin', superadminRoutes);
 app.use('/api/admin', adminRoutes);
 
 // MongoDB connection
