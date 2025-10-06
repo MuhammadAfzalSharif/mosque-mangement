@@ -1283,22 +1283,37 @@ router.delete('/mosque/:id', auth, requireSuperAdmin, async (req, res) => {
         const auditLogger = new AuditLogger(req);
         await auditLogger.logMosqueDeleted(mosque, admins[0], reason);
 
-        // Delete the mosque and all associated admins
+        // Update admins to mosque_deleted status instead of deleting them
+        const updatedAdmins = [];
+        for (const admin of admins) {
+            admin.status = 'mosque_deleted';
+            admin.mosque_deletion_reason = reason.trim();
+            admin.mosque_deletion_date = new Date();
+            admin.deleted_mosque_name = mosque.name;
+            admin.deleted_mosque_location = mosque.location;
+            admin.mosque_id = null; // Remove mosque association
+            admin.verification_code_used = null; // Clear verification code
+            admin.can_reapply = true; // Allow them to reapply by default
+
+            await admin.save();
+            updatedAdmins.push({
+                name: admin.name,
+                email: admin.email,
+                status: admin.status
+            });
+        }
+
+        // Delete the mosque
         await Mosque.findByIdAndDelete(req.params.id);
-        await Admin.deleteMany({ mosque_id: req.params.id });
 
         res.json({
-            message: 'Mosque deleted successfully',
+            message: 'Mosque deleted successfully. Associated admins have been notified and can reapply.',
             deleted_mosque: {
                 name: mosque.name,
                 location: mosque.location,
                 verification_code: mosque.verification_code
             },
-            deleted_admins: admins.map(admin => ({
-                name: admin.name,
-                email: admin.email,
-                status: admin.status
-            })),
+            updated_admins: updatedAdmins,
             reason: reason
         });
     } catch (err) {
@@ -1344,15 +1359,27 @@ router.post('/mosques/bulk-delete', auth, requireSuperAdmin, async (req, res) =>
                 const auditLogger = new AuditLogger(req);
                 await auditLogger.logMosqueDeleted(mosque, admins[0], reason);
 
-                // Delete mosque and admins
+                // Update admins to mosque_deleted status instead of deleting them
+                for (const admin of admins) {
+                    admin.status = 'mosque_deleted';
+                    admin.mosque_deletion_reason = reason.trim();
+                    admin.mosque_deletion_date = new Date();
+                    admin.deleted_mosque_name = mosque.name;
+                    admin.deleted_mosque_location = mosque.location;
+                    admin.mosque_id = null;
+                    admin.verification_code_used = null;
+                    admin.can_reapply = true;
+                    await admin.save();
+                }
+
+                // Delete mosque only
                 await Mosque.findByIdAndDelete(mosqueId);
-                await Admin.deleteMany({ mosque_id: mosqueId });
 
                 deletedMosques.push({
                     mosque_id: mosqueId,
                     name: mosque.name,
                     location: mosque.location,
-                    deleted_admins: admins.length
+                    updated_admins: admins.length
                 });
             } catch (err) {
                 errors.push({ mosque_id: mosqueId, error: err.message });
@@ -1360,7 +1387,7 @@ router.post('/mosques/bulk-delete', auth, requireSuperAdmin, async (req, res) =>
         }
 
         res.json({
-            message: `Successfully deleted ${deletedMosques.length} mosque(s)`,
+            message: `Successfully deleted ${deletedMosques.length} mosque(s). Associated admins can reapply.`,
             deleted_mosques: deletedMosques,
             failed: errors.length,
             errors: errors,

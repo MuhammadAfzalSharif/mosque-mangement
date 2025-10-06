@@ -83,7 +83,11 @@ export const getErrorMessage = (error: unknown): string => {
 };
 
 // Admin status types
-export type AdminStatus = "pending" | "approved" | "rejected";
+export type AdminStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "mosque_deleted";
 
 // Admin profile interface
 export interface AdminProfile {
@@ -101,6 +105,13 @@ export interface AdminProfile {
     rejection_reason: string;
     rejection_date: string;
     rejection_count: number;
+    can_reapply: boolean;
+  };
+  mosque_deletion_info?: {
+    mosque_deletion_reason: string;
+    mosque_deletion_date: string;
+    deleted_mosque_name: string;
+    deleted_mosque_location: string;
     can_reapply: boolean;
   };
   created_at: string;

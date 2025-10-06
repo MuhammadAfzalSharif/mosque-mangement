@@ -56,7 +56,7 @@ router.post('/admin/login', async (req, res) => {
             });
         }
 
-        // Check admin status - Issue LIMITED tokens for rejected/pending to allow status page access
+        // Check admin status - Issue LIMITED tokens for rejected/pending/mosque_deleted to allow status page access
         if (admin.status === 'rejected') {
             // Issue a limited token for status page access only
             const limitedToken = jwt.sign(
@@ -88,6 +88,41 @@ router.post('/admin/login', async (req, res) => {
                 message: admin.can_reapply
                     ? 'You are allowed to reapply. Please contact support or submit a new application.'
                     : 'You cannot reapply at this time. Please contact support for assistance.'
+            });
+        }
+
+        if (admin.status === 'mosque_deleted') {
+            // Issue a limited token for status page access only
+            const limitedToken = jwt.sign(
+                { userId: admin._id.toString(), role: 'admin', status: 'mosque_deleted', limited: true },
+                process.env.JWT_SECRET,
+                { expiresIn: '30d' } // 30 days to allow reapplication
+            );
+
+            console.log('MOSQUE DELETED LOGIN - Admin ID:', admin._id.toString());
+            console.log('MOSQUE DELETED LOGIN - Token generated for userId:', admin._id.toString());
+
+            return res.status(403).json({
+                error: 'Your mosque has been deleted',
+                code: 'MOSQUE_DELETED',
+                status: 'mosque_deleted',
+                token: limitedToken, // Provide token for status page access
+                admin: {
+                    _id: admin._id.toString(),
+                    name: admin.name,
+                    email: admin.email,
+                    phone: admin.phone,
+                    status: admin.status,
+                    mosque_id: admin.mosque_id
+                },
+                mosque_deletion_reason: admin.mosque_deletion_reason || 'No reason provided',
+                mosque_deletion_date: admin.mosque_deletion_date,
+                deleted_mosque_name: admin.deleted_mosque_name,
+                deleted_mosque_location: admin.deleted_mosque_location,
+                can_reapply: admin.can_reapply,
+                message: admin.can_reapply
+                    ? 'Your mosque was deleted by the Super Admin. You can reapply for a different mosque.'
+                    : 'Your mosque was deleted. Please contact the Super Admin for assistance.'
             });
         }
 
@@ -539,10 +574,10 @@ router.post('/admin/request-reapplication', auth, async (req, res) => {
             });
         }
 
-        // Check if admin is rejected
-        if (admin.status !== 'rejected') {
+        // Check if admin is rejected or mosque_deleted
+        if (admin.status !== 'rejected' && admin.status !== 'mosque_deleted') {
             return res.status(400).json({
-                error: 'Only rejected admins can request reapplication',
+                error: 'Only rejected or mosque_deleted admins can request reapplication',
                 code: 'INVALID_STATUS'
             });
         }
@@ -582,18 +617,55 @@ router.post('/admin/request-reapplication', auth, async (req, res) => {
             });
         }
 
-        // Check if this mosque was previously rejected
-        const previouslyRejectedFromThisMosque = admin.previous_mosque_ids.some(
-            pm => pm.mosque_id.toString() === mosque_id.toString()
-        );
+        // Store the previous status for audit logging
+        const previousStatus = admin.status;
+        const wasMosqueDeleted = previousStatus === 'mosque_deleted';
+        const wasRejected = previousStatus === 'rejected';
 
-        if (previouslyRejectedFromThisMosque) {
-            return res.status(400).json({
-                error: 'You were previously rejected from this mosque',
-                code: 'PREVIOUSLY_REJECTED_MOSQUE',
-                message: 'Please choose a different mosque or contact support.'
+        // BUSINESS RULES:
+        // 1. Rejected admins CAN reapply to the SAME mosque (allowed to improve application)
+        // 2. Mosque_deleted admins CANNOT apply to the same deleted mosque (it doesn't exist anymore)
+        //    - But since the mosque is deleted, they physically can't apply to it anyway
+        //    - This check is just for safety and logging
+
+        if (wasMosqueDeleted) {
+            // Mosque_deleted admins can only apply to NEW mosques
+            // The deleted mosque doesn't exist in the system anymore
+            console.log('Mosque_deleted admin applying to new mosque:', {
+                admin: admin.email,
+                deleted_mosque: admin.deleted_mosque_name,
+                new_mosque: mosque.name
             });
+
+            // Additional safety check: ensure they're not somehow trying to apply to a non-existent mosque
+            // (This shouldn't happen, but good to validate)
+        } else if (wasRejected) {
+            // Rejected admins CAN reapply to the SAME mosque OR a different one
+            // We allow this because they might have improved their application
+            const previouslyRejectedFromThisMosque = admin.previous_mosque_ids.some(
+                pm => pm.mosque_id && pm.mosque_id.toString() === mosque_id.toString()
+            );
+
+            if (previouslyRejectedFromThisMosque) {
+                console.log('Rejected admin reapplying to previously rejected mosque:', {
+                    admin: admin.email,
+                    mosque: mosque.name,
+                    rejection_count: admin.rejection_count
+                });
+                // ALLOW the reapplication - they can try again
+            } else {
+                console.log('Rejected admin applying to new mosque:', {
+                    admin: admin.email,
+                    mosque: mosque.name
+                });
+            }
         }
+
+        const previousMosqueInfo = wasMosqueDeleted ? {
+            deleted_mosque_name: admin.deleted_mosque_name,
+            deleted_mosque_location: admin.deleted_mosque_location,
+            deletion_reason: admin.mosque_deletion_reason
+        } : null;
 
         // Update admin to pending status with new mosque
         admin.status = 'pending';
@@ -601,6 +673,14 @@ router.post('/admin/request-reapplication', auth, async (req, res) => {
         admin.verification_code_used = new_verification_code;
         admin.can_reapply = false; // Reset until next rejection
         admin.application_notes = `REAPPLICATION: ${reason_for_reapplication.trim()}`;
+
+        // Clear mosque deletion fields if this was a mosque_deleted admin
+        if (admin.mosque_deletion_reason || admin.deleted_mosque_name) {
+            admin.mosque_deletion_reason = null;
+            admin.mosque_deletion_date = null;
+            admin.deleted_mosque_name = null;
+            admin.deleted_mosque_location = null;
+        }
 
         await admin.save();
 
@@ -617,13 +697,17 @@ router.post('/admin/request-reapplication', auth, async (req, res) => {
                 mosque_name: mosque.name,
                 mosque_location: mosque.location,
                 reason: reason_for_reapplication.trim(),
-                rejection_count: admin.rejection_count
+                previous_status: previousStatus,
+                rejection_count: admin.rejection_count,
+                ...(wasMosqueDeleted && previousMosqueInfo ? { previous_mosque_info: previousMosqueInfo } : {})
             }
         });
 
         res.json({
             success: true,
-            message: 'Reapplication submitted successfully',
+            message: previousStatus === 'mosque_deleted'
+                ? 'Reapplication submitted successfully. You are now applying for a new mosque.'
+                : 'Reapplication submitted successfully',
             admin: {
                 id: admin._id,
                 name: admin.name,
@@ -635,6 +719,7 @@ router.post('/admin/request-reapplication', auth, async (req, res) => {
                     location: mosque.location
                 }
             },
+            previous_status: previousStatus,
             next_steps: 'Your reapplication is now pending. Please wait for Super Admin approval.'
         });
 
@@ -679,6 +764,13 @@ router.get('/admin/me', auth, async (req, res) => {
                     rejection_reason: admin.rejection_reason,
                     rejection_date: admin.rejection_date,
                     rejection_count: admin.rejection_count,
+                    can_reapply: admin.can_reapply
+                } : null,
+                mosque_deletion_info: admin.status === 'mosque_deleted' ? {
+                    mosque_deletion_reason: admin.mosque_deletion_reason,
+                    mosque_deletion_date: admin.mosque_deletion_date,
+                    deleted_mosque_name: admin.deleted_mosque_name,
+                    deleted_mosque_location: admin.deleted_mosque_location,
                     can_reapply: admin.can_reapply
                 } : null,
                 created_at: admin.createdAt

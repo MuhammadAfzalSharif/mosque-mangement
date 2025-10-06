@@ -212,6 +212,7 @@ const AdminReapplicationPage: React.FC = () => {
                                     <li>• Ensure the mosque doesn't already have an admin</li>
                                     <li>• Your application will be pending until the super admin approves it</li>
                                     <li>• Verification codes are case-insensitive</li>
+                                    <li>• This page is for rejected admins and admins whose mosques were deleted</li>
                                 </ul>
                             </div>
                         </div>
