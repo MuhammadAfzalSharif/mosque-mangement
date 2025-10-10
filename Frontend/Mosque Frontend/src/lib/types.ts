@@ -88,7 +88,8 @@ export type AdminStatus =
   | "approved"
   | "rejected"
   | "mosque_deleted"
-  | "admin_removed";
+  | "admin_removed"
+  | "code_regenerated";
 
 // Admin profile interface
 export interface AdminProfile {
@@ -120,6 +121,13 @@ export interface AdminProfile {
     admin_removal_date: string;
     removed_from_mosque_name: string;
     removed_from_mosque_location: string;
+    can_reapply: boolean;
+  };
+  code_regeneration_info?: {
+    code_regeneration_reason: string;
+    code_regeneration_date: string;
+    code_regenerated_mosque_name: string;
+    code_regenerated_mosque_location: string;
     can_reapply: boolean;
   };
   created_at: string;

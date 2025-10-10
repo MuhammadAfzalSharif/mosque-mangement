@@ -161,6 +161,84 @@ router.post('/admin/login', async (req, res) => {
             });
         }
 
+        if (admin.status === 'code_regenerated') {
+            const { mosque_code } = req.body;
+
+            // For code_regenerated admins, mosque code is required
+            if (!mosque_code) {
+                // Issue a limited token for status page access only
+                const limitedToken = jwt.sign(
+                    { userId: admin._id.toString(), role: 'admin', status: 'code_regenerated', limited: true },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '30d' } // 30 days to allow access
+                );
+
+                return res.status(403).json({
+                    error: 'Mosque verification code is required',
+                    code: 'CODE_REGENERATED_NEEDS_CODE',
+                    status: 'code_regenerated',
+                    token: limitedToken,
+                    admin: {
+                        _id: admin._id.toString(),
+                        name: admin.name,
+                        email: admin.email,
+                        phone: admin.phone,
+                        status: admin.status,
+                        mosque_id: admin.mosque_id
+                    },
+                    code_regeneration_reason: admin.code_regeneration_reason || 'No reason provided',
+                    code_regeneration_date: admin.code_regeneration_date,
+                    code_regenerated_mosque_name: admin.code_regenerated_mosque_name,
+                    code_regenerated_mosque_location: admin.code_regenerated_mosque_location,
+                    can_reapply: admin.can_reapply,
+                    message: 'Your mosque verification code was regenerated. Please enter the new mosque code to continue, or reapply for a different mosque.',
+                    require_mosque_code: true
+                });
+            }
+
+            // Validate the mosque code
+            const mosque = await Mosque.findById(admin.mosque_id);
+            if (!mosque || mosque.verification_code !== mosque_code.trim().toUpperCase()) {
+                return res.status(401).json({
+                    error: 'Invalid mosque verification code',
+                    code: 'INVALID_MOSQUE_CODE'
+                });
+            }
+
+            // Check if the mosque code has expired
+            if (mosque.verification_code_expires && new Date() > mosque.verification_code_expires) {
+                return res.status(401).json({
+                    error: 'Mosque verification code has expired',
+                    code: 'EXPIRED_MOSQUE_CODE'
+                });
+            }
+
+            // Code is valid, restore admin to approved status and login
+            await Admin.findByIdAndUpdate(admin._id, {
+                status: 'approved',
+                // Clear code regeneration tracking fields
+                code_regeneration_reason: null,
+                code_regeneration_date: null,
+                code_regenerated_by: null,
+                previous_mosque_code: null,
+                code_regenerated_mosque_name: null,
+                code_regenerated_mosque_location: null
+            });
+
+            // Log the successful code validation and status restoration
+            try {
+                const auditLogger = new AuditLogger(req);
+                await auditLogger.logAdminCodeValidated(admin, mosque, mosque_code);
+            } catch (auditError) {
+                console.error('Failed to log admin code validation (non-critical):', auditError);
+            }
+
+            // Update admin status for token generation
+            admin.status = 'approved';
+
+            // Continue with normal approved login flow below
+        }
+
         if (admin.status === 'pending') {
             // Issue a limited token for status page access only
             const limitedToken = jwt.sign(
@@ -197,7 +275,7 @@ router.post('/admin/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: admin._id, role: 'admin', mosque_id: admin.mosque_id },
+            { userId: admin._id, role: 'admin', mosque_id: admin.mosque_id, name: admin.name, email: admin.email },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
@@ -509,7 +587,7 @@ router.post('/superadmin/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, superAdmin.password);
         if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
 
-        const token = jwt.sign({ userId: superAdmin._id, role: 'super_admin' }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        const token = jwt.sign({ userId: superAdmin._id, role: 'super_admin', name: superAdmin.name, email: superAdmin.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
         // Set cookie with token
         res.cookie('token', token, {
@@ -521,7 +599,7 @@ router.post('/superadmin/login', async (req, res) => {
 
         // Log the super admin login
         const auditLogger = new AuditLogger(req);
-        await auditLogger.logLogin({ id: superAdmin._id, email: superAdmin.email }, 'super_admin');
+        await auditLogger.logLogin({ id: superAdmin._id, email: superAdmin.email, name: superAdmin.name }, 'super_admin');
 
         res.json({
             message: 'Super admin login successful',
@@ -534,30 +612,67 @@ router.post('/superadmin/login', async (req, res) => {
 });
 
 // Super Admin Register (for initial setup or existing super admin creating new ones)
-router.post('/superadmin/register', async (req, res, next) => {
-    // This logic decides IF authentication is needed for this specific request
-    const superAdminCount = await SuperAdmin.countDocuments();
-    if (superAdminCount > 0) {
-        // If super admins exist, run the standard auth and authorization middleware
-        // The middleware will handle sending the error response if it fails
-        auth(req, res, () => requireSuperAdmin(req, res, next));
-    } else {
-        // If it's the first ever super admin, skip auth and go to the route handler
-        next();
-    }
-}, async (req, res) => {
-    // This is the main route handler. It only runs if the middleware above calls next().
+router.post('/superadmin/register', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { name, email, password } = req.body;
+
+        // Validate required fields
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Check current super admin count
+        const superAdminCount = await SuperAdmin.countDocuments();
+
+        // If super admins exist, require authentication and super admin role
+        if (superAdminCount > 0) {
+            // Check for authentication token
+            let token = null;
+            const authHeader = req.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+            }
+            if (!token && req.cookies.token) {
+                token = req.cookies.token;
+            }
+
+            if (!token) {
+                return res.status(401).json({ error: 'Authentication required to create super admin' });
+            }
+
+            // Verify token and user
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+                // Check if user still exists and is super admin
+                const superAdmin = await SuperAdmin.findById(decoded.userId);
+                if (!superAdmin || decoded.role !== 'super_admin') {
+                    return res.status(403).json({
+                        error: 'Super admin access required',
+                        code: 'UNAUTHORIZED_SUPER_ADMIN_CREATION'
+                    });
+                }
+
+                req.user = decoded; // Set user for audit logging
+            } catch (tokenError) {
+                return res.status(401).json({ error: 'Invalid authentication token' });
+            }
+        }
+        // If no super admins exist, allow registration without authentication (initial setup)
+
+        // Validate name length
+        if (name.trim().length < 2) {
+            return res.status(400).json({ error: 'Name must be at least 2 characters long' });
+        }
 
         const allowedDomainsRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com|yahoo\.com|hotmail\.com)$/i;
 
         if (!allowedDomainsRegex.test(email)) {
-            res.status(400).json({ error: 'Incorrect email format' })
+            return res.status(400).json({ error: 'Email must be from gmail.com, outlook.com, yahoo.com, or hotmail.com' })
         }
 
         if (password.length < 7) {
-            res.status(400).json({ error: 'Password length should be 8 character' })
+            return res.status(400).json({ error: 'Password must be at least 7 characters long' })
 
         }
 
@@ -565,9 +680,28 @@ router.post('/superadmin/register', async (req, res, next) => {
         if (existingSuperAdmin) return res.status(400).json({ error: 'Email already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const superAdmin = new SuperAdmin({ email, password: hashedPassword });
+        const superAdmin = new SuperAdmin({ name: name.trim(), email, password: hashedPassword });
         await superAdmin.save();
-        res.status(201).json({ message: 'Super admin registered', super_admin: { id: superAdmin._id, email } });
+
+        // Log the super admin creation
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.log({
+                action: 'super_admin_created',
+                targetModel: 'super_admin',
+                targetId: superAdmin._id,
+                details: {
+                    super_admin_name: superAdmin.name,
+                    super_admin_email: superAdmin.email,
+                    created_by: req.user ? 'existing_super_admin' : 'initial_setup'
+                }
+            });
+        } catch (auditError) {
+            console.error('Failed to log super admin creation:', auditError);
+            // Don't fail the request if audit logging fails
+        }
+
+        res.status(201).json({ message: 'Super admin registered', super_admin: { id: superAdmin._id, name: superAdmin.name, email } });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -813,6 +947,13 @@ router.get('/admin/me', auth, async (req, res) => {
                     admin_removal_date: admin.admin_removal_date,
                     removed_from_mosque_name: admin.removed_from_mosque_name,
                     removed_from_mosque_location: admin.removed_from_mosque_location,
+                    can_reapply: admin.can_reapply
+                } : null,
+                code_regeneration_info: admin.status === 'code_regenerated' ? {
+                    code_regeneration_reason: admin.code_regeneration_reason,
+                    code_regeneration_date: admin.code_regeneration_date,
+                    code_regenerated_mosque_name: admin.code_regenerated_mosque_name,
+                    code_regenerated_mosque_location: admin.code_regenerated_mosque_location,
                     can_reapply: admin.can_reapply
                 } : null,
                 created_at: admin.createdAt

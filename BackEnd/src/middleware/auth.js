@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const SuperAdmin = require('../models/SuperAdmin');
 
-const auth = (req, res, next) => {
+const auth = async (req, res, next) => {
     // PRIORITY: Check Authorization header FIRST (for frontend localStorage tokens)
     // Then fall back to cookies (for old sessions)
     let token = null;
@@ -31,6 +32,26 @@ const auth = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('AUTH MIDDLEWARE - Decoded token:', decoded);
+
+        // Verify user still exists in database and has correct role
+        let userExists = false;
+
+        if (decoded.role === 'super_admin') {
+            const superAdmin = await SuperAdmin.findById(decoded.userId);
+            userExists = !!superAdmin;
+        } else if (decoded.role === 'admin') {
+            const admin = await Admin.findById(decoded.userId);
+            userExists = !!admin;
+        }
+
+        if (!userExists) {
+            console.log('AUTH MIDDLEWARE - User no longer exists in database');
+            return res.status(401).json({
+                error: 'User account no longer exists',
+                code: 'USER_DELETED'
+            });
+        }
+
         req.user = decoded;
         next();
     } catch (err) {

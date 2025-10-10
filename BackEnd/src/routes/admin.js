@@ -58,11 +58,11 @@ router.post('/reapply', auth, async (req, res) => {
 
         console.log('Admin found:', { id: admin._id, status: admin.status, can_reapply: admin.can_reapply });
 
-        // Check if admin is rejected, mosque_deleted, or admin_removed
-        if (admin.status !== 'rejected' && admin.status !== 'mosque_deleted' && admin.status !== 'admin_removed') {
+        // Check if admin is rejected, mosque_deleted, admin_removed, or code_regenerated
+        if (admin.status !== 'rejected' && admin.status !== 'mosque_deleted' && admin.status !== 'admin_removed' && admin.status !== 'code_regenerated') {
             return res.status(400).json({
                 success: false,
-                error: `Only rejected, mosque_deleted, or admin_removed admins can reapply. Your current status is: ${admin.status}`,
+                error: `Only rejected, mosque_deleted, admin_removed, or code_regenerated admins can reapply. Your current status is: ${admin.status}`,
                 code: 'INVALID_STATUS',
                 current_status: admin.status
             });
@@ -164,6 +164,14 @@ router.post('/reapply', auth, async (req, res) => {
 
             console.log('Verification code regenerated for security:', { mosque: mosque.name, new_code: newCode });
 
+            // Log the verification code regeneration due to security breach
+            try {
+                const auditLogger = new AuditLogger(req);
+                await auditLogger.logVerificationCodeRegenerated(mosque, oldCode, newCode, admin);
+            } catch (auditError) {
+                console.error('Failed to log security code regeneration (non-critical):', auditError);
+            }
+
             // Log the security breach - wrapped in try-catch to prevent audit errors from failing the request
             try {
                 const auditLogger = new AuditLogger(req);
@@ -234,6 +242,14 @@ router.post('/reapply', auth, async (req, res) => {
         admin.removed_from_mosque_name = null;
         admin.removed_from_mosque_location = null;
         admin.removed_by = null;
+
+        // Clear code regeneration fields if coming from code_regenerated status
+        admin.code_regeneration_reason = null;
+        admin.code_regeneration_date = null;
+        admin.code_regenerated_by = null;
+        admin.previous_mosque_code = null;
+        admin.code_regenerated_mosque_name = null;
+        admin.code_regenerated_mosque_location = null;
 
         await admin.save();
         console.log('Admin updated successfully:', {

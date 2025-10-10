@@ -11,7 +11,6 @@ import {
     FaSearch,
     FaFilter,
     FaUserPlus,
-    FaTrash,
     FaClock,
     FaEnvelope,
     FaPhone,
@@ -20,6 +19,7 @@ import {
     FaIdCard,
     FaCheckCircle
 } from 'react-icons/fa';
+import { RefreshCw } from 'react-feather';
 
 interface MosqueWithoutAdmin {
     _id: string;
@@ -86,13 +86,16 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
     const [actionReason, setActionReason] = useState('');
     const [assignFormData, setAssignFormData] = useState({
         admin_name: '',
-        admin_email: '',
-        admin_phone: '',
+        admin_email: '@gmail.com',
+        admin_phone: '+923',
         admin_password: '',
-        super_admin_notes: ''
+        admin_confirm_password: '',
+        super_admin_notes: 'Admin assigned by super admin for mosque management and prayer time updates.'
     });
     const [assignLoading, setAssignLoading] = useState(false);
     const [assignError, setAssignError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [toast, setToast] = useState<{ show: boolean; type: 'success' | 'error' | 'warning'; message: string }>({
         show: false,
@@ -235,7 +238,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
     const handleRemoveAdminClick = (mosque: MosqueWithoutAdmin) => {
         setSelectedMosqueForRemove(mosque);
-        setRemovalReason('');
+        setRemovalReason('Admin removed due to policy compliance');
         setRemoveError(null);
         setShowRemoveAdminModal(true);
     };
@@ -378,18 +381,14 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
         setTargetMosque(mosqueId);
         setAssignFormData({
             admin_name: '',
-            admin_email: '',
-            admin_phone: '',
+            admin_email: '@gmail.com',
+            admin_phone: '+923',
             admin_password: '',
-            super_admin_notes: ''
+            admin_confirm_password: '',
+            super_admin_notes: 'Admin assigned by super admin for mosque management and prayer time updates.'
         });
         setAssignError(null);
         setShowAssignModal(true);
-    };
-
-    const handleDeleteMosque = (mosqueId: string) => {
-        setTargetMosque(mosqueId);
-        setShowDeleteModal(true);
     };
 
     const handleAssignSubmit = () => {
@@ -416,6 +415,16 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
         if (assignFormData.admin_password.length < 6) {
             setAssignError('Password must be at least 6 characters long');
+            return;
+        }
+
+        if (!assignFormData.admin_confirm_password.trim()) {
+            setAssignError('Please confirm the admin password');
+            return;
+        }
+
+        if (assignFormData.admin_password !== assignFormData.admin_confirm_password) {
+            setAssignError('Passwords do not match');
             return;
         }
 
@@ -448,12 +457,15 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
             // Reset form
             setAssignFormData({
                 admin_name: '',
-                admin_email: '',
-                admin_phone: '',
+                admin_email: '@gmail.com',
+                admin_phone: '+923',
                 admin_password: '',
-                super_admin_notes: ''
+                admin_confirm_password: '',
+                super_admin_notes: 'Admin assigned by super admin for mosque management and prayer time updates.'
             });
             setTargetMosque(null);
+            setShowPassword(false);
+            setShowConfirmPassword(false);
 
             // Refresh the mosques list
             await fetchMosquesWithoutAdmin();
@@ -575,437 +587,605 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-                <span className="ml-3 text-lg text-gray-600">Loading mosques without admin...</span>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-2xl"></div>
+                    <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl p-8 sm:p-12 text-center">
+                        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                            Loading Admin Management
+                        </h3>
+                        <p className="text-gray-600 text-sm sm:text-base">Please wait while we fetch mosque and admin data...</p>
+                    </div>
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                <div className="text-red-600 mb-2">
-                    <FaExclamationTriangle className="w-8 h-8 mx-auto mb-2" />
-                    <h3 className="text-lg font-semibold">Error Loading Data</h3>
+            <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 flex items-center justify-center p-4">
+                <div className="relative max-w-md w-full">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-3xl blur-2xl"></div>
+                    <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl p-8 text-center">
+                        <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <FaExclamationTriangle className="w-10 h-10 text-white" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-red-600 mb-4">Error Loading Data</h3>
+                        <p className="text-red-700 mb-6 text-sm sm:text-base leading-relaxed">{error}</p>
+                        <button
+                            onClick={fetchMosquesWithoutAdmin}
+                            className="group relative overflow-hidden px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                            <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                            <span className="relative flex items-center">
+                                <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> Try Again
+                            </span>
+                        </button>
+                    </div>
                 </div>
-                <p className="text-red-700 mb-4">{error}</p>
-                <button
-                    onClick={fetchMosquesWithoutAdmin}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                    Try Again
-                </button>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                    Admin Management
-                </h1>
-                <div className="flex items-center space-x-2">
-                    <FaBuilding className="w-5 h-5 text-blue-500" />
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                        {mosques.length} Total Mosques
-                    </span>
-                </div>
-            </div>
-
-            {/* Alert Notice */}
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
-                <div className="flex items-start">
-                    <FaBuilding className="w-6 h-6 text-blue-500 mr-3 mt-1" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-blue-800 mb-2">Mosque Admin Management</h3>
-                        <p className="text-blue-700 mb-2">
-                            Manage all mosques and their administrators. You can:
-                        </p>
-                        <ul className="text-sm text-blue-600 list-disc list-inside space-y-1">
-                            <li>View all mosques with or without admins</li>
-                            <li>Filter and search across all mosque and admin information</li>
-                            <li>Assign admins to mosques that need them</li>
-                            <li>Send reminder notifications to potential admins</li>
-                            <li>Manage mosque details and admin assignments</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            {/* Filters and Search */}
-            <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-6">
-                <div className="flex flex-col lg:flex-row gap-4">
-                    {/* Search */}
-                    <div className="flex-1 relative">
-                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by mosque or admin details (name, email, phone, location, etc.)..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                    </div>
-
-                    {/* Status Filter */}
-                    <div className="relative">
-                        <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'no_admin' | 'admin_removed' | 'admin_inactive')}
-                            className="pl-10 pr-8 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="no_admin">No Admin</option>
-                            <option value="admin_removed">Admin Removed</option>
-                            <option value="admin_inactive">Admin Inactive</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Admin Status Sorting Buttons */}
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-700">Filter by Admin Status:</span>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setAdminStatusFilter('all')}
-                            className={`px-4 py-2 rounded-lg font-medium transition-all ${adminStatusFilter === 'all'
-                                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                        >
-                            All Mosques
-                            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${adminStatusFilter === 'all'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-200 text-gray-600'
-                                }`}>
-                                {mosques.length}
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => setAdminStatusFilter('has_admin')}
-                            className={`px-4 py-2 rounded-lg font-medium transition-all ${adminStatusFilter === 'has_admin'
-                                ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                        >
-                            Has Admin
-                            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${adminStatusFilter === 'has_admin'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-200 text-gray-600'
-                                }`}>
-                                {mosques.filter(m => m.has_approved_admin).length}
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => setAdminStatusFilter('no_admin')}
-                            className={`px-4 py-2 rounded-lg font-medium transition-all ${adminStatusFilter === 'no_admin'
-                                ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                        >
-                            No Admin
-                            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${adminStatusFilter === 'no_admin'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-200 text-gray-600'
-                                }`}>
-                                {mosques.filter(m => !m.has_approved_admin).length}
-                            </span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Bulk Actions */}
-                {selectedMosques.length > 0 && (
-                    <div className="mt-4 flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-200">
-                        <span className="text-blue-800 font-semibold">
-                            {selectedMosques.length} mosque(s) selected
-                        </span>
-                        <div className="flex space-x-2">
-                            <button
-                                onClick={() => selectedMosques.forEach(id => onSendReminder(id))}
-                                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-                            >
-                                <FaEnvelope className="w-4 h-4 mr-2" />
-                                Send Reminders
-                            </button>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-2 sm:space-y-6 lg:space-y-8">
+                {/* Header */}
+                <div className="text-center sm:text-left">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-4 lg:mb-6">
+                        <div className="mb-2 sm:mb-0">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-800 bg-clip-text text-transparent mb-1 sm:mb-2">
+                                Admin Management
+                            </h1>
+                            <p className="text-xs sm:text-sm lg:text-base text-gray-600">Manage mosque administrators and assignments</p>
+                        </div>
+                        <div className="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-100/80 backdrop-blur-sm border border-blue-200 rounded-xl sm:rounded-2xl shadow-lg">
+                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                            <FaBuilding className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                            <span className="text-xs sm:text-sm lg:text-base font-semibold text-blue-700">{mosques.length} Total Mosques</span>
                         </div>
                     </div>
-                )}
-            </div>
-
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Total Mosques</p>
-                            <p className="text-2xl font-bold text-blue-600">
-                                {mosques.length}
-                            </p>
-                        </div>
-                        <FaBuilding className="w-8 h-8 text-blue-500" />
-                    </div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Has Admin</p>
-                            <p className="text-2xl font-bold text-green-600">
-                                {mosques.filter(m => m.has_approved_admin).length}
-                            </p>
-                        </div>
-                        <FaUserPlus className="w-8 h-8 text-green-500" />
-                    </div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">No Admin</p>
-                            <p className="text-2xl font-bold text-red-600">
-                                {mosques.filter(m => !m.has_approved_admin).length}
-                            </p>
-                        </div>
-                        <FaUserSlash className="w-8 h-8 text-red-500" />
-                    </div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-600">Filtered Results</p>
-                            <p className="text-2xl font-bold text-orange-600">
-                                {filteredMosques.length}
-                            </p>
-                        </div>
-                        <FaFilter className="w-8 h-8 text-orange-500" />
-                    </div>
-                </div>
-            </div>
-
-            {/* Mosques List */}
-            <div className="space-y-4">
-                {/* Results Header */}
-                <div className="flex items-center justify-between bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 border border-orange-200">
-                    <div className="flex items-center gap-3">
-                        <FaBuilding className="w-6 h-6 text-orange-600" />
-                        <div>
-                            <h2 className="text-lg font-bold text-gray-800">
-                                {adminStatusFilter === 'all' && 'All Mosques - Admin Management'}
-                                {adminStatusFilter === 'has_admin' && 'Mosques With Admin'}
-                                {adminStatusFilter === 'no_admin' && 'Mosques Without Admin'}
-                            </h2>
-                            <p className="text-sm text-gray-600">
-                                Showing {filteredMosques.length} of {mosques.length} mosques
-                                {searchTerm && ` • Search: "${searchTerm}"`}
-                            </p>
-                        </div>
-                    </div>
-                    {filteredMosques.length > 0 && (
-                        <div className="flex items-center gap-2">
-                            <span className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold">
-                                {filteredMosques.length}
-                            </span>
-                        </div>
-                    )}
                 </div>
 
-                {filteredMosques.length === 0 ? (
-                    <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-12 text-center">
-                        <FaBuilding className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">No Mosques Found</h3>
-                        <p className="text-gray-500">
-                            {searchTerm
-                                ? `No mosques match your search "${searchTerm}"`
-                                : 'No mosques match the current filters'
-                            }
-                        </p>
+                {/* Alert Notice */}
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl sm:rounded-3xl blur-xl"></div>
+                    <div className="relative bg-white/90 backdrop-blur-xl border border-blue-200/50 rounded-2xl sm:rounded-3xl shadow-2xl p-3 sm:p-6 lg:p-8 transform hover:scale-[1.01] transition-all duration-300">
+                        <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-6">
+                            <div className="flex-shrink-0 mx-auto sm:mx-0">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                                    <FaBuilding className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                                </div>
+                            </div>
+                            <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+                                    Mosque Admin Management
+                                </h3>
+                                <p className="text-gray-600 mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base">
+                                    Manage mosque administrators efficiently
+                                </p>
+                                <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:gap-2 text-xs sm:text-sm">
+                                    <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
+                                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full"></div>
+                                        <span>View mosques</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
+                                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full"></div>
+                                        <span>Search & filter</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
+                                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full"></div>
+                                        <span>Assign admins</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
+                                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full"></div>
+                                        <span>Send reminders</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                ) : (
-                    <>
-                        {/* Select All Header */}
-                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-4">
-                            <label className="flex items-center cursor-pointer">
+                </div>
+
+                {/* Filters and Search */}
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl sm:rounded-3xl blur-xl"></div>
+                    <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-2xl sm:rounded-3xl shadow-2xl p-2 sm:p-4 lg:p-6 transform hover:scale-[1.01] transition-all duration-300">
+                        <div className="flex flex-col xl:flex-row gap-2 sm:gap-4 lg:gap-6">
+                            {/* Search */}
+                            <div className="flex-1 relative group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <FaSearch className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors duration-300 z-10 w-3 h-3 sm:w-4 sm:h-4" />
                                 <input
-                                    type="checkbox"
-                                    checked={selectedMosques.length === filteredMosques.length}
-                                    onChange={handleSelectAll}
-                                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                                    type="text"
+                                    placeholder="Search by mosque or admin details..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="relative w-full pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base placeholder-gray-500 transition-all duration-300"
                                 />
-                                <span className="ml-3 text-sm font-medium text-gray-700">
-                                    Select All ({filteredMosques.length})
-                                </span>
-                            </label>
+                            </div>
+
+                            {/* Status Filter */}
+                            <div className="relative group w-full xl:w-56 lg:w-64">
+                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <FaFilter className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors duration-300 z-10 w-3 h-3 sm:w-4 sm:h-4" />
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value as 'all' | 'no_admin' | 'admin_removed' | 'admin_inactive')}
+                                    className="relative w-full pl-8 sm:pl-12 pr-8 sm:pr-10 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base appearance-none cursor-pointer transition-all duration-300"
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="no_admin">No Admin</option>
+                                    <option value="admin_removed">Admin Removed</option>
+                                    <option value="admin_inactive">Admin Inactive</option>
+                                </select>
+                                <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                    <svg className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Mosque Cards */}
-                        {filteredMosques.map((mosque) => (
-                            <div
-                                key={mosque._id}
-                                className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6"
-                            >
-                                <div className="flex items-start gap-4">
-                                    {/* Checkbox */}
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedMosques.includes(mosque._id)}
-                                        onChange={() => handleSelectMosque(mosque._id)}
-                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
-                                    />
+                        {/* Admin Status Sorting Buttons */}
+                        <div className="mt-3 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <span className="text-xs sm:text-sm lg:text-base font-bold text-gray-700">Filter by Admin Status:</span>
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3">
+                                <button
+                                    onClick={() => setAdminStatusFilter('all')}
+                                    className={`group relative overflow-hidden px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 ${adminStatusFilter === 'all'
+                                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl'
+                                        : 'bg-white/80 text-gray-700 hover:bg-white border border-gray-200 shadow-lg'
+                                        }`}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                    <span className="relative flex items-center space-x-1 sm:space-x-2">
+                                        <span className="text-xs sm:text-sm lg:text-base">All Mosques</span>
+                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold ${adminStatusFilter === 'all'
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            {mosques.length}
+                                        </span>
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setAdminStatusFilter('has_admin')}
+                                    className={`group relative overflow-hidden px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 ${adminStatusFilter === 'has_admin'
+                                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-xl'
+                                        : 'bg-white/80 text-gray-700 hover:bg-white border border-gray-200 shadow-lg'
+                                        }`}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                    <span className="relative flex items-center space-x-1 sm:space-x-2">
+                                        <span className="text-xs sm:text-sm lg:text-base">Has Admin</span>
+                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold ${adminStatusFilter === 'has_admin'
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-green-100 text-green-600'
+                                            }`}>
+                                            {mosques.filter(m => m.has_approved_admin).length}
+                                        </span>
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setAdminStatusFilter('no_admin')}
+                                    className={`group relative overflow-hidden px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 ${adminStatusFilter === 'no_admin'
+                                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-xl'
+                                        : 'bg-white/80 text-gray-700 hover:bg-white border border-gray-200 shadow-lg'
+                                        }`}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                    <span className="relative flex items-center space-x-1 sm:space-x-2">
+                                        <span className="text-xs sm:text-sm lg:text-base">No Admin</span>
+                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold ${adminStatusFilter === 'no_admin'
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-red-100 text-red-600'
+                                            }`}>
+                                            {mosques.filter(m => !m.has_approved_admin).length}
+                                        </span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
 
-                                    {/* Content */}
-                                    <div className="flex-1">
-                                        {/* Mosque Header */}
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                                    <FaBuilding className="w-5 h-5 text-orange-600" />
-                                                    {mosque.mosque_name}
-                                                </h3>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(mosque.status)}`}>
-                                                        {getStatusIcon(mosque.status)}
-                                                        <span className="ml-1">{getStatusLabel(mosque.status)}</span>
-                                                    </span>
-                                                </div>
-                                            </div>
+                        {/* Bulk Actions */}
+                        {selectedMosques.length > 0 && (
+                            <div className="mt-3 sm:mt-6 relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl sm:rounded-2xl blur-lg"></div>
+                                <div className="relative bg-blue-50/90 backdrop-blur-sm border border-blue-200/50 rounded-xl sm:rounded-2xl p-2 sm:p-4 lg:p-6 shadow-lg">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                                        <div className="flex items-center space-x-2 sm:space-x-3">
+                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                                            <span className="text-blue-800 font-bold text-xs sm:text-sm lg:text-base">
+                                                {selectedMosques.length} mosque(s) selected
+                                            </span>
                                         </div>
-
-                                        {/* Mosque Details */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            {/* Location */}
-                                            <div className="flex items-center gap-2 text-gray-700">
-                                                <FaMapMarkerAlt className="w-4 h-4 text-red-500 flex-shrink-0" />
-                                                <span className="text-sm">{mosque.location}</span>
-                                            </div>
-
-                                            {/* Created Date */}
-                                            <div className="flex items-center gap-2 text-gray-700">
-                                                <FaCalendarAlt className="w-4 h-4 text-purple-500 flex-shrink-0" />
-                                                <span className="text-sm">Created: {formatDate(mosque.created_at)}</span>
-                                            </div>
-
-                                            {/* Mosque Email */}
-                                            {mosque.contact_email && (
-                                                <div className="flex items-center gap-2 text-gray-700">
-                                                    <FaEnvelope className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                                                    <span className="text-sm truncate">{mosque.contact_email}</span>
-                                                </div>
-                                            )}
-
-                                            {/* Mosque Phone */}
-                                            {mosque.contact_phone && (
-                                                <div className="flex items-center gap-2 text-gray-700">
-                                                    <FaPhone className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                                    <span className="text-sm">{mosque.contact_phone}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Admin Details Section */}
-                                        {mosque.has_approved_admin && mosque.approved_admin ? (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                                                <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2">
-                                                    <FaUserPlus className="w-4 h-4" />
-                                                    Admin Details
-                                                </h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                                                    <div className="flex items-center gap-2 text-green-700">
-                                                        <FaIdCard className="w-3 h-3 flex-shrink-0" />
-                                                        <span className="truncate">{mosque.approved_admin.name}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-green-700">
-                                                        <FaEnvelope className="w-3 h-3 flex-shrink-0" />
-                                                        <span className="truncate">{mosque.approved_admin.email}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-green-700">
-                                                        <FaPhone className="w-3 h-3 flex-shrink-0" />
-                                                        <span>{mosque.approved_admin.phone}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                                                <p className="text-sm text-red-700 flex items-center gap-2">
-                                                    <FaUserSlash className="w-4 h-4" />
-                                                    <span className="font-medium">No admin assigned to this mosque</span>
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {/* Contact Attempts */}
-                                        <div className="flex items-center gap-2 text-gray-600 mb-4">
-                                            <FaEnvelope className="w-4 h-4 text-gray-400" />
-                                            <span className="text-sm">Contact Attempts: {mosque.contact_attempts}</span>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex flex-wrap gap-2">
-                                            {/* View Button - Always visible */}
+                                        <div className="flex space-x-2 sm:space-x-3">
                                             <button
-                                                onClick={() => {
-                                                    setSelectedMosqueForView(mosque);
-                                                    setShowViewModal(true);
-                                                }}
-                                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm"
+                                                onClick={() => selectedMosques.forEach(id => onSendReminder(id))}
+                                                className="group relative overflow-hidden px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg sm:rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                                             >
-                                                <FaEye className="w-4 h-4" />
-                                                View
-                                            </button>
-
-                                            {/* Conditional Buttons based on admin status */}
-                                            {mosque.has_approved_admin && mosque.approved_admin?.status === 'approved' ? (
-                                                // Has Admin with 'approved' status - Show Remove Admin button
-                                                <button
-                                                    onClick={() => handleRemoveAdminClick(mosque)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-sm"
-                                                >
-                                                    <FaUserMinus className="w-4 h-4" />
-                                                    Remove Admin
-                                                </button>
-                                            ) : (
-                                                // No Admin or admin not in approved status - Show Assign Admin button
-                                                <button
-                                                    onClick={() => handleAssignAdmin(mosque._id)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
-                                                >
-                                                    <FaUserPlus className="w-4 h-4" />
-                                                    Assign Admin
-                                                </button>
-                                            )}
-
-                                            {/* Delete Mosque Button */}
-                                            <button
-                                                onClick={() => handleDeleteMosque(mosque._id)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors text-sm"
-                                            >
-                                                <FaTrash className="w-4 h-4" />
-                                                Delete
+                                                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                                <span className="relative flex items-center gap-1 sm:gap-2">
+                                                    <FaEnvelope className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                    <span className="text-xs sm:text-sm lg:text-base">Send Reminders</span>
+                                                </span>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </>
-                )}
+                        )}
+                    </div>
+                </div>
+
+                {/* Statistics Cards */}
+                <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="group relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 font-medium mb-1">Total Mosques</p>
+                                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                        {mosques.length}
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <FaBuilding className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="group relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 font-medium mb-1">Has Admin</p>
+                                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                        {mosques.filter(m => m.has_approved_admin).length}
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <FaUserPlus className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="group relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-rose-500/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 font-medium mb-1">No Admin</p>
+                                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                                        {mosques.filter(m => !m.has_approved_admin).length}
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <FaUserSlash className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="group relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl p-4 sm:p-6 transform hover:scale-105 transition-all duration-300">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 font-medium mb-1">Filtered Results</p>
+                                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                                        {filteredMosques.length}
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <FaFilter className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mosques List */}
+                <div className="space-y-2 sm:space-y-4 lg:space-y-6">
+                    {/* Results Header */}
+                    <div className="hidden sm:relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-3xl blur-xl"></div>
+                        <div className="relative bg-white/90 backdrop-blur-xl border border-orange-200/50 rounded-3xl shadow-2xl p-4 sm:p-6 transform hover:scale-[1.01] transition-all duration-300">
+                            <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <FaBuilding className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                                            {adminStatusFilter === 'all' && 'All Mosques - Admin Management'}
+                                            {adminStatusFilter === 'has_admin' && 'Mosques With Admin'}
+                                            {adminStatusFilter === 'no_admin' && 'Mosques Without Admin'}
+                                        </h2>
+                                        <p className="text-sm text-gray-600">
+                                            Showing <span className="font-semibold text-orange-600">{filteredMosques.length}</span> of <span className="font-semibold">{mosques.length}</span> mosques
+                                            {searchTerm && <span className="text-blue-600"> • Search: "<span className="font-semibold">{searchTerm}</span>"</span>}
+                                        </p>
+                                    </div>
+                                </div>
+                                {filteredMosques.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold rounded-2xl shadow-lg">
+                                            <span className="text-sm sm:text-base">{filteredMosques.length} Results</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {filteredMosques.length === 0 ? (
+                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-12 text-center">
+                            <FaBuilding className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-400 mx-auto mb-2 sm:mb-3 lg:mb-4" />
+                            <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-1 sm:mb-2">No Mosques Found</h3>
+                            <p className="text-gray-500 text-xs sm:text-sm lg:text-base">
+                                {searchTerm
+                                    ? `No mosques match your search "${searchTerm}"`
+                                    : 'No mosques match the current filters'
+                                }
+                            </p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Select All Header */}
+                            <div className="hidden sm:relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl blur-lg"></div>
+                                <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-2xl shadow-xl p-4 sm:p-6">
+                                    <label className="hidden sm:flex items-center cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedMosques.length === filteredMosques.length}
+                                            onChange={handleSelectAll}
+                                            className="w-5 h-5 text-blue-600 border-gray-300 rounded-lg focus:ring-blue-500 focus:ring-2 transition-all duration-200"
+                                        />
+                                        <span className="ml-4 text-sm sm:text-base font-bold text-gray-700 group-hover:text-blue-600 transition-colors duration-200">
+                                            Select All ({filteredMosques.length} mosques)
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Mosque Cards */}
+                            <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                                {filteredMosques.map((mosque) => (
+                                    <div
+                                        key={mosque._id}
+                                        className="group relative"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl sm:rounded-3xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div className="relative bg-white/90 backdrop-blur-xl border border-white/30 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 p-1.5 sm:p-4 lg:p-6 transform hover:scale-[1.02]">
+                                            <div className="flex items-start gap-1.5 sm:gap-4 lg:gap-6">
+                                                {/* Checkbox */}
+                                                <div className="flex-shrink-0 mt-0.5">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedMosques.includes(mosque._id)}
+                                                        onChange={() => handleSelectMosque(mosque._id)}
+                                                        className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-1 transition-all duration-200"
+                                                    />
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 min-w-0">
+                                                    {/* Mosque Header */}
+                                                    <div className="flex flex-col gap-1 sm:gap-2 lg:gap-4 mb-2 sm:mb-4 lg:mb-6">
+                                                        <div className="flex-1">
+                                                            <h3 className="text-xs sm:text-lg lg:text-2xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-0.5 sm:mb-1 lg:mb-3 flex items-center gap-1 sm:gap-2 lg:gap-3">
+                                                                <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg sm:rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                    <FaBuilding className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
+                                                                </div>
+                                                                <span className="truncate text-xs sm:text-sm lg:text-xl">{mosque.mosque_name}</span>
+                                                            </h3>
+                                                            <div className="flex flex-wrap items-center gap-1 sm:gap-2 lg:gap-3">
+                                                                <span className={`inline-flex items-center px-1.5 py-0.5 sm:px-3 sm:py-1 lg:px-4 lg:py-2 rounded-lg sm:rounded-lg lg:rounded-2xl text-xs sm:text-xs lg:text-sm font-bold shadow-lg ${getStatusColor(mosque.status)} transition-all duration-300`}>
+                                                                    {getStatusIcon(mosque.status)}
+                                                                    <span className="ml-1 sm:ml-1 lg:ml-2">{getStatusLabel(mosque.status)}</span>
+                                                                </span>
+                                                                <div className="hidden sm:flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 rounded-lg sm:rounded-xl">
+                                                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full"></div>
+                                                                    <span className="text-xs sm:text-sm text-gray-600 font-medium">ID: {mosque.registration_code}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Mosque Details */}
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 lg:gap-4 mb-2 sm:mb-4 lg:mb-6">
+                                                        {/* Location */}
+                                                        <div className="group flex items-center gap-1 sm:gap-2 lg:gap-3 p-1.5 sm:p-2 lg:p-3 bg-red-50/50 backdrop-blur-sm border border-red-200/50 rounded-lg sm:rounded-lg lg:rounded-2xl hover:bg-red-50 transition-all duration-200">
+                                                            <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg sm:rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                <FaMapMarkerAlt className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-xs text-gray-500 font-medium hidden sm:block">Location</p>
+                                                                <p className="text-xs sm:text-xs lg:text-sm font-semibold text-gray-700 truncate">{mosque.location}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Created Date - Hidden on mobile */}
+                                                        <div className="hidden sm:flex group items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-purple-50/50 backdrop-blur-sm border border-purple-200/50 rounded-lg lg:rounded-2xl hover:bg-purple-50 transition-all duration-200">
+                                                            <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-purple-500 to-violet-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                <FaCalendarAlt className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-xs text-gray-500 font-medium">Created</p>
+                                                                <p className="text-xs lg:text-sm font-semibold text-gray-700">{formatDate(mosque.created_at)}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Mosque Email - Hidden on mobile */}
+                                                        {mosque.contact_email && (
+                                                            <div className="hidden sm:flex group items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-blue-50/50 backdrop-blur-sm border border-blue-200/50 rounded-lg lg:rounded-2xl hover:bg-blue-50 transition-all duration-200">
+                                                                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                    <FaEnvelope className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p className="text-xs text-gray-500 font-medium">Email</p>
+                                                                    <p className="text-xs lg:text-sm font-semibold text-gray-700 truncate">{mosque.contact_email}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Mosque Phone - Hidden on mobile */}
+                                                        {mosque.contact_phone && (
+                                                            <div className="hidden sm:flex group items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-green-50/50 backdrop-blur-sm border border-green-200/50 rounded-lg lg:rounded-2xl hover:bg-green-50 transition-all duration-200">
+                                                                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                    <FaPhone className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 font-medium">Phone</p>
+                                                                    <p className="text-xs lg:text-sm font-semibold text-gray-700">{mosque.contact_phone}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Admin Details Section */}
+                                                    {mosque.has_approved_admin && mosque.approved_admin ? (
+                                                        <div className="relative mb-2 sm:mb-4 lg:mb-6">
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg sm:rounded-lg lg:rounded-2xl blur-lg"></div>
+                                                            <div className="relative bg-green-50/90 backdrop-blur-sm border border-green-200/50 rounded-lg sm:rounded-lg lg:rounded-2xl p-1.5 sm:p-4 lg:p-6">
+                                                                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 mb-1.5 sm:mb-2 lg:mb-4">
+                                                                    <div className="w-5 h-5 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg sm:rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                        <FaUserPlus className="w-2.5 h-2.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white" />
+                                                                    </div>
+                                                                    <h4 className="text-xs sm:text-sm lg:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                                                        Has Admin
+                                                                    </h4>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 lg:gap-4">
+                                                                    <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 p-1.5 sm:p-2 lg:p-3 bg-white/70 backdrop-blur-sm border border-green-200/30 rounded-lg sm:rounded-lg lg:rounded-xl">
+                                                                        <FaIdCard className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-green-600 flex-shrink-0" />
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <p className="text-xs text-gray-500 font-medium hidden sm:block">Name</p>
+                                                                            <p className="text-xs sm:text-xs lg:text-sm font-semibold text-green-700 truncate">{mosque.approved_admin.name}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="hidden sm:flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-white/70 backdrop-blur-sm border border-green-200/30 rounded-lg lg:rounded-xl">
+                                                                        <FaEnvelope className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 flex-shrink-0" />
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <p className="text-xs text-gray-500 font-medium">Email</p>
+                                                                            <p className="text-xs lg:text-sm font-semibold text-green-700 truncate">{mosque.approved_admin.email}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="hidden sm:flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-white/70 backdrop-blur-sm border border-green-200/30 rounded-lg lg:rounded-xl">
+                                                                        <FaPhone className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 flex-shrink-0" />
+                                                                        <div>
+                                                                            <p className="text-xs text-gray-500 font-medium">Phone</p>
+                                                                            <p className="text-xs lg:text-sm font-semibold text-green-700">{mosque.approved_admin.phone}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="relative mb-2 sm:mb-4 lg:mb-6">
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-rose-500/20 rounded-lg sm:rounded-lg lg:rounded-2xl blur-lg"></div>
+                                                            <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200/50 rounded-lg sm:rounded-lg lg:rounded-2xl p-1.5 sm:p-4 lg:p-6">
+                                                                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                                                                    <div className="w-5 h-5 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-red-500 to-rose-500 rounded-lg sm:rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                                        <FaUserSlash className="w-2.5 h-2.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h4 className="text-xs sm:text-sm lg:text-lg font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-0 sm:mb-0 lg:mb-1">
+                                                                            No Admin
+                                                                        </h4>
+                                                                        <p className="text-xs sm:text-xs lg:text-sm text-red-600 hidden sm:block">This mosque requires an admin to manage operations</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Contact Attempts - Hidden on mobile */}
+                                                    <div className="hidden sm:flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-gray-50/80 backdrop-blur-sm border border-gray-200/50 rounded-lg lg:rounded-2xl mb-4 lg:mb-6">
+                                                        <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-gray-500 to-gray-400 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+                                                            <FaEnvelope className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 font-medium">Contact Attempts</p>
+                                                            <p className="text-xs lg:text-sm font-semibold text-gray-700">{mosque.contact_attempts} attempts</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Action Buttons */}
+                                                    <div className="flex flex-wrap gap-1 sm:gap-2 lg:gap-3">
+                                                        {/* View Button - Always visible */}
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedMosqueForView(mosque);
+                                                                setShowViewModal(true);
+                                                            }}
+                                                            className="group relative overflow-hidden px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg sm:rounded-lg lg:rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                                                        >
+                                                            <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                                            <span className="relative flex items-center gap-0.5 sm:gap-1 lg:gap-2">
+                                                                <FaEye className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
+                                                                <span className="text-xs sm:text-sm lg:text-base">View</span>
+                                                            </span>
+                                                        </button>
+
+                                                        {/* Conditional Buttons based on admin status */}
+                                                        {mosque.has_approved_admin && mosque.approved_admin?.status === 'approved' ? (
+                                                            // Has Admin with 'approved' status - Show Remove Admin button
+                                                            <button
+                                                                onClick={() => handleRemoveAdminClick(mosque)}
+                                                                className="group relative overflow-hidden px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-lg sm:rounded-lg lg:rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                                                            >
+                                                                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                                                <span className="relative flex items-center gap-0.5 sm:gap-1 lg:gap-2">
+                                                                    <FaUserMinus className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
+                                                                    <span className="text-xs sm:text-sm lg:text-base">Remove</span>
+                                                                </span>
+                                                            </button>
+                                                        ) : (
+                                                            // No Admin or admin not in approved status - Show Assign Admin button
+                                                            <button
+                                                                onClick={() => handleAssignAdmin(mosque._id)}
+                                                                className="group relative overflow-hidden px-2 py-1 sm:px-4 sm:py-2 lg:px-6 lg:py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-lg sm:rounded-lg lg:rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                                                            >
+                                                                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+                                                                <span className="relative flex items-center gap-0.5 sm:gap-1 lg:gap-2">
+                                                                    <FaUserPlus className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
+                                                                    <span className="text-xs sm:text-sm lg:text-base">Assign</span>
+                                                                </span>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
 
             {/* Assign Admin Modal */}
             {showAssignModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-                        <div className="mb-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                        <FaUserPlus className="w-6 h-6 text-green-600" />
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full p-3 sm:p-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                        <div className="mb-3 sm:mb-6">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4">
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <FaUserPlus className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-800">Assign New Admin</h3>
-                                        <p className="text-sm text-gray-600">Fill in the admin details to assign to this mosque</p>
+                                        <h3 className="text-lg sm:text-xl font-bold text-gray-800">Assign New Admin</h3>
+                                        <p className="text-xs sm:text-sm text-gray-600">Fill in the admin details</p>
                                     </div>
                                 </div>
                                 <button
@@ -1013,17 +1193,20 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         setShowAssignModal(false);
                                         setAssignFormData({
                                             admin_name: '',
-                                            admin_email: '',
-                                            admin_phone: '',
+                                            admin_email: '@gmail.com',
+                                            admin_phone: '+923',
                                             admin_password: '',
-                                            super_admin_notes: ''
+                                            admin_confirm_password: '',
+                                            super_admin_notes: 'Admin assigned by super admin for mosque management and prayer time updates.'
                                         });
                                         setAssignError(null);
                                         setTargetMosque(null);
+                                        setShowPassword(false);
+                                        setShowConfirmPassword(false);
                                     }}
-                                    className="text-gray-400 hover:text-gray-600 p-2"
+                                    className="text-gray-400 hover:text-gray-600 p-1 sm:p-2"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
@@ -1032,147 +1215,207 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
                         {/* Error Message */}
                         {assignError && (
-                            <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2 text-red-700">
-                                <FaExclamationTriangle className="w-5 h-5" />
-                                <span className="text-sm">{assignError}</span>
+                            <div className="mb-3 sm:mb-4 bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 flex items-center gap-2 text-red-700">
+                                <FaExclamationTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="text-xs sm:text-sm">{assignError}</span>
                             </div>
                         )}
 
                         {/* Form */}
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                             {/* Admin Name */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Name <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
-                                    <FaIdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                    <FaIdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
                                     <input
                                         type="text"
                                         value={assignFormData.admin_name}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_name: e.target.value })}
                                         placeholder="Enter admin full name"
-                                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
                                         required
                                         minLength={2}
                                         maxLength={50}
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">2-50 characters, letters only</p>
+                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">2-50 characters, letters only</p>
                             </div>
 
                             {/* Admin Email */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Email <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
-                                    <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                    <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
                                     <input
                                         type="email"
                                         value={assignFormData.admin_email}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_email: e.target.value })}
                                         placeholder="admin@gmail.com"
-                                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
                                         required
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Use gmail.com, outlook.com, yahoo.com, hotmail.com, icloud.com, or protonmail.com</p>
+                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Use gmail.com, outlook.com, yahoo.com, hotmail.com, icloud.com, or protonmail.com</p>
                             </div>
 
                             {/* Admin Phone */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Phone <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
-                                    <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                    <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
                                     <input
                                         type="tel"
                                         value={assignFormData.admin_phone}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_phone: e.target.value })}
                                         placeholder="+923001234567"
-                                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
                                         required
                                         pattern="^\+923[0-9]{9}$"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Format: +923xxxxxxxxx (Pakistani number)</p>
+                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Format: +923xxxxxxxxx (Pakistani number)</p>
                             </div>
 
                             {/* Admin Password */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Password <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
-                                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         value={assignFormData.admin_password}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_password: e.target.value })}
+                                        onPaste={() => setShowConfirmPassword(false)}
                                         placeholder="Enter secure password"
-                                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
                                         required
                                         minLength={8}
                                         maxLength={50}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showPassword ? (
+                                            <svg className="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        )}
+                                    </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">Min 8 characters, must include uppercase, lowercase, number, and special character (@$!%*?&#)</p>
+                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Min 8 characters, must include uppercase, lowercase, number, and special character (@$!%*?&#)</p>
+                            </div>
+
+                            {/* Confirm Admin Password */}
+                            <div>
+                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                    Confirm Password <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        value={assignFormData.admin_confirm_password}
+                                        onChange={(e) => setAssignFormData({ ...assignFormData, admin_confirm_password: e.target.value })}
+                                        onPaste={() => setShowPassword(false)}
+                                        placeholder="Confirm password"
+                                        className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
+                                        required
+                                        minLength={8}
+                                        maxLength={50}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showConfirmPassword ? (
+                                            <svg className="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Re-enter the password to confirm</p>
                             </div>
 
                             {/* Super Admin Notes (Optional) */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Super Admin Notes <span className="text-gray-400">(Optional)</span>
+                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                    Notes <span className="text-gray-400">(Optional)</span>
                                 </label>
                                 <textarea
                                     value={assignFormData.super_admin_notes}
                                     onChange={(e) => setAssignFormData({ ...assignFormData, super_admin_notes: e.target.value })}
-                                    placeholder="Add any notes about this admin assignment..."
-                                    rows={3}
+                                    placeholder="Add any notes..."
+                                    rows={2}
                                     maxLength={500}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-xs sm:text-sm"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">{assignFormData.super_admin_notes.length}/500 characters</p>
+                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">{assignFormData.super_admin_notes.length}/500 characters</p>
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
                             <button
                                 onClick={() => {
                                     setShowAssignModal(false);
                                     setAssignFormData({
                                         admin_name: '',
-                                        admin_email: '',
-                                        admin_phone: '',
+                                        admin_email: '@gmail.com',
+                                        admin_phone: '+923',
                                         admin_password: '',
-                                        super_admin_notes: ''
+                                        admin_confirm_password: '',
+                                        super_admin_notes: 'Admin assigned by super admin for mosque management and prayer time updates.'
                                     });
                                     setAssignError(null);
                                     setTargetMosque(null);
+                                    setShowPassword(false);
+                                    setShowConfirmPassword(false);
                                 }}
                                 disabled={assignLoading}
-                                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleAssignSubmit}
-                                disabled={assignLoading || !assignFormData.admin_name.trim() || !assignFormData.admin_email.trim() || !assignFormData.admin_phone.trim() || !assignFormData.admin_password.trim()}
-                                className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                disabled={assignLoading || !assignFormData.admin_name.trim() || !assignFormData.admin_email.trim() || !assignFormData.admin_phone.trim() || !assignFormData.admin_password.trim() || !assignFormData.admin_confirm_password.trim() || assignFormData.admin_password !== assignFormData.admin_confirm_password}
+                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
                             >
                                 {assignLoading ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
                                         Assigning...
                                     </>
                                 ) : (
                                     <>
-                                        <FaUserPlus className="w-4 h-4" />
+                                        <FaUserPlus className="w-3 h-3 sm:w-4 sm:h-4" />
                                         Assign Admin
                                     </>
                                 )}
@@ -1184,44 +1427,44 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
             {/* View Details Modal */}
             {showViewModal && selectedMosqueForView && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
                         {/* Modal Header */}
-                        <div className="sticky top-0 bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <FaBuilding className="w-6 h-6" />
-                                <h3 className="text-2xl font-bold">{selectedMosqueForView.mosque_name}</h3>
+                        <div className="sticky top-0 bg-blue-600 text-white p-3 sm:p-6 rounded-t-xl sm:rounded-t-2xl flex items-center justify-between">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <FaBuilding className="w-4 h-4 sm:w-6 sm:h-6" />
+                                <h3 className="text-lg sm:text-2xl font-bold">{selectedMosqueForView.mosque_name}</h3>
                             </div>
                             <button
                                 onClick={() => {
                                     setShowViewModal(false);
                                     setSelectedMosqueForView(null);
                                 }}
-                                className="text-white hover:bg-blue-700 rounded-lg p-2 transition-colors"
+                                className="text-white hover:bg-blue-700 rounded-lg p-1 sm:p-2 transition-colors"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
                         {/* Status Badge */}
-                        <div className="px-6 pt-4">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedMosqueForView.status)}`}>
+                        <div className="px-3 sm:px-6 pt-2 sm:pt-4">
+                            <span className={`inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedMosqueForView.status)}`}>
                                 {getStatusIcon(selectedMosqueForView.status)}
                                 <span className="ml-1">{getStatusLabel(selectedMosqueForView.status)}</span>
                             </span>
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-6 space-y-4">
+                        <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
                             {/* Mosque Verification Details Section */}
                             <div className="bg-green-50 rounded-xl p-5 border border-green-200">
                                 <h4 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
                                     <FaBuilding className="w-4 h-4 text-green-700" />
                                     Mosque Verification Details
                                 </h4>
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FaBuilding className="w-3 h-3 text-gray-600" />
@@ -1270,7 +1513,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     </svg>
                                     Verification Code Information
                                 </h4>
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                                     <div>
                                         <label className="text-xs font-semibold text-gray-600">Current Verification Code</label>
                                         <p className="text-sm text-gray-900 font-mono bg-yellow-100 px-3 py-2 rounded mt-1 border border-yellow-300">
@@ -1426,13 +1669,13 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="sticky bottom-0 bg-gray-100 p-4 rounded-b-2xl border-t border-gray-200">
+                        <div className="sticky bottom-0 bg-gray-100 p-3 sm:p-4 rounded-b-xl sm:rounded-b-2xl border-t border-gray-200">
                             <button
                                 onClick={() => {
                                     setShowViewModal(false);
                                     setSelectedMosqueForView(null);
                                 }}
-                                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm"
+                                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-lg transition-colors text-xs sm:text-sm"
                             >
                                 Close
                             </button>
@@ -1443,47 +1686,47 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
-                        <div className="text-center mb-6">
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <FaExclamationTriangle className="w-8 h-8 text-red-600" />
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-3xl shadow-2xl max-w-md w-full p-4 sm:p-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                        <div className="text-center mb-4 sm:mb-6">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <FaExclamationTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Deletion</h3>
-                            <p className="text-gray-600">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2">Confirm Deletion</h3>
+                            <p className="text-xs sm:text-sm text-gray-600">
                                 Are you sure you want to delete this mosque? This action cannot be undone.
                             </p>
                         </div>
 
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="mb-4 sm:mb-6">
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                                 Reason for Deletion *
                             </label>
                             <textarea
                                 value={actionReason}
                                 onChange={(e) => setActionReason(e.target.value)}
                                 placeholder="Please provide a reason for deleting this mosque..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-xs sm:text-sm"
                                 rows={3}
                                 required
                             />
                         </div>
 
-                        <div className="flex space-x-3">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <button
                                 onClick={() => {
                                     setShowDeleteModal(false);
                                     setActionReason('');
                                     setTargetMosque(null);
                                 }}
-                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmDelete}
                                 disabled={!actionReason.trim()}
-                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                             >
                                 Delete
                             </button>
@@ -1494,36 +1737,36 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
             {/* Confirmation Modal for Assign Admin */}
             {showConfirmModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
-                        <div className="text-center mb-6">
-                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <FaCheckCircle className="w-8 h-8 text-blue-600" />
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 animate-scale-in max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                        <div className="text-center mb-4 sm:mb-6">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <FaCheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-2">Confirm Admin Assignment</h3>
-                            <p className="text-gray-600">
+                            <h3 className="text-lg sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Confirm Admin Assignment</h3>
+                            <p className="text-xs sm:text-sm text-gray-600">
                                 Are you sure you want to assign this admin to the mosque?
                             </p>
                         </div>
 
-                        <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200">
-                            <h4 className="text-sm font-bold text-gray-800 mb-3">Admin Details:</h4>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                    <FaIdCard className="w-4 h-4 text-blue-600" />
-                                    <span className="text-gray-700"><strong>Name:</strong> {assignFormData.admin_name}</span>
+                        <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 border border-blue-200">
+                            <h4 className="text-xs sm:text-sm font-bold text-gray-800 mb-2 sm:mb-3">Admin Details:</h4>
+                            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <FaIdCard className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
+                                    <span className="text-gray-700 truncate"><strong>Name:</strong> {assignFormData.admin_name}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <FaEnvelope className="w-4 h-4 text-blue-600" />
-                                    <span className="text-gray-700"><strong>Email:</strong> {assignFormData.admin_email}</span>
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <FaEnvelope className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
+                                    <span className="text-gray-700 truncate"><strong>Email:</strong> {assignFormData.admin_email}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <FaPhone className="w-4 h-4 text-blue-600" />
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <FaPhone className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
                                     <span className="text-gray-700"><strong>Phone:</strong> {assignFormData.admin_phone}</span>
                                 </div>
                                 {assignFormData.super_admin_notes && (
-                                    <div className="flex items-start gap-2 mt-3 pt-3 border-t border-blue-200">
-                                        <svg className="w-4 h-4 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="flex items-start gap-1.5 sm:gap-2 mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-blue-200">
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                         <span className="text-gray-700 flex-1"><strong>Notes:</strong> {assignFormData.super_admin_notes}</span>
@@ -1532,37 +1775,37 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                             </div>
                         </div>
 
-                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-6">
+                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 sm:p-4 rounded mb-4 sm:mb-6">
                             <div className="flex items-start">
-                                <FaExclamationTriangle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5" />
-                                <div className="text-sm text-yellow-800">
+                                <FaExclamationTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
+                                <div className="text-xs sm:text-sm text-yellow-800">
                                     <p className="font-semibold">Important:</p>
                                     <p className="mt-1">This admin will be immediately approved and can login to manage this mosque.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <button
                                 onClick={cancelAssignConfirmation}
                                 disabled={assignLoading}
-                                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmAssignAdmin}
                                 disabled={assignLoading}
-                                className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
                             >
                                 {assignLoading ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
                                         <span>Assigning...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <FaCheckCircle className="w-4 h-4" />
+                                        <FaCheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                                         <span>Confirm & Assign</span>
                                     </>
                                 )}
@@ -1574,81 +1817,81 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
             {/* Remove Admin Modal */}
             {showRemoveAdminModal && selectedMosqueForRemove && selectedMosqueForRemove.approved_admin && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                <FaUserMinus className="text-red-600" />
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-3xl shadow-2xl max-w-md w-full p-4 sm:p-8 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
+                            <h3 className="text-lg sm:text-2xl font-bold text-gray-800 flex items-center gap-1.5 sm:gap-2">
+                                <FaUserMinus className="text-red-600 w-4 h-4 sm:w-5 sm:h-5" />
                                 Remove Admin
                             </h3>
                             <button
                                 onClick={closeRemoveAdminModal}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                            <p className="text-sm text-gray-700 mb-2">
+                        <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl">
+                            <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2">
                                 <strong>Admin:</strong> {selectedMosqueForRemove.approved_admin.name}
                             </p>
-                            <p className="text-sm text-gray-700 mb-2">
+                            <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2 truncate">
                                 <strong>Email:</strong> {selectedMosqueForRemove.approved_admin.email}
                             </p>
-                            <p className="text-sm text-gray-700 mb-2">
+                            <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2 truncate">
                                 <strong>Mosque:</strong> {selectedMosqueForRemove.mosque_name}
                             </p>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-xs sm:text-sm text-gray-700 truncate">
                                 <strong>Location:</strong> {selectedMosqueForRemove.location}
                             </p>
                         </div>
 
-                        <div className="mb-6">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <div className="mb-4 sm:mb-6">
+                            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                                 Removal Reason *
                             </label>
                             <textarea
                                 value={removalReason}
                                 onChange={(e) => setRemovalReason(e.target.value)}
                                 placeholder="Explain why this admin is being removed (minimum 10 characters)..."
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                                rows={4}
+                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-xs sm:text-sm"
+                                rows={3}
                                 disabled={removeLoading}
                             />
                             {removeError && (
-                                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                    <p className="text-sm text-red-600 font-medium">{removeError}</p>
+                                <div className="mt-2 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <p className="text-xs sm:text-sm text-red-600 font-medium">{removeError}</p>
                                 </div>
                             )}
-                            <p className="mt-2 text-xs text-gray-500">
+                            <p className="mt-1 sm:mt-2 text-xs text-gray-500">
                                 The admin's account will be preserved with 'admin_removed' status and they can reapply for a different mosque.
                             </p>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <button
                                 onClick={closeRemoveAdminModal}
                                 disabled={removeLoading}
-                                className="flex-1 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg sm:rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleRemoveAdmin}
                                 disabled={removeLoading || !removalReason.trim() || removalReason.trim().length < 10}
-                                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg sm:rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
                             >
                                 {removeLoading ? (
                                     <>
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <div className="w-3 h-3 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                         Removing...
                                     </>
                                 ) : (
                                     <>
-                                        <FaUserMinus />
+                                        <FaUserMinus className="w-3 h-3 sm:w-4 sm:h-4" />
                                         Remove Admin
                                     </>
                                 )}
@@ -1667,6 +1910,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                 />
             )}
         </div>
+        // </div>
     );
 };
 

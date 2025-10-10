@@ -6,6 +6,7 @@ import WelcomePage from './pages/WelcomePage';
 import MosqueFinderPage from './pages/MosqueFinderPage';
 import MosqueDetailPage from './pages/MosqueDetailPage';
 import AdminApplicationPage from './pages/AdminApplicationPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminStatusPage from './pages/AdminStatusPage';
 import AdminReapplicationPage from './pages/AdminReapplicationPage';
@@ -24,7 +25,8 @@ function App() {
           <Route path="/mosques/:id" element={<MosqueDetailPage />} />
           <Route path="/mosques/:id/apply" element={<AdminApplicationPage />} />
 
-          {/* Protected Admin Route */}
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/status" element={<AdminStatusPage />} />
           <Route path="/admin/reapply" element={<AdminReapplicationPage />} />

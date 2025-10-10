@@ -35,7 +35,6 @@ const WelcomePage: React.FC = () => {
                                 </svg>
                                 Find Mosques
                             </Link>
-
                         </div>
                     </div>
                 </div>
@@ -77,7 +76,7 @@ const WelcomePage: React.FC = () => {
                             </p>
 
                             {/* CTA Buttons */}
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                            <div className="flex flex-col items-center justify-center gap-6">
                                 <Link
                                     to="/mosques"
                                     className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center"
@@ -87,8 +86,18 @@ const WelcomePage: React.FC = () => {
                                     </svg>
                                     Find Mosques Near You
                                 </Link>
-
-
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+                                    <Link
+                                        to="/admin/login"
+                                        className="w-full sm:w-auto bg-white hover:bg-gray-50 text-blue-600 border-2 border-blue-600 px-6 py-3 rounded-xl text-base font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center"
+                                    >
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                        </svg>
+                                        Admin Login
+                                    </Link>
+                                    {/* Super Admin access hidden for security - only accessible via direct URL */}
+                                </div>
                             </div>
                         </div>
                     </div>

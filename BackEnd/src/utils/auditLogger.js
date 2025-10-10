@@ -162,6 +162,37 @@ class AuditLogger {
         });
     }
 
+    // Log admin assignment (by super admin)
+    async logAdminAssigned(adminData, mosqueData, notes = '') {
+        return await AuditLog.logAction({
+            action_type: 'admin_assigned',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'admin',
+                target_id: adminData._id,
+                target_name: adminData.name
+            },
+            action_details: {
+                admin_data: {
+                    name: adminData.name,
+                    email: adminData.email,
+                    phone: adminData.phone,
+                    status: adminData.status,
+                    mosque_id: adminData.mosque_id,
+                    mosque_name: mosqueData.name,
+                    mosque_location: mosqueData.location,
+                    verification_code_used: adminData.verification_code_used,
+                    application_notes: adminData.application_notes,
+                    super_admin_notes: notes
+                },
+                notes: notes,
+                assignment_type: 'direct_assignment',
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            }
+        });
+    }
+
     // Log admin rejection
     async logAdminRejected(adminData, mosqueData, reason = '') {
         return await AuditLog.logAction({
@@ -185,6 +216,35 @@ class AuditLogger {
                     application_notes: adminData.application_notes
                 },
                 reason: reason,
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            }
+        });
+    }
+
+    // Log admin allowed to reapply
+    async logAdminAllowedReapply(adminData, mosqueData, notes = '') {
+        return await AuditLog.logAction({
+            action_type: 'admin_allowed_reapply',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'admin',
+                target_id: adminData._id,
+                target_name: adminData.name
+            },
+            action_details: {
+                admin_data: {
+                    name: adminData.name,
+                    email: adminData.email,
+                    phone: adminData.phone,
+                    status: adminData.status,
+                    mosque_id: adminData.mosque_id,
+                    mosque_name: mosqueData?.name || 'Unknown Mosque',
+                    mosque_location: mosqueData?.location || 'Unknown Location',
+                    rejection_count: adminData.rejection_count,
+                    can_reapply: adminData.can_reapply
+                },
+                notes: notes,
                 ip_address: this.ip_address,
                 user_agent: this.user_agent
             }
@@ -331,6 +391,212 @@ class AuditLogger {
                 ip_address: this.ip_address,
                 user_agent: this.user_agent
             }
+        });
+    }
+
+    // Log errors
+    async logError(errorData) {
+        return await AuditLog.logAction({
+            action_type: 'error_logged',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'system',
+                target_name: 'System Error'
+            },
+            action_details: {
+                error_data: {
+                    action: errorData.action,
+                    error_message: errorData.errorMessage,
+                    endpoint: errorData.endpoint,
+                    method: errorData.method,
+                    status_code: errorData.statusCode
+                },
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            },
+            status: 'failed'
+        });
+    }
+
+    // Log super admin creation
+    async logSuperAdminCreated(superAdminData, createdBy = 'existing_super_admin') {
+        return await AuditLog.logAction({
+            action_type: 'super_admin_created',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'super_admin',
+                target_id: superAdminData._id,
+                target_name: superAdminData.name
+            },
+            action_details: {
+                super_admin_data: {
+                    name: superAdminData.name,
+                    email: superAdminData.email
+                },
+                created_by: createdBy,
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            }
+        });
+    }
+
+    // Log super admin deletion
+    async logSuperAdminDeleted(superAdminData, deletedBy = 'existing_super_admin') {
+        return await AuditLog.logAction({
+            action_type: 'super_admin_deleted',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'super_admin',
+                target_id: superAdminData._id,
+                target_name: superAdminData.name
+            },
+            action_details: {
+                super_admin_data: {
+                    name: superAdminData.name,
+                    email: superAdminData.email,
+                    created_at: superAdminData.createdAt
+                },
+                deleted_by: deletedBy,
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            }
+        });
+    }
+
+    // Log individual code regeneration
+    async logCodeRegenerated(mosque, oldCode, newCode, newExpiry) {
+        return await AuditLog.logAction({
+            action_type: 'code_regenerated',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'mosque',
+                target_id: mosque._id,
+                target_name: mosque.name
+            },
+            action_details: {
+                mosque_name: mosque.name,
+                mosque_location: mosque.location,
+                old_verification_code: oldCode,
+                new_verification_code: newCode,
+                new_expiry_date: newExpiry,
+                regeneration_reason: 'Manual regeneration by super admin',
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            },
+            status: 'success'
+        });
+    }
+
+    // Log bulk code regeneration
+    async logBulkCodeRegeneration(successCount, failedCount, expiryDays) {
+        return await AuditLog.logAction({
+            action_type: 'bulk_code_regeneration',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'system',
+                target_id: null,
+                target_name: 'Multiple Mosques'
+            },
+            action_details: {
+                total_successful: successCount,
+                total_failed: failedCount,
+                expiry_days: expiryDays,
+                operation_type: 'BULK CODE REGENERATION COMPLETED',
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            },
+            status: successCount > 0 ? 'success' : 'failed'
+        });
+    }
+
+    // Log admin code validation (when code_regenerated admin successfully validates mosque code)
+    async logAdminCodeValidated(adminData, mosqueData, validatedCode) {
+        return await AuditLog.logAction({
+            action_type: 'admin_code_validated',
+            performed_by: {
+                user_id: adminData._id,
+                user_type: 'admin',
+                user_email: adminData.email,
+                user_name: adminData.name
+            },
+            target: {
+                target_type: 'admin',
+                target_id: adminData._id,
+                target_name: adminData.name
+            },
+            action_details: {
+                admin_data: {
+                    admin_id: adminData._id,
+                    admin_name: adminData.name,
+                    admin_email: adminData.email,
+                    admin_phone: adminData.phone,
+                    previous_status: 'code_regenerated',
+                    new_status: 'approved'
+                },
+                mosque_data: {
+                    mosque_id: mosqueData._id,
+                    mosque_name: mosqueData.name,
+                    mosque_location: mosqueData.location,
+                    validated_code: validatedCode
+                },
+                action_summary: `Admin ${adminData.name} (${adminData.email}) successfully validated mosque code and status changed from 'code_regenerated' to 'approved'`,
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            },
+            status: 'success'
+        });
+    }
+
+    // Log admin code regeneration (when admin status is changed to code_regenerated)
+    async logAdminCodeRegenerated(adminData, mosqueData, oldCode, newCode) {
+        return await AuditLog.logAction({
+            action_type: 'admin_code_regenerated',
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: 'admin',
+                target_id: adminData.admin_id || adminData._id,
+                target_name: adminData.name
+            },
+            action_details: {
+                admin_data: {
+                    admin_id: adminData.admin_id || adminData._id,
+                    admin_name: adminData.name,
+                    admin_email: adminData.email,
+                    admin_phone: adminData.phone,
+                    previous_status: 'approved',
+                    new_status: 'code_regenerated'
+                },
+                mosque_data: {
+                    mosque_id: mosqueData._id,
+                    mosque_name: mosqueData.name,
+                    mosque_location: mosqueData.location,
+                    old_verification_code: oldCode,
+                    new_verification_code: newCode
+                },
+                action_summary: `Admin ${adminData.name} (${adminData.email}) status changed to 'code_regenerated' due to mosque code regeneration for ${mosqueData.name}`,
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            },
+            status: 'success'
+        });
+    }
+
+    // Generic log method for custom audit actions
+    async log(auditData) {
+        return await AuditLog.logAction({
+            action_type: auditData.action.toLowerCase().replace(/_/g, '_'),
+            performed_by: this.getUserInfo(),
+            target: {
+                target_type: auditData.targetModel ? auditData.targetModel.toLowerCase() : 'system',
+                target_id: auditData.targetId,
+                target_name: auditData.details?.target_name || auditData.details?.mosque_name || 'Unknown'
+            },
+            action_details: {
+                ...auditData.details,
+                ip_address: this.ip_address,
+                user_agent: this.user_agent
+            },
+            status: 'success'
         });
     }
 }

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { authApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
-import { Mail, Lock, Shield, ArrowLeft } from 'react-feather';
+import { Mail, Lock, Shield, ArrowLeft, Eye, EyeOff } from 'react-feather';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -18,6 +18,7 @@ const SuperAdminLoginPage: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -119,12 +120,21 @@ const SuperAdminLoginPage: React.FC = () => {
                                     <Lock className="w-4 h-4 mr-2 text-blue-600" />
                                     Password
                                 </label>
-                                <input
-                                    {...form.register('password')}
-                                    type="password"
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                    placeholder="Enter your password"
-                                />
+                                <div className="relative">
+                                    <input
+                                        {...form.register('password')}
+                                        type={showPassword ? 'text' : 'password'}
+                                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                        placeholder="Enter your password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                                 {form.formState.errors.password && (
                                     <p className="text-red-500 text-sm mt-2 font-medium">
                                         {form.formState.errors.password.message}
@@ -141,17 +151,7 @@ const SuperAdminLoginPage: React.FC = () => {
                             </button>
                         </form>
 
-                        <div className="mt-6 text-center">
-                            <p className="text-gray-600">
-                                Need to create an account?{' '}
-                                <Link
-                                    to="/superadmin/register"
-                                    className="text-blue-600 hover:text-blue-700 font-semibold"
-                                >
-                                    Register here
-                                </Link>
-                            </p>
-                        </div>
+                        {/* Registration link removed for security - super admins can only be created by existing super admins */}
                     </div>
                 </div>
             </div>

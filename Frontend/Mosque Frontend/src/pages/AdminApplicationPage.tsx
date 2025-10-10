@@ -5,16 +5,20 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { authApi, mosqueApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
-import { ArrowLeft, Phone, Mail, User, Lock, Shield, FileText, CheckCircle } from 'react-feather';
+import { ArrowLeft, Phone, Mail, User, Lock, Shield, FileText, CheckCircle, Eye, EyeOff } from 'react-feather';
 
 // Validation schemas
 const registerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(7, 'Password must be at least 7 characters'),
+    confirm_password: z.string(),
     phone: z.string().regex(/^\+923[0-9]{9}$/, 'Phone number must be in format +923xxxxxxxxx'),
     mosque_verification_code: z.string().min(1, 'Verification code is required'),
     application_notes: z.string().optional(),
+}).refine((data) => data.password === data.confirm_password, {
+    message: "Passwords don't match",
+    path: ["confirm_password"],
 });
 
 const loginSchema = z.object({
@@ -40,6 +44,8 @@ const AdminApplicationPage: React.FC = () => {
     const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const registerForm = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
@@ -48,6 +54,52 @@ const AdminApplicationPage: React.FC = () => {
     const loginForm = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     });
+
+    // Watch password for strength indicator
+    const password = registerForm.watch('password');
+
+    const getPasswordStrength = (pwd: string) => {
+        if (!pwd) return { strength: 0, label: '', color: '' };
+
+        let strength = 0;
+        let label = '';
+        let color = '';
+
+        // Only letters = weak
+        if (/^[a-zA-Z]+$/.test(pwd)) {
+            strength = 1;
+            label = 'Weak';
+            color = 'bg-red-500';
+        }
+        // Numbers added = good
+        else if (/[a-zA-Z]/.test(pwd) && /\d/.test(pwd) && !/[A-Z]/.test(pwd) && !/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
+            strength = 2;
+            label = 'Good';
+            color = 'bg-blue-500';
+        }
+        // Special characters = enhanced security
+        else if (/[a-zA-Z]/.test(pwd) && /\d/.test(pwd) && /[A-Z]/.test(pwd) && !/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
+            strength = 3;
+            label = 'Enhanced Security';
+            color = 'bg-purple-500';
+        }
+        // Capital letters = super strong
+        else if (/[a-zA-Z]/.test(pwd) && /\d/.test(pwd) && /[A-Z]/.test(pwd) && /[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
+            strength = 4;
+            label = 'Super Strong';
+            color = 'bg-green-500';
+        }
+        // Mixed but not meeting all criteria
+        else {
+            strength = 1;
+            label = 'Weak';
+            color = 'bg-red-500';
+        }
+
+        return { strength, label, color };
+    };
+
+    const passwordStrength = getPasswordStrength(password || '');
 
     useEffect(() => {
         const fetchMosqueInfo = async () => {
@@ -433,17 +485,73 @@ const AdminApplicationPage: React.FC = () => {
                                             <Lock className="w-4 h-4 mr-2 text-blue-600" />
                                             Password
                                         </label>
-                                        <input
-                                            {...registerForm.register('password')}
-                                            type="password"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="Create a password"
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                {...registerForm.register('password')}
+                                                type={showPassword ? 'text' : 'password'}
+                                                className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                                placeholder="Create a password"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        {password && (
+                                            <div className="mt-2">
+                                                <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                                    <span>Strength: {passwordStrength.label}</span>
+                                                    <span>{passwordStrength.strength}/4</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div
+                                                        className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                                                        style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        )}
                                         {registerForm.formState.errors.password && (
                                             <p className="text-red-500 text-sm mt-2 font-medium">
                                                 {registerForm.formState.errors.password.message}
                                             </p>
                                         )}
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Use letters, numbers, special characters, and capital letters for maximum security
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                            <Lock className="w-4 h-4 mr-2 text-blue-600" />
+                                            Confirm Password
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                {...registerForm.register('confirm_password')}
+                                                type={showConfirmPassword ? 'text' : 'password'}
+                                                className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                                placeholder="Confirm your password"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                            >
+                                                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        {registerForm.formState.errors.confirm_password && (
+                                            <p className="text-red-500 text-sm mt-2 font-medium">
+                                                {registerForm.formState.errors.confirm_password.message}
+                                            </p>
+                                        )}
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Must match the password entered above
+                                        </p>
                                     </div>
 
                                     <div>

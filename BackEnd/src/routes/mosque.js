@@ -377,40 +377,4 @@ router.post('/', auth, requireSuperAdmin, async (req, res) => {
     }
 });
 
-// Delete Mosque (Super Admin)
-// router.delete('/:id', auth, requireSuperAdmin, async (req, res) => {
-//     try {
-//         // Get mosque and admin data before deletion for audit logging
-//         const mosque = await Mosque.findById(req.params.id);
-//         if (!mosque) {
-//             return res.status(404).json({ error: 'Mosque not found' });
-//         }
-
-//         const admin = await Admin.findOne({ mosque_id: req.params.id });
-
-//         // Log the mosque deletion with admin details if exists
-//         const auditLogger = new AuditLogger(req);
-//         await auditLogger.logMosqueDeleted(mosque, admin);
-
-//         // Now delete the mosque and associated admins
-//         await Mosque.findByIdAndDelete(req.params.id);
-//         await Admin.deleteMany({ mosque_id: req.params.id });
-
-//         res.json({
-//             message: 'Mosque deleted successfully',
-//             deleted_mosque: {
-//                 name: mosque.name,
-//                 location: mosque.location
-//             },
-//             deleted_admin: admin ? {
-//                 name: admin.name,
-//                 email: admin.email,
-//                 phone: admin.phone
-//             } : null
-//         });
-//     } catch (err) {
-//         res.status(500).json({ error: 'Server error' });
-//     }
-// });
-
 module.exports = router;

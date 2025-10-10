@@ -10,7 +10,8 @@ import {
     Home,
     LogOut,
     RefreshCw,
-    FileText
+    FileText,
+    UserCheck
 } from 'react-feather';
 
 const AdminStatusPage: React.FC = () => {
@@ -49,12 +50,10 @@ const AdminStatusPage: React.FC = () => {
 
             setError(errorResponse.response?.data?.error || 'Failed to load status');
 
-            // If unauthorized, redirect to home
+            // If unauthorized, don't redirect - show helpful message instead
             if (errorResponse.response?.status === 401) {
-                console.log('401 Unauthorized - clearing localStorage and redirecting');
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                navigate('/');
+                console.log('401 Unauthorized - no valid token, showing login prompt');
+                setError('To check your account status, please try logging in first. You will be redirected to this page if your account has special status.');
             }
         } finally {
             setLoading(false);
@@ -84,19 +83,23 @@ const AdminStatusPage: React.FC = () => {
 
     if (error || !profile) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
                 <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
-                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <AlertCircle className="w-10 h-10 text-red-500" />
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <UserCheck className="w-8 h-8 text-white" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-3">Error Loading Status</h2>
-                    <p className="text-gray-600 mb-6">{error || 'Unable to load your account status'}</p>
-                    <Link
-                        to="/"
-                        className="inline-block bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300"
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                        Account Status Check
+                    </h2>
+                    <p className="text-gray-600 mb-6">
+                        {error || 'Unable to load your account status'}
+                    </p>
+                    <button
+                        onClick={() => navigate('/admin/login')}
+                        className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300"
                     >
-                        Back to Home
-                    </Link>
+                        Go to Login
+                    </button>
                 </div>
             </div>
         );
@@ -636,6 +639,153 @@ const AdminStatusPage: React.FC = () => {
                                 <button
                                     onClick={handleLogout}
                                     className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                                >
+                                    <LogOut size={18} />
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // CODE REGENERATED STATUS
+    if (profile.status === 'code_regenerated' && profile.code_regeneration_info) {
+        const { code_regeneration_reason, code_regeneration_date, code_regenerated_mosque_name, code_regenerated_mosque_location, can_reapply } = profile.code_regeneration_info;
+
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full filter blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-full filter blur-3xl"></div>
+                </div>
+
+                <div className="relative z-10 container mx-auto px-4 py-16">
+                    <div className="max-w-2xl mx-auto">
+                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
+                            {/* Status Icon */}
+                            <div className="w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <RefreshCw className="w-12 h-12 text-white" />
+                            </div>
+
+                            {/* Header */}
+                            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent text-center mb-3">
+                                Mosque Code Regenerated
+                            </h1>
+                            <p className="text-gray-600 text-center mb-8">
+                                Your mosque verification code has been regenerated by the Super Admin
+                            </p>
+
+                            {/* Info Card */}
+                            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-2xl p-6 mb-8">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Your Name</p>
+                                        <p className="font-semibold text-gray-800">{profile.name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Email</p>
+                                        <p className="font-semibold text-gray-800">{profile.email}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Phone</p>
+                                        <p className="font-semibold text-gray-800">{profile.phone}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Status</p>
+                                        <span className="inline-flex items-center gap-2 bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            <RefreshCw size={14} />
+                                            Code Regenerated
+                                        </span>
+                                    </div>
+                                    {code_regenerated_mosque_name && (
+                                        <>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">Mosque</p>
+                                                <p className="font-semibold text-gray-800">{code_regenerated_mosque_name}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-1">Location</p>
+                                                <p className="font-semibold text-gray-800">{code_regenerated_mosque_location}</p>
+                                            </div>
+                                        </>
+                                    )}
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Code Regenerated On</p>
+                                        <p className="font-semibold text-gray-800">
+                                            {new Date(code_regeneration_date).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Reason Card */}
+                            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 mb-8">
+                                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                    <AlertCircle size={18} className="text-orange-600" />
+                                    Reason for Code Regeneration
+                                </h3>
+                                <p className="text-gray-700 bg-white/50 rounded-xl p-4">
+                                    {code_regeneration_reason || 'No specific reason provided'}
+                                </p>
+                            </div>
+
+                            {/* Next Steps */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8">
+                                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                    <FileText size={18} className="text-blue-600" />
+                                    What You Can Do
+                                </h3>
+                                <ul className="space-y-2 text-sm text-gray-700">
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                                        <span>Contact the Super Admin to get the new mosque verification code</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                                        <span>Login again with your email, password, and the new mosque code</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                                        <span>Once validated, you'll regain full access to the admin dashboard</span>
+                                    </li>
+                                    {can_reapply && (
+                                        <li className="flex items-start gap-2">
+                                            <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                                            <span>Alternatively, you can reapply for a different mosque</span>
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Link
+                                    to="/admin/login"
+                                    className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                                >
+                                    <RefreshCw size={18} />
+                                    Try Login Again
+                                </Link>
+                                {can_reapply && (
+                                    <Link
+                                        to="/admin/reapply"
+                                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                                    >
+                                        <FileText size={18} />
+                                        Reapply
+                                    </Link>
+                                )}
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
                                 >
                                     <LogOut size={18} />
                                     Logout

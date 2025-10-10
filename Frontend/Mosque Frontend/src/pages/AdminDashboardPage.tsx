@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { mosqueApi, authApi } from '../lib/api';
+import { Search, AlertTriangle, BarChart, Home, Bell, TrendingUp, Settings, Zap, Users, Moon } from 'react-feather';
 
 // Validation schemas
 const prayerTimesSchema = z.object({
@@ -278,7 +279,9 @@ const AdminDashboardPage: React.FC = () => {
             <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 flex items-center justify-center">
                 <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-red-100">
                     <div className="text-center">
-                        <div className="text-red-500 text-6xl mb-4">⚠️</div>
+                        <div className="mb-4">
+                            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto" />
+                        </div>
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Unable to load dashboard</h2>
                         <p className="text-gray-600 mb-6">There was a problem loading your dashboard. Please try logging in again.</p>
                         <Link
@@ -316,7 +319,7 @@ const AdminDashboardPage: React.FC = () => {
                                 to="/"
                                 className="hidden sm:flex text-gray-600 hover:text-blue-600 px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium items-center"
                             >
-                                🔍 <span className="ml-1 hidden md:inline">Find Mosques</span>
+                                <Search className="w-4 h-4 mr-1" /> <span className="ml-1 hidden md:inline">Find Mosques</span>
                             </Link>
                             {/* Mobile menu for Find Mosques */}
                             <Link
@@ -324,7 +327,7 @@ const AdminDashboardPage: React.FC = () => {
                                 className="sm:hidden text-gray-600 hover:text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition-colors"
                                 title="Find Mosques"
                             >
-                                🔍
+                                <Search className="w-5 h-5" />
                             </Link>
                             <button
                                 onClick={handleLogout}
@@ -456,13 +459,13 @@ const AdminDashboardPage: React.FC = () => {
                                 `
                             }} />
                             {[
-                                { id: 'overview', name: 'Overview', icon: '📊', description: 'Dashboard overview' },
-                                { id: 'prayer-times', name: 'Prayer Times', icon: '🕌', description: 'Manage prayer schedules' },
-                                { id: 'mosque-info', name: 'Mosque Info', icon: '🏢', description: 'Update mosque details' },
-                                { id: 'notifications', name: 'Notifications', icon: '🔔', description: 'Manage alerts' },
-                                { id: 'users', name: 'Users', icon: '👥', description: 'User management' },
-                                { id: 'analytics', name: 'Analytics', icon: '📈', description: 'View statistics' },
-                                { id: 'settings', name: 'Settings', icon: '⚙️', description: 'System settings' },
+                                { id: 'overview', name: 'Overview', icon: BarChart, description: 'Dashboard overview' },
+                                { id: 'prayer-times', name: 'Prayer Times', icon: Moon, description: 'Manage prayer schedules' },
+                                { id: 'mosque-info', name: 'Mosque Info', icon: Home, description: 'Update mosque details' },
+                                { id: 'notifications', name: 'Notifications', icon: Bell, description: 'Manage alerts' },
+                                { id: 'users', name: 'Users', icon: Users, description: 'User management' },
+                                { id: 'analytics', name: 'Analytics', icon: TrendingUp, description: 'View statistics' },
+                                { id: 'settings', name: 'Settings', icon: Settings, description: 'System settings' },
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -473,7 +476,7 @@ const AdminDashboardPage: React.FC = () => {
                                         }`}
                                 >
                                     <div className="flex flex-col items-center">
-                                        <span className="text-2xl mb-1">{tab.icon}</span>
+                                        <tab.icon className="w-6 h-6 mb-1" />
                                         <span className="font-semibold">{tab.name}</span>
                                         <span className="text-xs text-gray-400 hidden lg:block mt-1">{tab.description}</span>
                                     </div>
@@ -712,7 +715,9 @@ const AdminDashboardPage: React.FC = () => {
                             activeTab === tabId && (
                                 <div key={tabId} className="text-center py-12">
                                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 border border-gray-200">
-                                        <div className="text-6xl mb-4">🚀</div>
+                                        <div className="mb-4">
+                                            <Zap className="w-16 h-16 text-gray-400 mx-auto" />
+                                        </div>
                                         <h3 className="text-2xl font-bold text-gray-800 mb-4 capitalize">{tabId.replace('-', ' ')} Feature</h3>
                                         <p className="text-gray-600 mb-6">This feature is coming soon! We're working hard to bring you the best mosque management experience.</p>
                                         <div className="bg-white rounded-lg p-4 inline-block border border-gray-200 shadow-sm">

@@ -5,11 +5,22 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { authApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
-import { Mail, Lock, Shield, ArrowLeft } from 'react-feather';
+import { Mail, Lock, Shield, ArrowLeft, Eye, EyeOff, User } from 'react-feather';
 
 const registerSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(7, 'Password must be at least 7 characters'),
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Invalid email address').refine((email) => {
+        const allowedDomainsRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com|yahoo\.com|hotmail\.com)$/i;
+        return allowedDomainsRegex.test(email);
+    }, 'Email must be from gmail.com, outlook.com, yahoo.com, or hotmail.com'),
+    password: z.string()
+        .min(7, 'Password must be at least 7 characters')
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{7,}$/,
+            'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
+    confirm_password: z.string(),
+}).refine((data) => data.password === data.confirm_password, {
+    message: "Passwords don't match",
+    path: ["confirm_password"],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -19,12 +30,75 @@ const SuperAdminRegisterPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const form = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     });
 
+    // Watch password for strength indicator
+    const password = form.watch('password');
+
+    const getPasswordStrength = (pwd: string) => {
+        if (!pwd) return { strength: 0, label: '', color: '', canSubmit: false };
+
+        let strength = 0;
+        let label = '';
+        let color = '';
+        let canSubmit = false;
+
+        const hasLower = /[a-z]/.test(pwd);
+        const hasUpper = /[A-Z]/.test(pwd);
+        const hasNumber = /\d/.test(pwd);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+
+        // Must have ALL requirements to submit
+        if (hasLower && hasUpper && hasNumber && hasSpecial && pwd.length >= 7) {
+            strength = 4;
+            label = 'Super Strong - Ready to Submit';
+            color = 'bg-green-500';
+            canSubmit = true;
+        } else {
+            // Calculate partial strength but cannot submit
+            let criteriaMet = 0;
+            if (hasLower) criteriaMet++;
+            if (hasUpper) criteriaMet++;
+            if (hasNumber) criteriaMet++;
+            if (hasSpecial) criteriaMet++;
+
+            if (criteriaMet === 0) {
+                strength = 0;
+                label = 'Very Weak - Missing all requirements';
+                color = 'bg-gray-300';
+            } else if (criteriaMet === 1) {
+                strength = 1;
+                label = 'Weak - Missing 3 requirements';
+                color = 'bg-red-500';
+            } else if (criteriaMet === 2) {
+                strength = 2;
+                label = 'Fair - Missing 2 requirements';
+                color = 'bg-orange-500';
+            } else if (criteriaMet === 3) {
+                strength = 3;
+                label = 'Good - Missing 1 requirement';
+                color = 'bg-yellow-500';
+            }
+            canSubmit = false;
+        }
+
+        return { strength, label, color, canSubmit };
+    };
+
+    const passwordStrength = getPasswordStrength(password || '');
+
     const handleRegister = async (data: RegisterFormData) => {
+        // Additional validation before submission
+        if (!passwordStrength.canSubmit) {
+            setError('Password must contain lowercase letters, uppercase letters, numbers, and special characters to register.');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -34,9 +108,18 @@ const SuperAdminRegisterPage: React.FC = () => {
             setTimeout(() => {
                 navigate('/superadmin/login');
             }, 2000);
-        } catch (err) {
+        } catch (err: unknown) {
             console.log('Super admin registration error:', err);
-            const errorMessage = getErrorMessage(err);
+            let errorMessage = getErrorMessage(err);
+
+            // Provide more specific error messages for super admin creation
+            const axiosError = err as { response?: { status?: number; data?: { code?: string } } };
+            if (axiosError.response?.status === 401) {
+                errorMessage = 'Authentication required. Please log in as a super admin to create additional accounts.';
+            } else if (axiosError.response?.status === 403) {
+                errorMessage = 'Super admin access required to create additional super admin accounts.';
+            }
+
             setError(errorMessage);
         } finally {
             setLoading(false);
@@ -112,6 +195,23 @@ const SuperAdminRegisterPage: React.FC = () => {
                         <form onSubmit={form.handleSubmit(handleRegister)} className="space-y-6">
                             <div>
                                 <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                    <User className="w-4 h-4 mr-2 text-blue-600" />
+                                    Full Name
+                                </label>
+                                <input
+                                    {...form.register('name')}
+                                    type="text"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                    placeholder="Enter your full name"
+                                />
+                                {form.formState.errors.name && (
+                                    <p className="text-red-500 text-sm mt-2 font-medium">
+                                        {form.formState.errors.name.message}
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                                     <Mail className="w-4 h-4 mr-2 text-blue-600" />
                                     Email Address
                                 </label>
@@ -133,23 +233,86 @@ const SuperAdminRegisterPage: React.FC = () => {
                                     <Lock className="w-4 h-4 mr-2 text-blue-600" />
                                     Password
                                 </label>
-                                <input
-                                    {...form.register('password')}
-                                    type="password"
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                    placeholder="Create a secure password"
-                                />
+                                <div className="relative">
+                                    <input
+                                        {...form.register('password')}
+                                        type={showPassword ? 'text' : 'password'}
+                                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                        placeholder="Create a secure password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                {password && (
+                                    <div className="mt-2">
+                                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                            <span>Strength: {passwordStrength.label}</span>
+                                            <span>{passwordStrength.strength}/4</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div
+                                                className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                                                style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
+                                            ></div>
+                                        </div>
+                                        {!passwordStrength.canSubmit && (
+                                            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                                <p className="text-red-700 text-xs font-medium">
+                                                    Password must include: lowercase letters, uppercase letters, numbers, and special characters
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 {form.formState.errors.password && (
                                     <p className="text-red-500 text-sm mt-2 font-medium">
                                         {form.formState.errors.password.message}
                                     </p>
                                 )}
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Must include lowercase, uppercase, numbers, and special characters
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                    <Lock className="w-4 h-4 mr-2 text-blue-600" />
+                                    Confirm Password
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        {...form.register('confirm_password')}
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                        placeholder="Confirm your password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                {form.formState.errors.confirm_password && (
+                                    <p className="text-red-500 text-sm mt-2 font-medium">
+                                        {form.formState.errors.confirm_password.message}
+                                    </p>
+                                )}
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Must match the password entered above
+                                </p>
                             </div>
 
                             <button
                                 type="submit"
-                                disabled={loading}
-                                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-blue-300 disabled:to-purple-300 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg disabled:transform-none"
+                                disabled={loading || !passwordStrength.canSubmit}
+                                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none shadow-lg"
                             >
                                 {loading ? 'Creating Account...' : 'Create Super Admin Account'}
                             </button>

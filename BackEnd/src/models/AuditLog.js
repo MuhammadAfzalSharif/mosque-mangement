@@ -15,10 +15,19 @@ const auditLogSchema = new mongoose.Schema({
             'admin_removed',
             'admin_login',
             'superadmin_login',
+            'super_admin_created',
             'verification_code_generated',
             'verification_code_regenerated',
+            'code_regenerated',
+            'bulk_code_regeneration',
             'prayer_times_updated',
-            'mosque_details_updated'
+            'mosque_details_updated',
+            'admin_reapplication',
+            'admin_allowed_reapply',
+            'admin_assigned',
+            'error',
+            'audit_logs_cleaned',
+            'audit_logs_bulk_deleted'
         ]
     },
 
@@ -32,7 +41,7 @@ const auditLogSchema = new mongoose.Schema({
 
     // Target of the action (mosque, admin, etc.)
     target: {
-        target_type: { type: String, enum: ['mosque', 'admin', 'verification_code', 'prayer_times'] },
+        target_type: { type: String, enum: ['mosque', 'admin', 'super_admin', 'verification_code', 'prayer_times', 'system'] },
         target_id: mongoose.Schema.Types.ObjectId,
         target_name: String
     },
@@ -107,9 +116,11 @@ auditLogSchema.statics.logAction = async function (actionData) {
     try {
         const auditEntry = new this(actionData);
         await auditEntry.save();
+        console.log('Audit log created successfully:', actionData.action_type);
         return auditEntry;
     } catch (error) {
-        console.error('Failed to create audit log:', error);
+        console.error('Failed to create audit log:', error.message);
+        console.error('Action data:', actionData);
         // Don't throw error to prevent breaking main functionality
         return null;
     }
@@ -172,6 +183,33 @@ auditLogSchema.methods.getActionDescription = function () {
 
         case 'superadmin_login':
             return `${userName} successfully logged in as Super Admin`;
+
+        case 'super_admin_created':
+            const createdSuperAdminName = action_details?.super_admin_data?.name || target.target_name || 'a super admin';
+            const createdSuperAdminEmail = action_details?.super_admin_data?.email || 'unknown email';
+            const createdBy = action_details?.created_by || 'unknown';
+            return `${userName} created a new super admin account for "${createdSuperAdminName}" (${createdSuperAdminEmail}) - ${createdBy}`;
+
+        case 'admin_allowed_reapply':
+            const reapplyAdminName = action_details?.admin_data?.name || target.target_name || 'an admin';
+            const reapplyMosqueName = action_details?.admin_data?.mosque_name || 'a mosque';
+            return `${userName} allowed ${reapplyAdminName} to reapply for admin position at "${reapplyMosqueName}"`;
+
+        case 'admin_reapplication':
+            const reapplyingAdminName = action_details?.admin_data?.name || target.target_name || 'an admin';
+            const reapplyingMosqueName = action_details?.admin_data?.mosque_name || 'a mosque';
+            return `${reapplyingAdminName} submitted a reapplication request for "${reapplyingMosqueName}"`;
+
+        case 'audit_logs_cleaned':
+            const cleanedCount = action_details?.deleted_count || 0;
+            const daysOld = action_details?.cleanup_criteria?.days_old || 90;
+            const cleanupReason = action_details?.notes || 'no reason provided';
+            return `${userName} cleaned up ${cleanedCount} audit logs older than ${daysOld} days. Reason: ${cleanupReason}`;
+
+        case 'audit_logs_bulk_deleted':
+            const bulkDeletedCount = action_details?.deleted_count || 0;
+            const bulkDeleteReason = action_details?.reason || 'no reason provided';
+            return `${userName} deleted ${bulkDeletedCount} selected audit logs. Reason: ${bulkDeleteReason}`;
 
         default:
             const targetName = target?.target_name || 'an item';

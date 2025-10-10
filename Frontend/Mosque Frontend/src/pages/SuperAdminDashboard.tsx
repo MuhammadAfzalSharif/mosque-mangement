@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { superAdminApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
@@ -9,9 +9,19 @@ import {
     XCircle,
     Trash2,
     AlertTriangle,
-    Activity
+    Activity,
+    Menu,
+    X,
+    LogOut,
+    Key
 } from 'react-feather';
-import { FaBuilding } from 'react-icons/fa';
+import {
+    FaBuilding,
+    FaEye,
+    FaEdit,
+    FaTimes,
+    FaCheckCircle
+} from 'react-icons/fa';
 import Toast from '../components/Toast';
 
 // Import tab components
@@ -23,8 +33,10 @@ import MosqueRegistrationSelector from '../components/superadmin/MosqueRegistrat
 import DeleteMosques from '../components/superadmin/DeleteMosques.tsx';
 import AdminManagement from '../components/superadmin/AdminManagement.tsx';
 import AuditLogs from '../components/superadmin/AuditLogs.tsx';
+import SuperAdminManagement from '../components/superadmin/SuperAdminManagement.tsx';
+import CodeRegeneration from '../components/superadmin/CodeRegeneration.tsx';
 
-type TabType = 'dashboard' | 'pending' | 'approved' | 'rejected' | 'registration' | 'delete' | 'no-admin' | 'audit';
+type TabType = 'dashboard' | 'pending' | 'approved' | 'rejected' | 'registration' | 'delete' | 'no-admin' | 'audit' | 'superadmin' | 'code-regeneration';
 
 interface ToastState {
     show: boolean;
@@ -37,6 +49,11 @@ interface DashboardStats {
     approved_mosques: number;
     pending_requests: number;
     rejected_requests: number;
+    mosque_deleted_admins: number;
+    admin_removed_admins: number;
+    code_regenerated_admins: number;
+    total_super_admins: number;
+    total_audit_logs: number;
 }
 
 interface AdminApplication {
@@ -134,6 +151,7 @@ const SuperAdminDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('dashboard');
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false); // New state for background refresh indicator
     const [error, setError] = useState<string | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedMosqueDetails, setSelectedMosqueDetails] = useState<MosqueDetailsModalData | null>(null);
@@ -143,6 +161,9 @@ const SuperAdminDashboard: React.FC = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [toast, setToast] = useState<ToastState>({ show: false, type: 'success', message: '' });
     const [refreshApprovedMosques, setRefreshApprovedMosques] = useState(0); // Trigger for refreshing approved mosques
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar toggle
+    const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(true); // Toggle for auto-refresh - enabled by default
+    const autoRefreshIntervalRef = useRef<number | null>(null); // Ref to store interval ID
     const [editFormData, setEditFormData] = useState({
         name: '',
         location: '',
@@ -160,6 +181,51 @@ const SuperAdminDashboard: React.FC = () => {
         }
     });
 
+    const fetchStats = useCallback(async () => {
+        try {
+            // Don't show loading spinner for background updates
+            // Only show loading on initial load
+            if (!stats) {
+                setLoading(true);
+            } else {
+                setIsRefreshing(true);
+            }
+            console.log('Fetching dashboard stats...');
+            const response = await superAdminApi.getDashboardStats();
+            console.log('Dashboard stats response:', response.data);
+            setStats(response.data.stats);
+        } catch (err) {
+            console.error('Failed to fetch stats:', err);
+            // Only set error on initial load, not background updates
+            if (!stats) {
+                setError(getErrorMessage(err));
+            }
+        } finally {
+            setLoading(false);
+            setIsRefreshing(false);
+        }
+    }, [stats]);
+
+    // Toggle auto-refresh functionality
+    const toggleAutoRefresh = () => {
+        if (isAutoRefreshEnabled) {
+            // Stop auto-refresh
+            if (autoRefreshIntervalRef.current) {
+                clearInterval(autoRefreshIntervalRef.current);
+                autoRefreshIntervalRef.current = null;
+            }
+            setIsAutoRefreshEnabled(false);
+            setToast({ show: true, type: 'warning', message: 'Auto-refresh disabled' });
+        } else {
+            // Start auto-refresh
+            setIsAutoRefreshEnabled(true);
+            autoRefreshIntervalRef.current = setInterval(() => {
+                fetchStats();
+            }, 30000); // 30 seconds
+            setToast({ show: true, type: 'success', message: 'Auto-refresh enabled - updates every 30 seconds' });
+        }
+    };
+
     useEffect(() => {
         // Check if super admin is logged in
         const superAdmin = localStorage.getItem('superadmin');
@@ -171,22 +237,20 @@ const SuperAdminDashboard: React.FC = () => {
         }
 
         fetchStats();
-    }, [navigate]);
 
-    const fetchStats = async () => {
-        try {
-            setLoading(true);
-            console.log('Fetching dashboard stats...');
-            const response = await superAdminApi.getDashboardStats();
-            console.log('Dashboard stats response:', response.data);
-            setStats(response.data.stats);
-        } catch (err) {
-            console.error('Failed to fetch stats:', err);
-            setError(getErrorMessage(err));
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Start auto-refresh by default (30 seconds)
+        autoRefreshIntervalRef.current = setInterval(() => {
+            fetchStats();
+        }, 30000); // 30 seconds
+
+        // Cleanup interval on component unmount
+        return () => {
+            if (autoRefreshIntervalRef.current) {
+                clearInterval(autoRefreshIntervalRef.current);
+            }
+        };
+
+    }, [navigate, fetchStats]);
 
     // Handler functions for pending requests
     const handleApproveAdmin = async (id: string, notes?: string) => {
@@ -195,7 +259,7 @@ const SuperAdminDashboard: React.FC = () => {
             const response = await superAdminApi.approveAdmin(id, { super_admin_notes: notes });
             console.log('Approval response:', response);
             await fetchStats(); // Refresh stats
-            setToast({ show: true, type: 'success', message: '✓ Admin approved successfully!' });
+            setToast({ show: true, type: 'success', message: 'Admin approved successfully!' });
         } catch (err) {
             console.error('Failed to approve admin:', err);
             const errorMessage = getErrorMessage(err);
@@ -210,7 +274,7 @@ const SuperAdminDashboard: React.FC = () => {
             const response = await superAdminApi.rejectAdmin(id, { reason });
             console.log('Rejection response:', response);
             await fetchStats(); // Refresh stats
-            setToast({ show: true, type: 'success', message: '✓ Admin rejected successfully!' });
+            setToast({ show: true, type: 'success', message: 'Admin rejected successfully!' });
         } catch (err) {
             console.error('Failed to reject admin:', err);
             const errorMessage = getErrorMessage(err);
@@ -275,7 +339,7 @@ const SuperAdminDashboard: React.FC = () => {
             setToast({
                 show: true,
                 type: 'error',
-                message: `✗ Failed to load mosque details: ${errorMessage}`
+                message: `Failed to load mosque details: ${errorMessage}`
             });
         }
     };
@@ -328,7 +392,7 @@ const SuperAdminDashboard: React.FC = () => {
             setToast({
                 show: true,
                 type: 'error',
-                message: `✗ Failed to load mosque details: ${errorMessage}`
+                message: `Failed to load mosque details: ${errorMessage}`
             });
         }
     };
@@ -385,7 +449,7 @@ const SuperAdminDashboard: React.FC = () => {
             setToast({
                 show: true,
                 type: 'success',
-                message: `✓ ${mosqueName} details updated successfully!`
+                message: `${mosqueName} details updated successfully!`
             });
 
             console.log('Mosque updated successfully:', response.data);
@@ -403,7 +467,7 @@ const SuperAdminDashboard: React.FC = () => {
             setToast({
                 show: true,
                 type: 'error',
-                message: `✗ Failed to update mosque: ${errorMessage}`
+                message: `Failed to update mosque: ${errorMessage}`
             });
         }
     };
@@ -442,15 +506,15 @@ const SuperAdminDashboard: React.FC = () => {
             count: stats?.approved_mosques || 0
         },
         {
-            id: 'rejected' as TabType,
-            label: 'Rejected Admins',
-            icon: XCircle,
-            count: stats?.rejected_requests || 0
-        },
-        {
             id: 'registration' as TabType,
             label: 'Mosque Registration',
             icon: FaBuilding,
+            count: null
+        },
+        {
+            id: 'code-regeneration' as TabType,
+            label: 'Code Regeneration',
+            icon: Key,
             count: null
         },
         {
@@ -466,10 +530,22 @@ const SuperAdminDashboard: React.FC = () => {
             count: null
         },
         {
+            id: 'rejected' as TabType,
+            label: 'Rejected Admins',
+            icon: XCircle,
+            count: stats?.rejected_requests || 0
+        },
+        {
             id: 'audit' as TabType,
             label: 'Audit Logs',
             icon: Activity,
-            count: null
+            count: stats?.total_audit_logs || 0
+        },
+        {
+            id: 'superadmin' as TabType,
+            label: 'Super Admin Management',
+            icon: AlertTriangle,
+            count: stats?.total_super_admins || 0
         }
     ];
 
@@ -581,6 +657,8 @@ const SuperAdminDashboard: React.FC = () => {
                         }}
                     />
                 );
+            case 'code-regeneration':
+                return <CodeRegeneration />;
             case 'delete':
                 return <DeleteMosques />;
             case 'no-admin':
@@ -592,6 +670,8 @@ const SuperAdminDashboard: React.FC = () => {
                 );
             case 'audit':
                 return <AuditLogs />;
+            case 'superadmin':
+                return <SuperAdminManagement />;
             default:
                 return <DashboardOverview stats={stats} onRefresh={fetchStats} />;
         }
@@ -610,39 +690,114 @@ const SuperAdminDashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-            <div className="flex">
-                {/* Sidebar */}
-                <div className="w-80 bg-white/80 backdrop-blur-lg border-r border-white/20 shadow-2xl min-h-screen">
-                    {/* Header */}
-                    <div className="p-6 border-b border-gray-200">
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            Super Admin Dashboard
-                        </h1>
-                        <p className="text-gray-600 text-sm mt-1">Mosque Management System</p>
+            <div className="flex relative">
+                {/* Universal Toggle Button - Works for all screen sizes */}
+                <button
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className="fixed top-2 left-2 z-[10000] bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}
+                >
+                    {isSidebarOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
+                </button>
+
+                {/* Overlay for mobile when sidebar is open */}
+                {isSidebarOpen && (
+                    <div
+                        className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9990]"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                {/* Enhanced Sidebar with slide animation for all screens */}
+                <div className={`
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    fixed z-[9995]
+                    w-64 sm:w-72 lg:w-80 xl:w-80 bg-white/95 backdrop-blur-lg border-r border-white/20 shadow-2xl min-h-screen max-h-screen
+                    transition-all duration-300 ease-in-out overflow-hidden
+                    flex flex-col
+                `}>
+                    {/* Header Section */}
+                    <div className={`${isSidebarOpen ? 'pt-12 sm:pt-14' : 'pt-16 sm:pt-18 lg:pt-20'} p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg mr-2 sm:mr-3">
+                                    <FaBuilding className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+                                </div>
+                                <div>
+                                    <h1 className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                        Super Admin
+                                    </h1>
+                                    <p className="text-gray-600 text-xs sm:text-sm lg:text-sm mt-0.5 sm:mt-1 hidden sm:block">Mosque Management System</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-1 sm:space-x-2">
+                                {isRefreshing && (
+                                    <div className="flex items-center text-blue-600" title="Auto-refreshing stats...">
+                                        <Activity className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                                    </div>
+                                )}
+                                <button
+                                    onClick={toggleAutoRefresh}
+                                    className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${isAutoRefreshEnabled
+                                        ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                    title={isAutoRefreshEnabled ? 'Disable auto-refresh' : 'Enable auto-refresh (30s intervals)'}
+                                >
+                                    <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Real-time Status Indicator */}
+                        <div className="flex items-center mt-2 sm:mt-3 lg:mt-4">
+                            <div className={`w-2 h-2 rounded-full mr-2 ${isRefreshing ? 'bg-yellow-400 animate-pulse' : isAutoRefreshEnabled ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+                            <span className="text-xs text-gray-500">
+                                {isRefreshing ? 'Updating...' : isAutoRefreshEnabled ? 'Live Dashboard (Auto)' : 'Live Dashboard'}
+                            </span>
+                        </div>
                     </div>
 
-                    {/* Navigation Tabs */}
-                    <nav className="p-4 space-y-2">
+                    {/* Navigation Section - Scrollable */}
+                    <nav className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4 space-y-1 sm:space-y-2 custom-scrollbar">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+
                             return (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-300 ${activeTab === tab.id
-                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
-                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                        }`}
+                                    onClick={() => {
+                                        setActiveTab(tab.id);
+                                        // Only close sidebar on mobile screens
+                                        if (window.innerWidth < 1024) {
+                                            setIsSidebarOpen(false);
+                                        }
+                                    }}
+                                    className={`
+                                        w-full flex items-center justify-between p-2 sm:p-3 lg:p-4 rounded-lg sm:rounded-xl text-left transition-all duration-300 group relative overflow-hidden
+                                        ${isActive
+                                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-[1.02]'
+                                            : 'text-gray-700 hover:bg-white/60 hover:shadow-md hover:scale-[1.01]'
+                                        }
+                                    `}
                                 >
-                                    <div className="flex items-center">
-                                        <Icon className="w-5 h-5 mr-3" />
-                                        <span className="font-medium">{tab.label}</span>
-                                    </div>
-                                    {tab.count !== null && (
-                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${activeTab === tab.id
-                                            ? 'bg-white/20 text-white'
-                                            : 'bg-blue-100 text-blue-600'
+                                    <div className="flex items-center min-w-0 flex-1">
+                                        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 sm:mr-3 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-500'
+                                            }`} />
+                                        <span className={`font-medium text-xs sm:text-sm lg:text-base truncate ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'
                                             }`}>
+                                            {tab.label}
+                                        </span>
+                                    </div>
+                                    {tab.count !== null && tab.count > 0 && (
+                                        <span className={`
+                                            ml-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-bold flex-shrink-0
+                                            ${isActive
+                                                ? 'bg-white/20 text-white'
+                                                : 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'
+                                            }
+                                        `}>
                                             {tab.count}
                                         </span>
                                     )}
@@ -651,23 +806,27 @@ const SuperAdminDashboard: React.FC = () => {
                         })}
                     </nav>
 
-                    {/* Logout Button */}
-                    <div className="absolute bottom-6 left-4 right-4">
+                    {/* Logout Button - Fixed at bottom */}
+                    <div className="flex-shrink-0 p-2 sm:p-3 lg:p-4 border-t border-gray-200">
                         <button
                             onClick={handleLogout}
-                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center"
                         >
-                            Logout
+                            <LogOut className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                            <span className="text-xs sm:text-sm lg:text-base">Logout</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Main Content */}
-                <div className="flex-1 overflow-hidden">
-                    <div className="h-screen overflow-y-auto p-6">
+                {/* Main Content with dynamic spacing based on sidebar state */}
+                <div className={`
+                    flex-1 min-h-screen transition-all duration-300 ease-in-out
+                    ${isSidebarOpen ? 'lg:ml-80 xl:ml-80' : 'ml-0'}
+                `}>
+                    <div className={`h-screen overflow-y-auto p-2 sm:p-3 lg:p-6 ${isSidebarOpen ? 'pt-12 sm:pt-14 lg:pt-6' : 'pt-20 sm:pt-22 lg:pt-16'}`}>
                         {error && (
-                            <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4 mb-6">
-                                <p className="text-red-700 font-medium">{error}</p>
+                            <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                                <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>
                             </div>
                         )}
 
@@ -676,206 +835,252 @@ const SuperAdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Mosque Details Modal */}
+            {/* Modern 3D Mosque Details Modal */}
             {showDetailsModal && selectedMosqueDetails && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                        {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9998] p-2 sm:p-3 lg:p-4">
+                    <div className="relative bg-white backdrop-blur-xl border border-gray-200/50 sm:border-2 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg sm:shadow-2xl w-full max-w-sm sm:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-hidden transform scale-95 animate-[modalSlideIn_0.3s_ease-out_forwards]">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50/80 rounded-2xl"></div>
+                        <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-purple-200/20 to-transparent rounded-full blur-lg"></div>
+
+                        {/* Modern Header */}
+                        <div className="relative z-10 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white p-4 sm:p-6 rounded-t-2xl">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-2xl font-bold">Mosque Verification Details</h2>
-                                    <p className="text-blue-100 mt-1">Request Information & Verification Status</p>
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                                        <FaEye className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl sm:text-2xl font-bold">Mosque Verification Details</h2>
+                                        <p className="text-blue-100 text-sm sm:text-base mt-1">Request Information & Verification Status</p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => setShowDetailsModal(false)}
-                                    className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white/10 hover:bg-red-500/80 text-white hover:text-white rounded-xl transition-all duration-200 flex items-center justify-center backdrop-blur-sm shadow-lg hover:scale-110"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <FaTimes className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Modal Content */}
-                        <div className="p-6">
+                        {/* Modern Content with Scrollbar */}
+                        <div className="relative z-10 p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[calc(90vh-120px)] overflow-y-auto">
                             {selectedMosqueDetails.error ? (
-                                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-                                    <div className="text-red-600 mb-4">
-                                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <h3 className="text-lg font-semibold">Error Loading Details</h3>
+                                <div className="relative bg-gradient-to-br from-red-50 via-rose-50/50 to-red-50/30 backdrop-blur-xl border-2 border-red-200/50 rounded-2xl shadow-xl p-6 text-center">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-red-100/20 to-transparent opacity-60 rounded-2xl"></div>
+                                    <div className="absolute -top-3 -right-3 w-16 h-16 bg-gradient-to-br from-red-200/20 to-transparent rounded-full blur-lg"></div>
+
+                                    <div className="relative z-10">
+                                        <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md">
+                                            <FaTimes className="w-8 h-8 text-white" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Error Loading Details</h3>
+                                        <p className="text-red-700">{selectedMosqueDetails.error}</p>
                                     </div>
-                                    <p className="text-red-700">{selectedMosqueDetails.error}</p>
                                 </div>
                             ) : (
-                                <div className="space-y-6">
-                                    {/* Admin Request Information */}
-                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                            Admin Request Information
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-3">
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600">Admin Name</label>
-                                                    <p className="text-gray-800 font-semibold">{selectedMosqueDetails.request.admin_name || 'N/A'}</p>
-                                                </div>
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600">Email Address</label>
-                                                    <p className="text-gray-800">{selectedMosqueDetails.request.admin_email || 'N/A'}</p>
-                                                </div>
+                                <div className="space-y-4 sm:space-y-6">
+                                    {/* Basic Information */}
+                                    <div>
+                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
+                                            Basic Information
+                                        </h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Mosque Name</label>
+                                                <p className="text-gray-800 font-semibold text-sm sm:text-base">{selectedMosqueDetails.mosqueData?.mosque?.name || selectedMosqueDetails.request.mosque_name || 'N/A'}</p>
                                             </div>
-                                            <div className="space-y-3">
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600">Phone Number</label>
-                                                    <p className="text-gray-800">{selectedMosqueDetails.request.admin_phone || 'N/A'}</p>
-                                                </div>
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600">Registration Code Used</label>
-                                                    <p className="text-gray-800 font-mono bg-yellow-100 px-2 py-1 rounded">
-                                                        {selectedMosqueDetails.request.registration_code || 'N/A'}
-                                                    </p>
-                                                </div>
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Location</label>
+                                                <p className="text-gray-800 text-sm sm:text-base">{selectedMosqueDetails.mosqueData?.mosque?.location || 'N/A'}</p>
+                                            </div>
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Registration Code</label>
+                                                <p className="text-gray-800 font-mono bg-yellow-100 px-2 py-1 rounded text-xs sm:text-sm font-semibold">
+                                                    {selectedMosqueDetails.request.registration_code || 'N/A'}
+                                                </p>
+                                            </div>
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Registration Date</label>
+                                                <p className="text-gray-800 text-sm sm:text-base">Oct 8, 2025, 01:56 PM</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Mosque Information */}
-                                    {selectedMosqueDetails.mosqueData ? (
-                                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                                <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
-                                                Mosque Verification Details
-                                            </h3>
-
-                                            {/* Basic Mosque Information */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600 flex items-center">
-                                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                            </svg>
-                                                            Mosque Name
-                                                        </label>
-                                                        <p className="text-gray-800 font-semibold text-lg">{selectedMosqueDetails.mosqueData.mosque?.name || 'N/A'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600 flex items-center">
-                                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            </svg>
-                                                            Location
-                                                        </label>
-                                                        <p className="text-gray-800">{selectedMosqueDetails.mosqueData.mosque?.location || 'N/A'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600 flex items-center">
-                                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                                            </svg>
-                                                            Contact Phone
-                                                        </label>
-                                                        <p className="text-gray-800">{selectedMosqueDetails.mosqueData.mosque?.contact_phone || 'Not provided'}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600 flex items-center">
-                                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                            </svg>
-                                                            Contact Email
-                                                        </label>
-                                                        <p className="text-gray-800">{selectedMosqueDetails.mosqueData.mosque?.contact_email || 'Not provided'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600 flex items-center">
-                                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                            </svg>
-                                                            Description
-                                                        </label>
-                                                        <p className="text-gray-800 text-sm">{selectedMosqueDetails.mosqueData.mosque?.description || 'No description provided'}</p>
-                                                    </div>
-                                                </div>
+                                    {/* Admin Information */}
+                                    <div>
+                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
+                                            Admin Information
+                                        </h4>
+                                        <div className="space-y-3">
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Admin Name</label>
+                                                <p className="text-gray-800 font-semibold text-sm sm:text-base">{selectedMosqueDetails.request.admin_name || 'N/A'}</p>
                                             </div>
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Admin Email</label>
+                                                <p className="text-gray-800 text-sm sm:text-base">{selectedMosqueDetails.request.admin_email || 'N/A'}</p>
+                                            </div>
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Admin Phone</label>
+                                                <p className="text-gray-800 text-sm sm:text-base">{selectedMosqueDetails.request.admin_phone || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                            {/* Verification Code Information */}
-                                            <div className="border-t pt-6">
-                                                <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-                                                    <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 00-2-2m0 0a2 2 0 012-2m0 0a2 2 0 00-2 2m2 2a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 00-2-2" />
-                                                    </svg>
-                                                    Verification Code Information
-                                                </h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600">Current Verification Code</label>
-                                                        <p className="text-gray-800 font-mono bg-blue-100 px-3 py-2 rounded-lg text-lg font-semibold">
-                                                            {selectedMosqueDetails.mosqueData.mosque?.verification_code || 'N/A'}
-                                                        </p>
+                                    {/* Mosque Management Contact */}
+                                    <div>
+                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-indigo-100 px-3 py-1 rounded-lg inline-block">
+                                            Mosque Management Contact
+                                        </h4>
+                                        <div className="space-y-3">
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Mosque Management Email</label>
+                                                <p className="text-gray-800 text-sm sm:text-base">{selectedMosqueDetails.mosqueData?.mosque?.contact_email || selectedMosqueDetails.request.admin_email || 'N/A'}</p>
+                                            </div>
+                                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 block">Management Phone</label>
+                                                <p className="text-gray-800 text-sm sm:text-base">{selectedMosqueDetails.mosqueData?.mosque?.contact_phone || selectedMosqueDetails.request.admin_phone || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>                                    {/* Modern Mosque Information Section */}
+                                    {selectedMosqueDetails.mosqueData ? (
+                                        <div className="relative bg-gradient-to-br from-green-50 via-emerald-50/50 to-green-50/30 backdrop-blur-xl border-2 border-green-200/50 rounded-2xl shadow-lg p-4 sm:p-6">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 to-transparent opacity-60 rounded-2xl"></div>
+                                            <div className="absolute -top-3 -right-3 w-16 h-16 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg"></div>
+
+                                            <div className="relative z-10">
+                                                <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 bg-green-100 px-3 py-2 rounded-lg inline-block">
+                                                    <span className="text-lg mr-2">🕌</span>
+                                                    Mosque Verification Details
+                                                </h3>
+
+                                                {/* Basic Mosque Information */}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600 flex items-center">
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                                </svg>
+                                                                Mosque Name
+                                                            </label>
+                                                            <p className="text-gray-800 font-semibold text-lg">{selectedMosqueDetails.mosqueData.mosque?.name || 'N/A'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600 flex items-center">
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                </svg>
+                                                                Location
+                                                            </label>
+                                                            <p className="text-gray-800">{selectedMosqueDetails.mosqueData.mosque?.location || 'N/A'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600 flex items-center">
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                                </svg>
+                                                                Contact Phone
+                                                            </label>
+                                                            <p className="text-gray-800">{selectedMosqueDetails.mosqueData.mosque?.contact_phone || 'Not provided'}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <label className="text-sm font-medium text-gray-600">Code Status</label>
-                                                        <div className="flex items-center mt-1">
-                                                            <div className={`w-3 h-3 rounded-full mr-2 ${selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                                                            <p className={`font-semibold ${selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'text-red-600' : 'text-green-600'}`}>
-                                                                {selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'Expired' : 'Active'}
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600 flex items-center">
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                                </svg>
+                                                                Contact Email
+                                                            </label>
+                                                            <p className="text-gray-800">{selectedMosqueDetails.mosqueData.mosque?.contact_email || 'Not provided'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600 flex items-center">
+                                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                </svg>
+                                                                Description
+                                                            </label>
+                                                            <p className="text-gray-800 text-sm">{selectedMosqueDetails.mosqueData.mosque?.description || 'No description provided'}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Verification Code Information */}
+                                                <div className="border-t pt-6">
+                                                    <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                                                        <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 00-2-2m0 0a2 2 0 012-2m0 0a2 2 0 00-2 2m2 2a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2a2 2 0 00-2-2" />
+                                                        </svg>
+                                                        Verification Code Information
+                                                    </h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600">Current Verification Code</label>
+                                                            <p className="text-gray-800 font-mono bg-blue-100 px-3 py-2 rounded-lg text-lg font-semibold">
+                                                                {selectedMosqueDetails.mosqueData.mosque?.verification_code || 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-600">Code Status</label>
+                                                            <div className="flex items-center mt-1">
+                                                                <div className={`w-3 h-3 rounded-full mr-2 ${selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                                                                <p className={`font-semibold ${selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'text-red-600' : 'text-green-600'}`}>
+                                                                    {selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'Expired' : 'Active'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <label className="text-sm font-medium text-gray-600">Code Expires</label>
+                                                            <p className={`text-gray-800 font-semibold ${selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'text-red-600' : 'text-green-600'}`}>
+                                                                {selectedMosqueDetails.mosqueData.mosque?.code_expires
+                                                                    ? new Date(selectedMosqueDetails.mosqueData.mosque.code_expires).toLocaleDateString('en-US', {
+                                                                        year: 'numeric',
+                                                                        month: 'long',
+                                                                        day: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })
+                                                                    : 'N/A'
+                                                                }
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="md:col-span-2">
-                                                        <label className="text-sm font-medium text-gray-600">Code Expires</label>
-                                                        <p className={`text-gray-800 font-semibold ${selectedMosqueDetails.mosqueData.mosque?.code_expired ? 'text-red-600' : 'text-green-600'}`}>
-                                                            {selectedMosqueDetails.mosqueData.mosque?.code_expires
-                                                                ? new Date(selectedMosqueDetails.mosqueData.mosque.code_expires).toLocaleDateString('en-US', {
-                                                                    year: 'numeric',
-                                                                    month: 'long',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })
-                                                                : 'N/A'
-                                                            }
-                                                        </p>
-                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            {/* Admin Instructions */}
-                                            {selectedMosqueDetails.mosqueData.mosque?.admin_instructions && (
-                                                <div className="border-t pt-6 mt-6">
-                                                    <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
-                                                        <svg className="w-4 h-4 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        Admin Instructions
-                                                    </h4>
-                                                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                                                        <p className="text-gray-700 text-sm leading-relaxed">{selectedMosqueDetails.mosqueData.mosque.admin_instructions}</p>
+                                                {/* Admin Instructions */}
+                                                {selectedMosqueDetails.mosqueData.mosque?.admin_instructions && (
+                                                    <div className="border-t pt-6 mt-6">
+                                                        <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
+                                                            <svg className="w-4 h-4 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            Admin Instructions
+                                                        </h4>
+                                                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+                                                            <p className="text-gray-700 text-sm leading-relaxed">{selectedMosqueDetails.mosqueData.mosque.admin_instructions}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     ) : (
-                                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 text-center">
-                                            <div className="text-orange-600 mb-2">
-                                                <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
-                                                </svg>
-                                                <h3 className="text-lg font-semibold">No Mosque Information</h3>
+                                        <div className="relative bg-gradient-to-br from-orange-50 via-yellow-50/50 to-orange-50/30 backdrop-blur-xl border-2 border-orange-200/50 rounded-2xl shadow-lg p-6 text-center">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-orange-100/20 to-transparent opacity-60 rounded-2xl"></div>
+                                            <div className="absolute -top-3 -right-3 w-16 h-16 bg-gradient-to-br from-orange-200/20 to-transparent rounded-full blur-lg"></div>
+
+                                            <div className="relative z-10">
+                                                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-yellow-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md">
+                                                    <FaTimes className="w-8 h-8 text-white" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-gray-800 mb-2">No Mosque Information</h3>
+                                                <p className="text-orange-700">This request does not have associated mosque verification details.</p>
                                             </div>
-                                            <p className="text-orange-700">This request does not have associated mosque verification details.</p>
                                         </div>
                                     )}
 
@@ -917,11 +1122,11 @@ const SuperAdminDashboard: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Modal Footer */}
-                        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end">
+                        {/* Modern Footer */}
+                        <div className="relative z-10 p-4 sm:p-6 border-t border-gray-200 flex justify-center">
                             <button
                                 onClick={() => setShowDetailsModal(false)}
-                                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
+                                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                             >
                                 Close
                             </button>
@@ -930,108 +1135,120 @@ const SuperAdminDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Edit Mosque Modal */}
+            {/* Modern 3D Edit Mosque Modal */}
             {showEditModal && selectedMosqueForEdit && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                        {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 rounded-t-2xl">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9998] p-2 sm:p-3 lg:p-4">
+                    <div className="relative bg-white backdrop-blur-xl border border-gray-200/50 sm:border-2 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg sm:shadow-2xl w-full max-w-sm sm:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col transform scale-95 animate-[modalSlideIn_0.3s_ease-out_forwards]">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50/80 rounded-2xl"></div>
+                        <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full blur-lg"></div>
+
+                        {/* Modern Header */}
+                        <div className="relative z-10 bg-gradient-to-r from-emerald-600 via-green-600 to-blue-600 text-white p-4 sm:p-6 rounded-t-2xl flex-shrink-0">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-2xl font-bold">Edit Mosque Details</h2>
-                                    <p className="text-green-100 mt-1">Update mosque information and prayer times</p>
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                                        <FaEdit className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl sm:text-2xl font-bold">Edit Mosque Details</h2>
+                                        <p className="text-green-100 text-sm sm:text-base mt-1">Update mosque information and prayer times</p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => setShowEditModal(false)}
-                                    className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+                                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white/10 hover:bg-red-500/80 text-white hover:text-white rounded-xl transition-all duration-200 flex items-center justify-center backdrop-blur-sm shadow-lg hover:scale-110"
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <FaTimes className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Modal Content */}
-                        <div className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Modern Content with Scrollbar */}
+                        <div className="relative z-10 p-4 sm:p-6 flex-1 overflow-y-auto">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                                 {/* Basic Information */}
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h3>
+                                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
+                                        Basic Information
+                                    </h3>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Mosque Name</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Mosque Name</label>
                                         <input
                                             type="text"
                                             value={editFormData.name}
                                             onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                             placeholder="Enter mosque name"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Location</label>
                                         <input
                                             type="text"
                                             value={editFormData.location}
                                             onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                             placeholder="Enter location"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Description</label>
                                         <textarea
                                             value={editFormData.description}
                                             onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                            placeholder="Enter description"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="A mosque serving the local Muslim community with daily prayers, Friday sermons, and various Islamic activities and events."
                                             rows={3}
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Contact Phone</label>
                                         <input
                                             type="tel"
                                             value={editFormData.contact_phone}
                                             onChange={(e) => setEditFormData({ ...editFormData, contact_phone: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                            placeholder="Enter contact phone"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="+923024228990"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Email</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Contact Email</label>
                                         <input
                                             type="email"
                                             value={editFormData.contact_email}
                                             onChange={(e) => setEditFormData({ ...editFormData, contact_email: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                            placeholder="Enter contact email"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="hira@gmail.com"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Admin Instructions</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Admin Instructions</label>
                                         <textarea
                                             value={editFormData.admin_instructions}
                                             onChange={(e) => setEditFormData({ ...editFormData, admin_instructions: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                            placeholder="Enter admin instructions"
-                                            rows={3}
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="To become an admin for this mosque, please contact the mosque management committee with your full name, phone number, and email address."
+                                            rows={4}
                                         />
                                     </div>
                                 </div>
 
                                 {/* Prayer Times */}
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Prayer Times</h3>
+                                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
+                                        Prayer Times
+                                    </h3>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Fajr</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Fajr</label>
                                         <input
                                             type="time"
                                             value={editFormData.prayer_times.fajr}
@@ -1039,12 +1256,12 @@ const SuperAdminDashboard: React.FC = () => {
                                                 ...editFormData,
                                                 prayer_times: { ...editFormData.prayer_times, fajr: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Dhuhr</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Dhuhr</label>
                                         <input
                                             type="time"
                                             value={editFormData.prayer_times.dhuhr}
@@ -1052,12 +1269,12 @@ const SuperAdminDashboard: React.FC = () => {
                                                 ...editFormData,
                                                 prayer_times: { ...editFormData.prayer_times, dhuhr: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Asr</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Asr</label>
                                         <input
                                             type="time"
                                             value={editFormData.prayer_times.asr}
@@ -1065,12 +1282,12 @@ const SuperAdminDashboard: React.FC = () => {
                                                 ...editFormData,
                                                 prayer_times: { ...editFormData.prayer_times, asr: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Maghrib</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Maghrib</label>
                                         <input
                                             type="time"
                                             value={editFormData.prayer_times.maghrib}
@@ -1078,12 +1295,12 @@ const SuperAdminDashboard: React.FC = () => {
                                                 ...editFormData,
                                                 prayer_times: { ...editFormData.prayer_times, maghrib: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Isha</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Isha</label>
                                         <input
                                             type="time"
                                             value={editFormData.prayer_times.isha}
@@ -1091,12 +1308,12 @@ const SuperAdminDashboard: React.FC = () => {
                                                 ...editFormData,
                                                 prayer_times: { ...editFormData.prayer_times, isha: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Jummah</label>
+                                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-200">
+                                        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Jummah</label>
                                         <input
                                             type="time"
                                             value={editFormData.prayer_times.jummah}
@@ -1104,62 +1321,90 @@ const SuperAdminDashboard: React.FC = () => {
                                                 ...editFormData,
                                                 prayer_times: { ...editFormData.prayer_times, jummah: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm bg-white/80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                         />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Modal Footer */}
-                        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end space-x-3">
-                            <button
-                                onClick={() => setShowEditModal(false)}
-                                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSaveMosqueEdit}
-                                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-                            >
-                                Save Changes
-                            </button>
+                        {/* Modern Footer */}
+                        <div className="relative z-20 p-4 sm:p-6 border-t border-gray-200 flex-shrink-0">
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    onClick={() => setShowEditModal(false)}
+                                    className="group relative bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <FaTimes className="w-4 h-4 mr-2" />
+                                        <span>Cancel</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                </button>
+                                <button
+                                    onClick={handleSaveMosqueEdit}
+                                    className="group relative bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <FaCheckCircle className="w-4 h-4 mr-2" />
+                                        <span>Save Changes</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Confirmation Modal */}
+            {/* Modern 3D Confirmation Modal */}
             {showConfirmModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-                        <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-t-2xl">
-                            <div className="flex items-center">
-                                <svg className="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                </svg>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9998] p-3 sm:p-4">
+                    <div className="relative bg-white backdrop-blur-xl border border-gray-200/50 sm:border-2 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg sm:shadow-2xl w-full max-w-xs sm:max-w-md transform scale-95 animate-[modalSlideIn_0.3s_ease-out_forwards]">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50/80 rounded-2xl"></div>
+                        <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-yellow-200/20 to-transparent rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-orange-200/20 to-transparent rounded-full blur-lg"></div>
+
+                        {/* Modern Header */}
+                        <div className="relative z-10 bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 text-white p-6 rounded-t-2xl">
+                            <div className="flex items-center justify-center">
+                                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg mr-3">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                </div>
                                 <h3 className="text-xl font-bold">Confirm Update</h3>
                             </div>
                         </div>
 
-                        <div className="p-6">
-                            <p className="text-gray-700 text-lg mb-6">
-                                Are you sure you want to update the mosque details? This action will modify the mosque information and prayer times.
-                            </p>
+                        <div className="relative z-10 p-6">
+                            <div className="text-center mb-6">
+                                <p className="text-gray-700 text-lg mb-4">
+                                    Are you sure you want to update the mosque details? This action will modify the mosque information and prayer times.
+                                </p>
+                            </div>
 
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowConfirmModal(false)}
-                                    className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
+                                    className="flex-1 group relative bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
                                 >
-                                    Cancel
+                                    <div className="flex items-center justify-center">
+                                        <FaTimes className="w-4 h-4 mr-2" />
+                                        <span>Cancel</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                                 </button>
                                 <button
                                     onClick={handleConfirmMosqueEdit}
-                                    className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                                    className="flex-1 group relative bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
                                 >
-                                    Yes, Update
+                                    <div className="flex items-center justify-center">
+                                        <FaCheckCircle className="w-4 h-4 mr-2" />
+                                        <span>Yes, Update</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                                 </button>
                             </div>
                         </div>
@@ -1167,38 +1412,47 @@ const SuperAdminDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Success Modal */}
+            {/* Modern 3D Success Modal */}
             {showSuccessModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-t-2xl">
-                            <div className="flex items-center">
-                                <svg className="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9998] p-3 sm:p-4">
+                    <div className="relative bg-white backdrop-blur-xl border border-gray-200/50 sm:border-2 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg sm:shadow-2xl w-full max-w-xs sm:max-w-md transform scale-95 animate-[modalSlideIn_0.3s_ease-out_forwards]">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50/80 rounded-2xl"></div>
+                        <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-lg"></div>
+
+                        {/* Modern Header */}
+                        <div className="relative z-10 bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6 rounded-t-2xl">
+                            <div className="flex items-center justify-center">
+                                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg mr-3">
+                                    <FaCheckCircle className="w-6 h-6" />
+                                </div>
                                 <h3 className="text-xl font-bold">Success!</h3>
                             </div>
                         </div>
 
-                        <div className="p-6 text-center">
-                            <div className="mb-4">
-                                <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                        <div className="relative z-10 p-6 text-center">
+                            <div className="mb-6">
+                                <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                    <FaCheckCircle className="w-10 h-10 text-white" />
+                                </div>
+                                <h4 className="text-xl font-bold text-gray-800 mb-3">
+                                    Mosque Details Updated!
+                                </h4>
+                                <p className="text-gray-600 mb-6">
+                                    The mosque information and prayer times have been successfully updated. Changes will be reflected across the system.
+                                </p>
                             </div>
-
-                            <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                                Mosque Details Updated!
-                            </h4>
-                            <p className="text-gray-600 mb-6">
-                                The mosque information and prayer times have been successfully updated. Changes will be reflected across the system.
-                            </p>
 
                             <button
                                 onClick={handleCloseSuccessModal}
-                                className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                                className="group relative w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                             >
-                                Great!
+                                <div className="flex items-center justify-center">
+                                    <FaCheckCircle className="w-5 h-5 mr-2" />
+                                    <span>Great!</span>
+                                </div>
+                                <div className="absolute inset-0 bg-white/20 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                             </button>
                         </div>
                     </div>
@@ -1213,6 +1467,113 @@ const SuperAdminDashboard: React.FC = () => {
                     onClose={() => setToast({ ...toast, show: false })}
                 />
             )}
+
+            {/* Custom Styles for Enhanced Sidebar */}
+            <style>{`
+                /* Custom scrollbar for navigation */
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                    border-radius: 10px;
+                }
+                
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+                    border-radius: 10px;
+                    opacity: 0.7;
+                }
+                
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: linear-gradient(to bottom, #2563eb, #7c3aed);
+                    opacity: 1;
+                }
+
+                /* Enhanced sidebar animation */
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-100%);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+
+                @keyframes slideOut {
+                    from {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateX(-100%);
+                    }
+                }
+
+                /* Modal animations */
+                @keyframes modalSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(50px) scale(0.9);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                /* Backdrop blur enhancement */
+                .backdrop-blur-enhanced {
+                    backdrop-filter: blur(20px) saturate(180%);
+                    -webkit-backdrop-filter: blur(20px) saturate(180%);
+                }
+
+                /* Smooth transitions for content area */
+                .content-transition {
+                    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                /* Enhanced shadow effects */
+                .shadow-3d {
+                    box-shadow: 
+                        0 10px 25px -3px rgba(0, 0, 0, 0.1),
+                        0 4px 6px -2px rgba(0, 0, 0, 0.05),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                }
+
+                /* Glassmorphism effect */
+                .glass-effect {
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(20px) saturate(180%);
+                    -webkit-backdrop-filter: blur(20px) saturate(180%);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+
+                /* Mobile optimizations */
+                @media (max-width: 640px) {
+                    .sidebar-mobile {
+                        width: 280px;
+                    }
+                }
+
+                @media (max-width: 360px) {
+                    .sidebar-mobile {
+                        width: 260px;
+                    }
+                    
+                    .text-mobile-xs {
+                        font-size: 0.65rem;
+                    }
+                    
+                    .p-mobile-xs {
+                        padding: 0.375rem;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

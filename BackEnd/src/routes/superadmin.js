@@ -1,5 +1,6 @@
 const express = require('express');
 const Admin = require('../models/Admin');
+const SuperAdmin = require('../models/SuperAdmin');
 const Mosque = require('../models/Mosque');
 const AuditLog = require('../models/AuditLog');
 const { auth, requireSuperAdmin } = require('../middleware/auth');
@@ -29,13 +30,23 @@ router.get('/dashboard/stats', auth, requireSuperAdmin, async (req, res) => {
 
         const pendingMosques = await Admin.countDocuments({ status: 'pending' });
         const rejectedMosques = await Admin.countDocuments({ status: 'rejected' });
+        const mosqueDeletedAdmins = await Admin.countDocuments({ status: 'mosque_deleted' });
+        const adminRemovedAdmins = await Admin.countDocuments({ status: 'admin_removed' });
+        const codeRegeneratedAdmins = await Admin.countDocuments({ status: 'code_regenerated' });
+        const totalSuperAdmins = await SuperAdmin.countDocuments();
+        const totalAuditLogs = await AuditLog.countDocuments();
 
         res.json({
             stats: {
                 total_mosques: totalMosques,
                 approved_mosques: approvedMosques,
                 pending_requests: pendingMosques,
-                rejected_requests: rejectedMosques
+                rejected_requests: rejectedMosques,
+                mosque_deleted_admins: mosqueDeletedAdmins,
+                admin_removed_admins: adminRemovedAdmins,
+                code_regenerated_admins: codeRegeneratedAdmins,
+                total_super_admins: totalSuperAdmins,
+                total_audit_logs: totalAuditLogs
             }
         });
     } catch (err) {
@@ -77,6 +88,20 @@ router.put('/:id/approve', auth, requireSuperAdmin, async (req, res) => {
             }
         });
     } catch (err) {
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'approve_admin',
+                error: err,
+                errorMessage: err.message,
+                statusCode: 500,
+                endpoint: `/superadmin/${req.params.id}/approve`,
+                method: 'PUT'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -149,6 +174,7 @@ router.put('/:id/reject', auth, requireSuperAdmin, async (req, res) => {
         // If there was a mosque, regenerate its verification code
         let newVerificationCode = null;
         if (mosqueDetails) {
+            const oldCode = mosqueDetails.verification_code || 'unknown';
             newVerificationCode = crypto.randomBytes(8).toString('hex').toUpperCase();
             const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -159,6 +185,15 @@ router.put('/:id/reject', auth, requireSuperAdmin, async (req, res) => {
                     verification_code_expires: expiryDate
                 }
             );
+
+            // Log the verification code regeneration
+            try {
+                const auditLogger = new AuditLogger(req);
+                const mosque = await Mosque.findById(mosqueDetails.id);
+                await auditLogger.logVerificationCodeRegenerated(mosque, oldCode, newVerificationCode, admin);
+            } catch (auditError) {
+                console.error('Failed to log verification code regeneration (non-critical):', auditError);
+            }
         }
 
         // Audit log
@@ -188,6 +223,22 @@ router.put('/:id/reject', auth, requireSuperAdmin, async (req, res) => {
 
     } catch (error) {
         console.error('Error rejecting admin:', error);
+
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'reject_admin',
+                error: error,
+                errorMessage: error.message,
+                statusCode: 500,
+                endpoint: `/superadmin/${req.params.id}/reject`,
+                method: 'PUT'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
+
         res.status(500).json({
             error: 'Server error during rejection process',
             code: 'SERVER_ERROR'
@@ -253,6 +304,7 @@ router.put('/admin/:id/remove', auth, requireSuperAdmin, async (req, res) => {
         await admin.save();
 
         // Regenerate mosque verification code so someone else can apply
+        const oldCode = mosqueDetails.verification_code || 'unknown';
         const newVerificationCode = crypto.randomBytes(8).toString('hex').toUpperCase();
         const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -263,6 +315,15 @@ router.put('/admin/:id/remove', auth, requireSuperAdmin, async (req, res) => {
                 verification_code_expires: expiryDate
             }
         );
+
+        // Log the verification code regeneration
+        try {
+            const auditLogger = new AuditLogger(req);
+            const mosque = await Mosque.findById(mosqueDetails.id);
+            await auditLogger.logVerificationCodeRegenerated(mosque, oldCode, newVerificationCode, admin);
+        } catch (auditError) {
+            console.error('Failed to log verification code regeneration (non-critical):', auditError);
+        }
 
         // Audit log
         const auditLogger = new AuditLogger(req);
@@ -292,6 +353,22 @@ router.put('/admin/:id/remove', auth, requireSuperAdmin, async (req, res) => {
 
     } catch (error) {
         console.error('Error removing admin:', error);
+
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'remove_admin',
+                error: error,
+                errorMessage: error.message,
+                statusCode: 500,
+                endpoint: `/superadmin/admin/${req.params.id}/remove`,
+                method: 'PUT'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
+
         res.status(500).json({
             error: 'Server error during admin removal process',
             code: 'SERVER_ERROR'
@@ -323,9 +400,9 @@ router.put('/mosque/:id/regenerate-code', auth, requireSuperAdmin, async (req, r
 
         const mosque_admin = await Admin.findOneAndDelete({ mosque_id: req.params.id });
 
-        // Log the verification code regeneration
+        // Log the verification code regeneration (single mosque)
         const auditLogger = new AuditLogger(req);
-        await auditLogger.logVerificationCodeRegenerated(mosque, 'old_code', newCode, mosque_admin);
+        await auditLogger.logCodeRegenerated(mosque, 'old_code', newCode, new Date(Date.now() + expiry_days * 24 * 60 * 60 * 1000));
 
         if (mosque_admin) {
             return res.json({
@@ -362,6 +439,20 @@ router.put('/mosque/:id/regenerate-code', auth, requireSuperAdmin, async (req, r
 
 
     } catch (err) {
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'regenerate_verification_code',
+                error: err,
+                errorMessage: err.message,
+                statusCode: 500,
+                endpoint: `/superadmin/mosque/${req.params.id}/regenerate-code`,
+                method: 'PUT'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -590,6 +681,26 @@ router.put('/mosque/:id', auth, requireSuperAdmin, async (req, res) => {
             if (prayer_times.jummah !== undefined) updateData.prayer_times.jummah = prayer_times.jummah;
         }
 
+        // Get current mosque data for audit logging
+        const currentMosque = await Mosque.findById(req.params.id);
+        if (!currentMosque) {
+            return res.status(404).json({
+                error: 'Mosque not found',
+                code: 'MOSQUE_NOT_FOUND'
+            });
+        }
+
+        // Store old data for audit
+        const beforeData = {
+            name: currentMosque.name,
+            location: currentMosque.location,
+            description: currentMosque.description,
+            contact_phone: currentMosque.contact_phone,
+            contact_email: currentMosque.contact_email,
+            admin_instructions: currentMosque.admin_instructions,
+            prayer_times: currentMosque.prayer_times
+        };
+
         const mosque = await Mosque.findByIdAndUpdate(
             req.params.id,
             updateData,
@@ -603,6 +714,39 @@ router.put('/mosque/:id', auth, requireSuperAdmin, async (req, res) => {
             });
         }
 
+        // Log the mosque update - separate logs for prayer times and details
+        try {
+            const auditLogger = new AuditLogger(req);
+
+            // If prayer times were updated, log separately
+            if (prayer_times !== undefined) {
+                await auditLogger.logPrayerTimesUpdated(
+                    mosque,
+                    beforeData.prayer_times,
+                    mosque.prayer_times
+                );
+            }
+
+            // If other details were updated, log them
+            const detailsUpdated = name !== undefined || location !== undefined ||
+                description !== undefined || contact_phone !== undefined ||
+                contact_email !== undefined || admin_instructions !== undefined;
+
+            if (detailsUpdated) {
+                const afterData = {
+                    name: mosque.name,
+                    location: mosque.location,
+                    description: mosque.description,
+                    contact_phone: mosque.contact_phone,
+                    contact_email: mosque.contact_email,
+                    admin_instructions: mosque.admin_instructions
+                };
+                await auditLogger.logMosqueDetailsUpdated(mosque, beforeData, afterData);
+            }
+        } catch (auditError) {
+            console.error('Failed to log mosque update (non-critical):', auditError);
+        }
+
         res.json({
             message: 'Mosque details updated successfully',
             mosque,
@@ -610,6 +754,21 @@ router.put('/mosque/:id', auth, requireSuperAdmin, async (req, res) => {
         });
     } catch (error) {
         console.error('Error updating mosque:', error);
+
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'update_mosque',
+                error: error,
+                errorMessage: error.message,
+                statusCode: error.code === 11000 ? 409 : (error.name === 'ValidationError' ? 400 : 500),
+                endpoint: `/superadmin/mosque/${req.params.id}`,
+                method: 'PUT'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
 
         // Handle duplicate key errors
         if (error.code === 11000) {
@@ -688,7 +847,10 @@ router.put('/mosque/regenerate-expired-codes', auth, requireSuperAdmin, async (r
         });
 
         const updates = [];
+        const auditLogger = new AuditLogger(req);
+
         for (let mosque of expiredMosques) {
+            const oldCode = mosque.verification_code;
             const newCode = crypto.randomBytes(8).toString('hex').toUpperCase();
             const newExpiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -697,10 +859,18 @@ router.put('/mosque/regenerate-expired-codes', auth, requireSuperAdmin, async (r
                 verification_code_expires: newExpiryDate
             });
 
+            // Log each code regeneration
+            try {
+                const updatedMosque = await Mosque.findById(mosque._id);
+                await auditLogger.logVerificationCodeRegenerated(updatedMosque, oldCode, newCode, null);
+            } catch (auditError) {
+                console.error('Failed to log bulk code regeneration (non-critical):', auditError);
+            }
+
             updates.push({
                 mosque_id: mosque._id,
                 mosque_name: mosque.name,
-                old_code: mosque.verification_code,
+                old_code: oldCode,
                 new_code: newCode,
                 new_expiry: newExpiryDate
             });
@@ -850,7 +1020,10 @@ router.get('/audit-logs', auth, requireSuperAdmin, async (req, res) => {
             page = 1,
             limit = 20,
             start_date,
-            end_date
+            end_date,
+            search,
+            sort_by = 'timestamp',
+            sort_order = 'desc'
         } = req.query;
 
         const AuditLog = require('../models/AuditLog');
@@ -882,8 +1055,33 @@ router.get('/audit-logs', auth, requireSuperAdmin, async (req, res) => {
             }
         }
 
+        // Search functionality
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search.trim(), 'i');
+            query.$or = [
+                { 'performed_by.user_name': searchRegex },
+                { 'performed_by.user_email': searchRegex },
+                { 'target.target_name': searchRegex },
+                { action_type: searchRegex },
+                { description: searchRegex },
+                { 'action_details.mosque_data.name': searchRegex },
+                { 'action_details.mosque_data.location': searchRegex },
+                { 'action_details.admin_data.name': searchRegex },
+                { 'action_details.admin_data.email': searchRegex },
+                { 'action_details.admin_data.mosque_name': searchRegex },
+                { 'action_details.super_admin_data.name': searchRegex },
+                { 'action_details.super_admin_data.email': searchRegex },
+                { 'action_details.notes': searchRegex },
+                { 'action_details.reason': searchRegex }
+            ];
+        }
+
+        // Build sort object
+        const sortOptions = {};
+        sortOptions[sort_by] = sort_order === 'asc' ? 1 : -1;
+
         const auditLogs = await AuditLog.find(query)
-            .sort({ timestamp: -1 })
+            .sort(sortOptions)
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
@@ -1045,8 +1243,32 @@ router.get('/action-types-summary', auth, requireSuperAdmin, async (req, res) =>
                 icon: 'user-minus',
                 category: 'admin'
             },
-            'verification_code_regenerated': {
+            'admin_reapplication': {
+                label: 'Admin Reapplications',
+                color: 'lime',
+                icon: 'user-plus',
+                category: 'admin'
+            },
+            'admin_allowed_reapply': {
+                label: 'Reapplication Allowed',
+                color: 'emerald',
+                icon: 'user-check',
+                category: 'admin'
+            },
+            'admin_assigned': {
+                label: 'Admins Assigned',
+                color: 'sky',
+                icon: 'user-plus',
+                category: 'admin'
+            },
+            'code_regenerated': {
                 label: 'Codes Regenerated',
+                color: 'yellow',
+                icon: 'refresh',
+                category: 'verification'
+            },
+            'bulk_code_regeneration': {
+                label: 'Bulk Code Regeneration',
                 color: 'yellow',
                 icon: 'refresh',
                 category: 'verification'
@@ -1063,17 +1285,29 @@ router.get('/action-types-summary', auth, requireSuperAdmin, async (req, res) =>
                 icon: 'info',
                 category: 'mosque'
             },
-            'admin_login': {
-                label: 'Admin Logins',
-                color: 'pink',
-                icon: 'sign-in',
-                category: 'auth'
+            'error': {
+                label: 'System Errors',
+                color: 'red',
+                icon: 'exclamation-triangle',
+                category: 'system'
             },
-            'superadmin_login': {
-                label: 'Super Admin Logins',
+            'audit_logs_cleaned': {
+                label: 'Audit Logs Cleaned',
+                color: 'slate',
+                icon: 'trash',
+                category: 'system'
+            },
+            'super_admin_created': {
+                label: 'Super Admins Created',
                 color: 'violet',
-                icon: 'shield',
-                category: 'auth'
+                icon: 'user-shield',
+                category: 'admin'
+            },
+            'super_admin_deleted': {
+                label: 'Super Admins Deleted',
+                color: 'red',
+                icon: 'user-shield',
+                category: 'admin'
             }
         };
 
@@ -1160,6 +1394,41 @@ router.get('/action-types-summary', auth, requireSuperAdmin, async (req, res) =>
             };
         });
 
+        // Combine code_regenerated and bulk_code_regeneration into a single "Codes Regenerated" entry
+        const codeRegeneratedIndex = actionTypesData.findIndex(item => item.action_type === 'code_regenerated');
+        const bulkCodeRegenerationIndex = actionTypesData.findIndex(item => item.action_type === 'bulk_code_regeneration');
+
+        if (codeRegeneratedIndex !== -1 && bulkCodeRegenerationIndex !== -1) {
+            // Merge bulk_code_regeneration into code_regenerated
+            const codeRegenerated = actionTypesData[codeRegeneratedIndex];
+            const bulkCodeRegeneration = actionTypesData[bulkCodeRegenerationIndex];
+
+            codeRegenerated.total_count += bulkCodeRegeneration.total_count;
+            codeRegenerated.success_count += bulkCodeRegeneration.success_count;
+            codeRegenerated.failure_count += bulkCodeRegeneration.failure_count;
+            codeRegenerated.count_24h += bulkCodeRegeneration.count_24h;
+            codeRegenerated.count_today += bulkCodeRegeneration.count_today;
+
+            // Update timestamps to most recent
+            if (bulkCodeRegeneration.latest_timestamp > codeRegenerated.latest_timestamp) {
+                codeRegenerated.latest_timestamp = bulkCodeRegeneration.latest_timestamp;
+            }
+            if (bulkCodeRegeneration.earliest_timestamp < codeRegenerated.earliest_timestamp) {
+                codeRegenerated.earliest_timestamp = bulkCodeRegeneration.earliest_timestamp;
+            }
+
+            // Recalculate success rate
+            codeRegenerated.success_rate = codeRegenerated.total_count > 0
+                ? Math.round((codeRegenerated.success_count / codeRegenerated.total_count) * 100)
+                : 0;
+
+            // Remove bulk_code_regeneration from the array
+            actionTypesData.splice(bulkCodeRegenerationIndex, 1);
+        } else if (bulkCodeRegenerationIndex !== -1 && codeRegeneratedIndex === -1) {
+            // If only bulk exists, rename it to "Codes Regenerated"
+            actionTypesData[bulkCodeRegenerationIndex].label = 'Codes Regenerated';
+        }
+
         // Sort by total count descending
         actionTypesData.sort((a, b) => b.total_count - a.total_count);
 
@@ -1224,21 +1493,28 @@ router.get('/audit-logs/export/csv', auth, requireSuperAdmin, async (req, res) =
             user_type,
             target_type,
             start_date,
-            end_date
+            end_date,
+            log_ids
         } = req.query;
 
         const AuditLog = require('../models/AuditLog');
         const query = {};
 
-        // Apply filters
-        if (action_type) query.action_type = action_type;
-        if (user_type) query['performed_by.user_type'] = user_type;
-        if (target_type) query['target.target_type'] = target_type;
+        // If specific log IDs are provided, only export those logs
+        if (log_ids) {
+            const logIdArray = Array.isArray(log_ids) ? log_ids : log_ids.split(',');
+            query._id = { $in: logIdArray };
+        } else {
+            // Apply filters only if no specific log IDs are provided
+            if (action_type) query.action_type = action_type;
+            if (user_type) query['performed_by.user_type'] = user_type;
+            if (target_type) query['target.target_type'] = target_type;
 
-        if (start_date || end_date) {
-            query.timestamp = {};
-            if (start_date) query.timestamp.$gte = new Date(start_date);
-            if (end_date) query.timestamp.$lte = new Date(end_date);
+            if (start_date || end_date) {
+                query.timestamp = {};
+                if (start_date) query.timestamp.$gte = new Date(start_date);
+                if (end_date) query.timestamp.$lte = new Date(end_date);
+            }
         }
 
         const logs = await AuditLog.find(query).sort({ timestamp: -1 });
@@ -1272,27 +1548,43 @@ router.get('/audit-logs/export/csv', auth, requireSuperAdmin, async (req, res) =
 // Delete old audit logs (cleanup)
 router.delete('/audit-logs/cleanup', auth, requireSuperAdmin, async (req, res) => {
     try {
-        const { days_old = 90 } = req.query;
+        const { days_old = 90, reason } = req.query;
         const AuditLog = require('../models/AuditLog');
+
+        // Validation for reason
+        if (!reason || reason.trim().length < 10) {
+            return res.status(400).json({
+                error: 'Reason is required and must be at least 10 characters long',
+                code: 'INVALID_REASON'
+            });
+        }
 
         const cutoffDate = new Date(Date.now() - days_old * 24 * 60 * 60 * 1000);
 
+        // Delete old audit logs from database
         const result = await AuditLog.deleteMany({
             timestamp: { $lt: cutoffDate }
         });
 
-        // Log the cleanup action
+        console.log(`Deleted ${result.deletedCount} audit logs older than ${days_old} days from database`);
+
+        // Log the cleanup action (this creates a new audit log entry)
         const auditLogger = new AuditLogger(req);
         await AuditLog.logAction({
-            action_type: 'mosque_created', // Reusing existing type for system action
+            action_type: 'audit_logs_cleaned',
             performed_by: auditLogger.getUserInfo(),
             target: {
-                target_type: 'mosque',
+                target_type: 'system',
                 target_id: null,
-                target_name: 'System Cleanup'
+                target_name: 'Audit System'
             },
             action_details: {
-                notes: `Deleted ${result.deletedCount} audit logs older than ${days_old} days`,
+                notes: reason.trim(),
+                cleanup_criteria: {
+                    days_old: days_old,
+                    cutoff_date: cutoffDate
+                },
+                deleted_count: result.deletedCount,
                 ip_address: auditLogger.ip_address,
                 user_agent: auditLogger.user_agent
             }
@@ -1306,6 +1598,69 @@ router.delete('/audit-logs/cleanup', auth, requireSuperAdmin, async (req, res) =
     } catch (err) {
         console.error('Audit logs cleanup error:', err);
         res.status(500).json({ error: 'Server error during cleanup' });
+    }
+});
+
+// Delete specific audit logs by IDs
+router.delete('/audit-logs/bulk-delete', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { log_ids, reason } = req.body;
+
+        // Validation
+        if (!log_ids || !Array.isArray(log_ids) || log_ids.length === 0) {
+            return res.status(400).json({ error: 'log_ids array is required and cannot be empty' });
+        }
+
+        if (!reason || reason.trim().length < 10) {
+            return res.status(400).json({ error: 'Reason is required and must be at least 10 characters long' });
+        }
+
+        const AuditLog = require('../models/AuditLog');
+
+        // Get the logs before deletion for audit logging
+        const logsToDelete = await AuditLog.find({ _id: { $in: log_ids } });
+
+        if (logsToDelete.length === 0) {
+            return res.status(404).json({ error: 'No logs found with the provided IDs' });
+        }
+
+        // Delete the specific logs
+        const result = await AuditLog.deleteMany({ _id: { $in: log_ids } });
+
+        // Log the bulk deletion action
+        const auditLogger = new AuditLogger(req);
+        await AuditLog.logAction({
+            action_type: 'audit_logs_bulk_deleted',
+            performed_by: auditLogger.getUserInfo(),
+            target: {
+                target_type: 'system',
+                target_id: null,
+                target_name: 'Audit System'
+            },
+            action_details: {
+                notes: `Bulk deleted ${result.deletedCount} specific audit logs`,
+                reason: reason.trim(),
+                deleted_log_ids: log_ids,
+                deleted_logs_summary: logsToDelete.map(log => ({
+                    id: log._id,
+                    action_type: log.action_type,
+                    performed_by: log.performed_by.user_name,
+                    timestamp: log.timestamp
+                })),
+                deleted_count: result.deletedCount,
+                ip_address: auditLogger.ip_address,
+                user_agent: auditLogger.user_agent
+            }
+        });
+
+        res.json({
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} audit logs`,
+            deleted_count: result.deletedCount
+        });
+    } catch (err) {
+        console.error('Bulk audit logs deletion error:', err);
+        res.status(500).json({ error: 'Server error during bulk deletion' });
     }
 });
 
@@ -1722,6 +2077,22 @@ router.get('/mosques/all', auth, requireSuperAdmin, async (req, res) => {
         });
     } catch (err) {
         console.error('Error fetching all mosques:', err);
+
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'fetch_all_mosques',
+                error: err,
+                errorMessage: err.message,
+                statusCode: 500,
+                endpoint: '/superadmin/mosques/all',
+                method: 'GET'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
+
         res.status(500).json({ error: 'Server error', details: err.message });
     }
 });
@@ -1901,26 +2272,16 @@ router.put('/:id/allow-reapplication', auth, requireSuperAdmin, async (req, res)
         admin.can_reapply = true;
         await admin.save();
 
+        // Get mosque data for audit logging
+        const mosque = await Mosque.findById(admin.mosque_id);
+
         // Audit log
-        const auditLogger = new AuditLogger(req);
-        await AuditLog.logAction({
-            action_type: 'admin_reapplication_allowed',
-            performed_by: auditLogger.getUserInfo(),
-            target: {
-                target_type: 'admin',
-                target_id: admin._id,
-                target_name: admin.name
-            },
-            action_details: {
-                admin_name: admin.name,
-                admin_email: admin.email,
-                admin_phone: admin.phone,
-                notes: notes || 'No notes provided',
-                rejection_count: admin.rejection_count,
-                ip_address: auditLogger.ip_address,
-                user_agent: auditLogger.user_agent
-            }
-        });
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logAdminAllowedReapply(admin, mosque, notes);
+        } catch (auditError) {
+            console.error('Failed to log admin allowed to reapply (non-critical):', auditError);
+        }
 
         res.json({
             success: true,
@@ -1937,6 +2298,22 @@ router.put('/:id/allow-reapplication', auth, requireSuperAdmin, async (req, res)
 
     } catch (error) {
         console.error('Error allowing reapplication:', error);
+
+        // Log the error
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logError({
+                action: 'allow_admin_reapplication',
+                error: error,
+                errorMessage: error.message,
+                statusCode: 500,
+                endpoint: `/superadmin/${req.params.id}/allow-reapplication`,
+                method: 'PUT'
+            });
+        } catch (auditError) {
+            console.error('Failed to log error (non-critical):', auditError);
+        }
+
         res.status(500).json({
             error: 'Server error',
             code: 'SERVER_ERROR'
@@ -2144,7 +2521,7 @@ router.post('/assign-admin/:mosqueId', auth, requireSuperAdmin, async (req, res)
 
         // Log the admin assignment
         const auditLogger = new AuditLogger(req);
-        await auditLogger.logAdminApproved(newAdmin, mosque, super_admin_notes || 'Admin assigned by super admin');
+        await auditLogger.logAdminAssigned(newAdmin, mosque, super_admin_notes || 'Admin assigned by super admin');
 
         res.status(201).json({
             message: 'Admin successfully assigned to mosque',
@@ -2323,7 +2700,7 @@ router.post('/mosques/:mosqueId/assign-admin', auth, requireSuperAdmin, async (r
 
         // Log the admin assignment
         const auditLogger = new AuditLogger(req);
-        await auditLogger.logAdminApproved(newAdmin, mosque, sanitizedNotes || 'Admin assigned by super admin');
+        await auditLogger.logAdminAssigned(newAdmin, mosque, sanitizedNotes || 'Admin assigned by super admin');
 
         res.status(201).json({
             message: 'Admin assigned to mosque successfully',
@@ -2349,6 +2726,447 @@ router.post('/mosques/:mosqueId/assign-admin', auth, requireSuperAdmin, async (r
         res.status(500).json({
             error: 'Server error',
             code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Create new super admin (Internal route - requires existing super admin authentication)
+router.post('/create-superadmin', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // Validate required fields
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Validate name length
+        if (name.trim().length < 2) {
+            return res.status(400).json({ error: 'Name must be at least 2 characters long' });
+        }
+
+        const allowedDomainsRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com|yahoo\.com|hotmail\.com)$/i;
+
+        if (!allowedDomainsRegex.test(email)) {
+            return res.status(400).json({ error: 'Email must be from gmail.com, outlook.com, yahoo.com, or hotmail.com' });
+        }
+
+        if (password.length < 7) {
+            return res.status(400).json({ error: 'Password must be at least 7 characters long' });
+        }
+
+        // Check if email already exists
+        const existingSuperAdmin = await SuperAdmin.findOne({ email });
+        if (existingSuperAdmin) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const superAdmin = new SuperAdmin({ name: name.trim(), email, password: hashedPassword });
+        await superAdmin.save();
+
+        // Log the super admin creation
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logSuperAdminCreated(superAdmin, 'existing_super_admin');
+        } catch (auditError) {
+            console.error('Failed to log super admin creation:', auditError);
+            // Don't fail the request if audit logging fails
+        }
+
+        res.status(201).json({
+            message: 'Super admin created successfully',
+            super_admin: { id: superAdmin._id, name: superAdmin.name, email }
+        });
+    } catch (err) {
+        console.error('Error creating super admin:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get all super admins
+router.get('/super-admins', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const superAdmins = await SuperAdmin.find({}, 'name email createdAt').sort({ createdAt: -1 });
+        res.json({ super_admins: superAdmins });
+    } catch (err) {
+        console.error('Error fetching super admins:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete super admin
+router.delete('/super-admin/:id', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Prevent self-deletion
+        if (req.user.userId === id) {
+            return res.status(400).json({ error: 'Cannot delete your own super admin account' });
+        }
+
+        const superAdmin = await SuperAdmin.findById(id);
+        if (!superAdmin) {
+            return res.status(404).json({ error: 'Super admin not found' });
+        }
+
+        // Log the deletion before removing
+        try {
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logSuperAdminDeleted(superAdmin, 'existing_super_admin');
+        } catch (auditError) {
+            console.error('Failed to log super admin deletion:', auditError);
+        }
+
+        await SuperAdmin.findByIdAndDelete(id);
+
+        res.json({ message: 'Super admin deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting super admin:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ================================
+// CODE REGENERATION ENDPOINTS
+// ================================
+
+// Get mosques list for code regeneration with filtering and search
+router.get('/mosque/code-regeneration', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const {
+            search,
+            expiry_filter,
+            sort = 'verification_code_expires',
+            order = 'asc',
+            page = 1,
+            limit = 50
+        } = req.query;
+
+        console.log('Code regeneration list request:', {
+            search,
+            expiry_filter,
+            sort,
+            order,
+            page,
+            limit
+        });
+
+        // Build filter query
+        let filter = {};
+
+        // Search filter
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search.trim(), 'i');
+            filter.$or = [
+                { name: searchRegex },
+                { location: searchRegex },
+                { contact_email: searchRegex },
+                { contact_phone: searchRegex }
+            ];
+        }
+
+        // Get all mosques first
+        let mosques = await Mosque.find(filter);
+
+        // Calculate days remaining for each mosque and filter by expiry
+        const now = new Date();
+        const filteredMosques = [];
+
+        for (const mosque of mosques) {
+            const expiryDate = new Date(mosque.verification_code_expires);
+            const timeDiff = expiryDate.getTime() - now.getTime();
+            const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            const isExpired = expiryDate < now;
+
+            // Apply expiry filter
+            let includeInResults = false;
+            switch (expiry_filter) {
+                case 'expired':
+                    includeInResults = isExpired;
+                    break;
+                case '1':
+                    includeInResults = daysRemaining <= 1 && !isExpired;
+                    break;
+                case '3':
+                    includeInResults = daysRemaining <= 3 && !isExpired;
+                    break;
+                case '7':
+                    includeInResults = daysRemaining <= 7 && !isExpired;
+                    break;
+                case '10':
+                    includeInResults = daysRemaining <= 10 && !isExpired;
+                    break;
+                case 'all':
+                default:
+                    includeInResults = true;
+                    break;
+            }
+
+            if (includeInResults) {
+                // Get admin info if exists
+                let adminInfo = null;
+                try {
+                    const admin = await Admin.findOne({ mosque_id: mosque._id, status: 'approved' });
+                    if (admin) {
+                        adminInfo = {
+                            name: admin.name,
+                            email: admin.email,
+                            phone: admin.phone
+                        };
+                    }
+                } catch (adminErr) {
+                    console.warn(`Could not fetch admin for mosque ${mosque._id}:`, adminErr.message);
+                }
+
+                filteredMosques.push({
+                    id: mosque._id.toString(),
+                    name: mosque.name,
+                    location: mosque.location,
+                    verification_code: mosque.verification_code,
+                    verification_code_expires: mosque.verification_code_expires,
+                    contact_phone: mosque.contact_phone || 'N/A',
+                    contact_email: mosque.contact_email || 'N/A',
+                    days_remaining: daysRemaining,
+                    is_expired: isExpired,
+                    admin: adminInfo
+                });
+            }
+        }
+
+        // Sort results
+        const sortOrder = order === 'desc' ? -1 : 1;
+        filteredMosques.sort((a, b) => {
+            let aVal, bVal;
+
+            switch (sort) {
+                case 'name':
+                    aVal = a.name.toLowerCase();
+                    bVal = b.name.toLowerCase();
+                    break;
+                case 'location':
+                    aVal = a.location.toLowerCase();
+                    bVal = b.location.toLowerCase();
+                    break;
+                case 'verification_code_expires':
+                default:
+                    aVal = new Date(a.verification_code_expires).getTime();
+                    bVal = new Date(b.verification_code_expires).getTime();
+                    break;
+            }
+
+            if (aVal < bVal) return -1 * sortOrder;
+            if (aVal > bVal) return 1 * sortOrder;
+            return 0;
+        });
+
+        // Pagination
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const startIndex = (pageNum - 1) * limitNum;
+        const endIndex = startIndex + limitNum;
+        const paginatedMosques = filteredMosques.slice(startIndex, endIndex);
+
+        const totalPages = Math.ceil(filteredMosques.length / limitNum);
+
+        console.log(`Found ${filteredMosques.length} mosques for code regeneration`);
+        console.log('Sample mosque data:', JSON.stringify(paginatedMosques.slice(0, 1), null, 2));
+
+        const response = {
+            mosques: paginatedMosques,
+            pagination: {
+                current_page: pageNum,
+                total_pages: totalPages,
+                total_count: filteredMosques.length,
+                per_page: limitNum,
+                has_next: pageNum < totalPages,
+                has_prev: pageNum > 1
+            }
+        };
+
+        console.log('Response summary:', {
+            mosqueCount: response.mosques.length,
+            pagination: response.pagination
+        });
+
+        res.json(response);
+
+    } catch (err) {
+        console.error('Error fetching mosques for code regeneration:', err);
+        res.status(500).json({
+            error: 'Failed to fetch mosques for code regeneration',
+            details: err.message
+        });
+    }
+});
+
+// Regenerate multiple mosque verification codes
+router.post('/mosque/regenerate-multiple-codes', auth, requireSuperAdmin, async (req, res) => {
+    try {
+        const { mosque_ids, expiry_days = 30 } = req.body;
+
+        console.log('Multiple code regeneration request:', {
+            mosque_ids,
+            expiry_days,
+            requestedBy: req.user.email
+        });
+
+        // Validation
+        if (!mosque_ids || !Array.isArray(mosque_ids) || mosque_ids.length === 0) {
+            return res.status(400).json({
+                error: 'Invalid request: mosque_ids array is required and cannot be empty'
+            });
+        }
+
+        if (expiry_days < 1 || expiry_days > 365) {
+            return res.status(400).json({
+                error: 'Invalid expiry_days: must be between 1 and 365'
+            });
+        }
+
+        const updatedMosques = [];
+        const failedMosques = [];
+        let successCount = 0;
+        let failedCount = 0;
+
+        // Process each mosque
+        for (const mosqueId of mosque_ids) {
+            try {
+                console.log(`Processing mosque ID: ${mosqueId}`);
+
+                // Find the mosque
+                const mosque = await Mosque.findById(mosqueId);
+                if (!mosque) {
+                    console.warn(`Mosque not found: ${mosqueId}`);
+                    failedMosques.push({
+                        mosque_id: mosqueId,
+                        error: 'Mosque not found'
+                    });
+                    failedCount++;
+                    continue;
+                }
+
+                // Store old code for audit
+                const oldCode = mosque.verification_code;
+                const oldExpiry = mosque.verification_code_expires;
+
+                // Generate new verification code (8 bytes = 16 hex characters)
+                const newCode = crypto.randomBytes(8).toString('hex').toUpperCase();
+                const newExpiry = new Date();
+                console.log(`Generated new code for ${mosque.name}: ${newCode} (${newCode.length} characters)`);
+                console.log(`Old code was: ${oldCode} (${oldCode.length} characters)`);
+                newExpiry.setDate(newExpiry.getDate() + parseInt(expiry_days));
+
+                // Find and update associated admin status (if any)
+                let adminStatusChanged = null;
+                try {
+                    const admin = await Admin.findOne({ mosque_id: mosqueId, status: 'approved' });
+                    if (admin) {
+                        adminStatusChanged = {
+                            name: admin.name,
+                            email: admin.email,
+                            phone: admin.phone
+                        };
+
+                        // Update admin status to code_regenerated instead of deleting
+                        await Admin.findByIdAndUpdate(admin._id, {
+                            status: 'code_regenerated',
+                            code_regeneration_reason: 'Mosque verification code was regenerated by super admin',
+                            code_regeneration_date: new Date(),
+                            code_regenerated_by: req.user._id,
+                            previous_mosque_code: oldCode,
+                            code_regenerated_mosque_name: mosque.name,
+                            code_regenerated_mosque_location: mosque.location,
+                            can_reapply: true
+                        });
+                        console.log(`Changed admin ${admin.email} status to code_regenerated for mosque ${mosque.name}`);
+                    }
+                } catch (adminError) {
+                    console.warn(`Failed to update admin status for mosque ${mosqueId}:`, adminError);
+                }
+
+                // Update mosque with new code
+                mosque.verification_code = newCode;
+                mosque.verification_code_expires = newExpiry;
+                await mosque.save();
+
+                console.log(`Successfully regenerated code for mosque: ${mosque.name}`);
+
+                // Add to successful updates
+                updatedMosques.push({
+                    mosque_id: mosqueId,
+                    mosque_name: mosque.name,
+                    old_code: oldCode,
+                    new_code: newCode,
+                    new_expiry: newExpiry.toISOString(),
+                    admin_status_changed: adminStatusChanged
+                });
+
+                successCount++;
+
+                // Create audit log for this mosque
+                try {
+                    const auditLogger = new AuditLogger(req);
+                    if (mosque_ids.length === 1) {
+                        // Single mosque - create individual audit log
+                        console.log(`Creating individual audit log for mosque: ${mosque.name}`);
+                        await auditLogger.logCodeRegenerated(mosque, oldCode, newCode, newExpiry);
+                        console.log(`✅ Individual audit log created successfully`);
+                    }
+                    // Also log the admin status change if there was one
+                    if (adminStatusChanged) {
+                        await auditLogger.logAdminCodeRegenerated(adminStatusChanged, mosque, oldCode, newCode);
+                        console.log(`✅ Admin code regeneration audit log created for ${adminStatusChanged.email}`);
+                    }
+                    // For multiple mosques, we'll create a bulk audit log below
+                } catch (auditError) {
+                    console.error(`❌ Failed to create audit log for mosque ${mosqueId}:`, auditError);
+                }
+
+            } catch (error) {
+                console.error(`Failed to regenerate code for mosque ${mosqueId}:`, error);
+                failedMosques.push({
+                    mosque_id: mosqueId,
+                    error: error.message
+                });
+                failedCount++;
+            }
+        }
+
+        // Create bulk audit log if multiple mosques were processed
+        if (mosque_ids.length > 1) {
+            try {
+                console.log(`Creating bulk audit log for ${mosque_ids.length} mosques (${successCount} successful, ${failedCount} failed)`);
+                const auditLogger = new AuditLogger(req);
+                await auditLogger.logBulkCodeRegeneration(successCount, failedCount, expiry_days);
+                console.log(`✅ Bulk audit log created successfully`);
+            } catch (auditError) {
+                console.error('❌ Failed to create bulk audit log:', auditError);
+            }
+        }
+
+        console.log(`Code regeneration completed: ${successCount} successful, ${failedCount} failed`);
+
+        // Determine audit log type for frontend
+        const auditLogType = mosque_ids.length === 1 ? 'Code Regenerated' : 'BULK CODE REGENERATION COMPLETED';
+
+        res.json({
+            message: `Code regeneration completed: ${successCount} successful, ${failedCount} failed`,
+            summary: {
+                total_requested: mosque_ids.length,
+                successful: successCount,
+                failed: failedCount,
+                audit_log_type: auditLogType
+            },
+            updated_mosques: updatedMosques,
+            failed_mosques: failedMosques.length > 0 ? failedMosques : undefined
+        });
+
+    } catch (err) {
+        console.error('Error in multiple code regeneration:', err);
+        res.status(500).json({
+            error: 'Failed to regenerate verification codes',
+            details: err.message
         });
     }
 });
