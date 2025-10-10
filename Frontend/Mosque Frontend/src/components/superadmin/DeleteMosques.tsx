@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { superAdminApi } from '../../lib/api';
 import { getErrorMessage } from '../../lib/types';
 import Toast from '../Toast';
@@ -71,7 +71,7 @@ const DeleteMosques: React.FC = () => {
         message: ''
     });
 
-    const fetchMosquesForDeletion = async () => {
+    const fetchMosquesForDeletion = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -89,16 +89,16 @@ const DeleteMosques: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [statusFilter]);
 
     useEffect(() => {
         fetchMosquesForDeletion();
-    }, []);
+    }, [fetchMosquesForDeletion]);
 
     // Refetch when status filter changes
     useEffect(() => {
         fetchMosquesForDeletion();
-    }, [statusFilter]);
+    }, [fetchMosquesForDeletion]);
 
     const filteredMosques = mosques
         .filter(mosque => {
