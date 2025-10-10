@@ -601,7 +601,7 @@ const AdminStatusPage: React.FC = () => {
                                         <div>
                                             <h3 className="font-semibold text-gray-800 mb-2">Reapplication Available</h3>
                                             <p className="text-sm text-gray-700 mb-4">
-                                                You can apply to manage this mosque again or a different mosque. Get a verification code to continue.
+                                                You can apply to manage for this mosque again or a different mosque. Get a verification code to continue.
                                             </p>
                                             <Link
                                                 to="/admin/reapply"
