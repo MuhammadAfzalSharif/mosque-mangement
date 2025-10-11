@@ -17,12 +17,6 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose, duration = 5000 }
         return () => clearTimeout(timer);
     }, [duration, onClose]);
 
-    const icons = {
-        success: <CheckCircle className="w-6 h-6 text-green-500" />,
-        error: <XCircle className="w-6 h-6 text-red-500" />,
-        warning: <AlertCircle className="w-6 h-6 text-yellow-500" />
-    };
-
     const bgColors = {
         success: 'bg-green-50 border-green-200',
         error: 'bg-red-50 border-red-200',
@@ -36,21 +30,57 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose, duration = 5000 }
     };
 
     return (
-        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 ${bgColors[type]} border-2 rounded-lg shadow-lg p-4 min-w-[300px] max-w-md animate-slide-in`}>
+        <div className={`
+            fixed top-2 left-2 right-2 sm:top-4 sm:right-4 sm:left-auto z-50 
+            flex items-center gap-2 sm:gap-3 
+            ${bgColors[type]} border-2 rounded-lg sm:rounded-xl 
+            shadow-lg p-2 sm:p-4 
+            w-auto sm:min-w-[300px] sm:max-w-md 
+            animate-slide-in
+            text-xs sm:text-sm
+        `}>
             <div className="flex-shrink-0">
-                {icons[type]}
+                <div className="w-4 h-4 sm:w-6 sm:h-6">
+                    {type === 'success' && <CheckCircle className="w-full h-full text-green-500" />}
+                    {type === 'error' && <XCircle className="w-full h-full text-red-500" />}
+                    {type === 'warning' && <AlertCircle className="w-full h-full text-yellow-500" />}
+                </div>
             </div>
-            <p className={`flex-1 ${textColors[type]} font-medium`}>
+            <p className={`flex-1 ${textColors[type]} font-medium text-xs sm:text-sm leading-tight sm:leading-normal`}>
                 {message}
             </p>
             <button
                 onClick={onClose}
-                className={`flex-shrink-0 ${textColors[type]} hover:opacity-70 transition-opacity`}
+                className={`flex-shrink-0 ${textColors[type]} hover:opacity-70 transition-opacity p-1`}
             >
-                <X className="w-5 h-5" />
+                <X className="w-3 h-3 sm:w-5 sm:h-5" />
             </button>
         </div>
     );
 };
+
+// Add animation styles
+if (typeof document !== 'undefined') {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+    `;
+    if (!document.querySelector('style[data-toast-animations]')) {
+        style.setAttribute('data-toast-animations', 'true');
+        document.head.appendChild(style);
+    }
+}
 
 export default Toast;
