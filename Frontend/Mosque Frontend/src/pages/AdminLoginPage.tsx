@@ -358,7 +358,7 @@ const AdminLoginPage: React.FC = () => {
                                         <input
                                             id="password"
                                             type={showPassword ? 'text' : 'password'}
-                                            autoComplete="current-password"
+                                            autoComplete={showPassword ? 'off' : 'current-password'}
                                             className={`block w-full px-3 sm:px-4 pr-10 sm:pr-12 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base ${errors.password ? 'border-red-300/50 bg-red-50/40' : 'border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-green-50/40 hover:bg-gray-100/80'
                                                 }`}
                                             placeholder="Enter your password"
@@ -382,6 +382,16 @@ const AdminLoginPage: React.FC = () => {
                                             {errors.password.message}
                                         </p>
                                     )}
+
+                                    {/* Forgot Password Link */}
+                                    <div className="text-right mt-2">
+                                        <Link
+                                            to="/forgot-password/admin"
+                                            className="text-xs sm:text-sm text-green-600 hover:text-green-500 font-medium transition-colors hover:underline"
+                                        >
+                                            Forgot Password?
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 {/* Islamic Submit Button */}

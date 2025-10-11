@@ -168,6 +168,22 @@ export const authApi = {
   loginSuperAdmin: (data: { email: string; password: string }) =>
     api.post("/superadmin/login", data),
 
+  // Password Reset APIs
+  forgotPassword: (data: { email: string; userType: "admin" | "superadmin" }) =>
+    api.post("/forgot-password", data),
+
+  verifyResetCode: (data: {
+    email: string;
+    code: string;
+    userType: "admin" | "superadmin";
+  }) => api.post("/verify-reset-code", data),
+
+  resetPassword: (data: {
+    resetToken: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => api.post("/reset-password", data),
+
   // Logout
   logout: () => api.post("/logout"),
 };

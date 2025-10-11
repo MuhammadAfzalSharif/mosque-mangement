@@ -60,6 +60,7 @@ const AdminApplicationPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
 
     const registerForm = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
@@ -743,12 +744,23 @@ const AdminApplicationPage: React.FC = () => {
                                                 </div>
                                                 <span>Password</span>
                                             </label>
-                                            <input
-                                                {...loginForm.register('password')}
-                                                type="password"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
-                                                placeholder="Enter your password"
-                                            />
+                                            <div className="relative">
+                                                <input
+                                                    {...loginForm.register('password')}
+                                                    type={showLoginPassword ? 'text' : 'password'}
+                                                    autoComplete={showLoginPassword ? 'off' : 'current-password'}
+                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                    placeholder="Enter your password"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                                    className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1"
+                                                    key={showLoginPassword ? 'login-password-eye-off' : 'login-password-eye-on'}
+                                                >
+                                                    {showLoginPassword ? <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" /> : <Eye className="w-3 h-3 sm:w-4 sm:h-4" />}
+                                                </button>
+                                            </div>
                                             {loginForm.formState.errors.password && (
                                                 <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />

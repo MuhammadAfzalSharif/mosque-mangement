@@ -159,6 +159,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                         <input
                                             {...form.register('password')}
                                             type={showPassword ? 'text' : 'password'}
+                                            autoComplete={showPassword ? 'off' : 'current-password'}
                                             className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
                                             placeholder="Enter your password"
                                         />
@@ -177,6 +178,16 @@ const SuperAdminLoginPage: React.FC = () => {
                                             {form.formState.errors.password.message}
                                         </p>
                                     )}
+
+                                    {/* Forgot Password Link */}
+                                    <div className="text-right mt-2">
+                                        <Link
+                                            to="/forgot-password/superadmin"
+                                            className="text-xs sm:text-sm text-green-600 hover:text-emerald-700 font-medium transition-colors hover:underline"
+                                        >
+                                            Forgot Password?
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 <button

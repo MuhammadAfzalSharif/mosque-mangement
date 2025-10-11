@@ -973,4 +973,380 @@ router.get('/admin/me', auth, async (req, res) => {
     }
 });
 
+// Import required modules for password reset
+const crypto = require('crypto');
+const PasswordReset = require('../../models/PasswordReset');
+const { sendPasswordResetEmail } = require('../../services/mailService');
+
+// Forgot Password Endpoint
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email, userType } = req.body;
+
+        console.log('Password reset request:', { email, userType });
+
+        // Validate input
+        if (!email || !userType) {
+            return res.status(400).json({
+                error: 'Email and user type are required',
+                code: 'MISSING_FIELDS'
+            });
+        }
+
+        if (!['admin', 'superadmin'].includes(userType)) {
+            return res.status(400).json({
+                error: 'Invalid user type',
+                code: 'INVALID_USER_TYPE'
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                error: 'Invalid email format',
+                code: 'INVALID_EMAIL'
+            });
+        }
+
+        const UserModel = userType === 'admin' ? Admin : SuperAdmin;
+        console.log('DEBUG: Looking up user with:', {
+            model: userType === 'admin' ? 'Admin' : 'SuperAdmin',
+            email: email.toLowerCase().trim(),
+            originalEmail: email
+        });
+
+        const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
+
+        console.log('DEBUG: User lookup result:', user ? 'Found user' : 'No user found');
+        if (user) {
+            console.log('DEBUG: Found user details:', {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                status: userType === 'admin' ? user.status : 'N/A'
+            });
+        }
+
+        if (!user) {
+            // Security: Don't reveal if email exists or not
+            console.log('DEBUG: Returning INVALID_CREDENTIALS - no user found');
+            return res.status(400).json({
+                error: 'Invalid credentials',
+                code: 'INVALID_CREDENTIALS'
+            });
+        }
+
+        // Check rate limit using the new rate limiting system
+        const rateLimitResult = await PasswordReset.checkRateLimit(email.toLowerCase().trim(), userType);
+
+        if (!rateLimitResult.allowed) {
+            const minutesUntilRetry = Math.ceil((rateLimitResult.canRetryAt - new Date()) / (60 * 1000));
+
+            return res.status(429).json({
+                error: `You have already requested 2 password resets within the last hour. Your limit is exceeded, try one hour later.`,
+                code: 'RATE_LIMIT_EXCEEDED',
+                rateLimit: {
+                    attemptsUsed: rateLimitResult.attemptsUsed,
+                    attemptsRemaining: rateLimitResult.attemptsRemaining,
+                    maxAttemptsPerHour: 2,
+                    canRetryAt: rateLimitResult.canRetryAt.toISOString(),
+                    minutesUntilRetry: minutesUntilRetry
+                }
+            });
+        }
+
+        // Generate 6-digit code
+        const code = crypto.randomInt(100000, 999999).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+        console.log('🎲 Generated reset code:', code);
+        console.log('📧 Email:', email.toLowerCase().trim());
+        console.log('👤 User type:', userType);
+
+        // Clean up expired or already used reset codes for this email and user type
+        // NOTE: We intentionally do NOT delete all previous recent reset records because
+        // we use them for rate-limiting (allow up to MAX_REQUESTS_PER_HOUR per hour).
+        await PasswordReset.deleteMany({
+            email: email.toLowerCase().trim(),
+            userType,
+            $or: [
+                { expiresAt: { $lt: new Date() } },
+                { used: true }
+            ]
+        });
+
+        console.log('🧹 Cleaned up expired/used reset codes (kept recent attempts for rate-limit)');
+
+        // Save new reset code to DB
+        const resetRecord = new PasswordReset({
+            email: email.toLowerCase().trim(),
+            userType,
+            code,
+            expiresAt
+        });
+
+        console.log('💾 Saving reset record with code:', code);
+        await resetRecord.save();
+        console.log('✅ Reset record saved to database');
+
+        // DEBUG: Write code to file for testing
+        const fs = require('fs');
+        fs.writeFileSync('./last-reset-code.txt', code);
+        console.log('📄 Code written to last-reset-code.txt:', code);
+
+        // Send email
+        await sendPasswordResetEmail(email, user.name, code, userType);
+
+        // Log the action (simple console log for now)
+        console.log(`Password reset requested for ${email} (${userType}) at ${new Date().toISOString()}`);
+
+        console.log(`Password reset code sent to ${email} for ${userType}`);
+
+        res.json({
+            message: 'If your email exists in our system, you will receive a password reset code within a few minutes. The code expires in 15 minutes.',
+            success: true,
+            rateLimit: {
+                attemptsUsed: rateLimitResult.attemptsUsed,
+                attemptsRemaining: rateLimitResult.attemptsRemaining,
+                maxAttemptsPerHour: 2,
+                resetTime: rateLimitResult.canRetryAt ? rateLimitResult.canRetryAt.toISOString() : new Date(Date.now() + 60 * 60 * 1000).toISOString()
+            }
+        });
+
+    } catch (error) {
+        console.error('Forgot password error:', error);
+
+        // Log the error (simple console log)
+        console.error('Password reset error details:', {
+            error: error.message,
+            email: req.body?.email,
+            userType: req.body?.userType,
+            timestamp: new Date().toISOString()
+        });
+
+        res.status(500).json({
+            error: 'Server error occurred while processing your request. Please try again later.',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Verify Reset Code Endpoint
+router.post('/verify-reset-code', async (req, res) => {
+    try {
+        const { email, code, userType } = req.body;
+
+        console.log('Verify reset code request:', { email, userType, codeLength: code?.length });
+
+        // Validate input
+        if (!email || !code || !userType) {
+            return res.status(400).json({
+                error: 'Email, code, and user type are required',
+                code: 'MISSING_FIELDS'
+            });
+        }
+
+        if (!['admin', 'superadmin'].includes(userType)) {
+            return res.status(400).json({
+                error: 'Invalid user type',
+                code: 'INVALID_USER_TYPE'
+            });
+        }
+
+        // Validate code format (6 digits)
+        if (!/^\d{6}$/.test(code)) {
+            return res.status(400).json({
+                error: 'Invalid code format. Code must be 6 digits.',
+                code: 'INVALID_CODE_FORMAT'
+            });
+        }
+
+        // Find reset record
+        const resetDoc = await PasswordReset.findOne({
+            email: email.toLowerCase().trim(),
+            userType,
+            expiresAt: { $gt: new Date() },
+            used: false
+        });
+
+        if (!resetDoc) {
+            return res.status(400).json({
+                error: 'Invalid or expired reset code',
+                code: 'INVALID_CODE'
+            });
+        }
+
+        // Check attempts limit
+        if (resetDoc.attempts >= 5) {
+            return res.status(400).json({
+                error: 'Too many invalid attempts. Please request a new reset code.',
+                code: 'MAX_ATTEMPTS_EXCEEDED'
+            });
+        }
+
+        // Verify code
+        const isValidCode = await resetDoc.verifyCode(code);
+
+        if (!isValidCode) {
+            // Increment attempts
+            resetDoc.attempts += 1;
+            await resetDoc.save();
+
+            return res.status(400).json({
+                error: 'Invalid reset code',
+                code: 'INVALID_CODE',
+                attemptsRemaining: 5 - resetDoc.attempts
+            });
+        }
+
+        // Code is valid - generate temporary token for password reset
+        const resetToken = jwt.sign(
+            {
+                email: email.toLowerCase().trim(),
+                userType,
+                resetId: resetDoc._id.toString(),
+                purpose: 'password_reset'
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '10m' } // 10 minutes to complete password reset
+        );
+
+        console.log(`Valid reset code verified for ${email}`);
+
+        res.json({
+            message: 'Code verified successfully',
+            resetToken,
+            success: true
+        });
+
+    } catch (error) {
+        console.error('Verify reset code error:', error);
+        res.status(500).json({
+            error: 'Server error occurred while verifying code',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Reset Password Endpoint
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { resetToken, newPassword, confirmPassword } = req.body;
+
+        console.log('Reset password request received');
+
+        // Validate input
+        if (!resetToken || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                error: 'Reset token, new password, and confirmation are required',
+                code: 'MISSING_FIELDS'
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                error: 'Passwords do not match',
+                code: 'PASSWORDS_MISMATCH'
+            });
+        }
+
+        // Validate password strength
+        if (newPassword.length < 7) {
+            return res.status(400).json({
+                error: 'Password must be at least 7 characters long',
+                code: 'WEAK_PASSWORD'
+            });
+        }
+
+        // Verify reset token
+        let decoded;
+        try {
+            decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+        } catch (jwtError) {
+            return res.status(400).json({
+                error: 'Invalid or expired reset token',
+                code: 'INVALID_TOKEN'
+            });
+        }
+
+        if (decoded.purpose !== 'password_reset') {
+            return res.status(400).json({
+                error: 'Invalid token purpose',
+                code: 'INVALID_TOKEN'
+            });
+        }
+
+        const { email, userType, resetId } = decoded;
+
+        // Verify reset record still exists and is valid
+        const resetDoc = await PasswordReset.findOne({
+            _id: resetId,
+            email: email,
+            userType: userType,
+            expiresAt: { $gt: new Date() },
+            used: false
+        });
+
+        if (!resetDoc) {
+            return res.status(400).json({
+                error: 'Reset session has expired or is invalid',
+                code: 'INVALID_RESET_SESSION'
+            });
+        }
+
+        // Find user
+        const UserModel = userType === 'admin' ? Admin : SuperAdmin;
+        const user = await UserModel.findOne({ email: email });
+
+        if (!user) {
+            return res.status(400).json({
+                error: 'User not found',
+                code: 'USER_NOT_FOUND'
+            });
+        }
+
+        // Update password
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        user.password = hashedPassword;
+        await user.save();
+
+        // Mark reset code as used
+        resetDoc.used = true;
+        await resetDoc.save();
+
+        // Clean up other reset codes for this user
+        await PasswordReset.deleteMany({
+            email: email,
+            userType: userType,
+            _id: { $ne: resetId }
+        });
+
+        // Log the successful password reset
+        console.log(`Password reset completed for ${email} (${userType}) at ${new Date().toISOString()}`);
+
+        console.log(`Password successfully reset for ${email} (${userType})`);
+
+        res.json({
+            message: 'Password has been reset successfully. You can now login with your new password.',
+            success: true
+        });
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+
+        // Log the error (simple console log)
+        console.error('Password reset completion error details:', {
+            error: error.message,
+            action: 'reset_password',
+            timestamp: new Date().toISOString()
+        });
+
+        res.status(500).json({
+            error: 'Server error occurred while resetting password',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
 module.exports = router;

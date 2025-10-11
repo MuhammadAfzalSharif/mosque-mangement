@@ -6,6 +6,46 @@ const AuditLogger = require('../utils/auditLogger');
 
 const router = express.Router();
 
+// Get Admin Profile (for /api/admin/me endpoint)
+router.get('/me', auth, async (req, res) => {
+    try {
+        console.log('GET /admin/me - User ID:', req.user.userId);
+
+        const admin = await Admin.findById(req.user.userId).populate('mosque_id', 'name location');
+
+        if (!admin) {
+            console.log('Admin not found for ID:', req.user.userId);
+            return res.status(404).json({
+                error: 'Admin not found',
+                code: 'ADMIN_NOT_FOUND'
+            });
+        }
+
+        console.log('Admin found:', { id: admin._id, name: admin.name, status: admin.status });
+
+        res.json({
+            success: true,
+            admin: {
+                _id: admin._id,
+                name: admin.name,
+                email: admin.email,
+                phone: admin.phone,
+                status: admin.status,
+                mosque_id: admin.mosque_id,
+                created_at: admin.created_at,
+                rejection_reason: admin.rejection_reason,
+                can_reapply: admin.can_reapply
+            }
+        });
+    } catch (err) {
+        console.error('Error in /admin/me:', err);
+        res.status(500).json({
+            error: 'Server error',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
 // Get Admin Status
 router.get('/status', auth, async (req, res) => {
     try {
