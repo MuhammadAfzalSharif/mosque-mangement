@@ -5,7 +5,21 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { authApi, mosqueApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
-import { ArrowLeft, Phone, Mail, User, Lock, Shield, FileText, CheckCircle, Eye, EyeOff } from 'react-feather';
+import {
+    ArrowLeft,
+    Phone,
+    Mail,
+    User,
+    Lock,
+    Shield,
+    FileText,
+    CheckCircle,
+    Eye,
+    EyeOff,
+    AlertTriangle,
+    LogIn,
+    UserPlus
+} from 'react-feather';
 
 // Validation schemas
 const registerSchema = z.object({
@@ -294,38 +308,59 @@ const AdminApplicationPage: React.FC = () => {
 
     if (applicationStatus === 'pending') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-20">
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full filter blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
+                {/* Modern Islamic 3D Background Effects */}
+                <div className="absolute inset-0 opacity-30">
+                    <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-green-300/40 via-emerald-400/30 to-teal-300/20 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+                    <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-80 sm:h-80 bg-gradient-to-br from-emerald-300/30 via-teal-400/25 to-green-300/20 rounded-full filter blur-2xl transform translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute top-1/2 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-teal-200/20 to-green-200/15 rounded-full filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
                 </div>
 
-                <div className="relative z-10 container mx-auto px-4 py-16">
-                    <div className="max-w-lg mx-auto">
-                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                                <CheckCircle className="w-10 h-10 text-white" />
-                            </div>
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
-                                Application Submitted Successfully!
-                            </h2>
-                            <p className="text-gray-600 mb-8 leading-relaxed">
-                                Your application is pending review by the super admin. You will be notified once it's approved or Login with in 24 hours.
-                            </p>
-                            <div className="space-y-3">
-                                <Link
-                                    to={`/mosques/${id}`}
-                                    className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-                                >
-                                    Back to Mosque
-                                </Link>
-                                <Link
-                                    to="/mosques"
-                                    className="block w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-                                >
-                                    Browse Other Mosques
-                                </Link>
+                <div className="relative z-10 container mx-auto px-2 sm:px-4 py-8 sm:py-16">
+                    <div className="max-w-sm sm:max-w-lg mx-auto">
+                        <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 text-center overflow-hidden">
+                            {/* 3D Background Effects */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-3xl"></div>
+                            <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                            <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                            <div className="relative z-10">
+                                <div className="relative mb-4 sm:mb-6">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-lg opacity-30"></div>
+                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                                        <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                                    </div>
+                                </div>
+                                <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 sm:mb-3">
+                                    <span className="hidden sm:inline">Application Submitted Successfully!</span>
+                                    <span className="sm:hidden">Application Submitted!</span>
+                                </h2>
+                                <p className="text-xs sm:text-base text-gray-600 mb-4 sm:mb-8 leading-relaxed px-2">
+                                    <span className="hidden sm:inline">Your application is pending review by the super admin. You will be notified once it's approved or Login within 24 hours.</span>
+                                    <span className="sm:hidden">Application pending review. Check back in 24 hours.</span>
+                                </p>
+                                <div className="space-y-2 sm:space-y-3">
+                                    <Link
+                                        to={`/mosques/${id}`}
+                                        className="group relative block w-full bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                        <span className="relative text-sm sm:text-base">
+                                            <span className="hidden sm:inline">Back to Mosque</span>
+                                            <span className="sm:hidden">Back to Mosque</span>
+                                        </span>
+                                    </Link>
+                                    <Link
+                                        to="/mosques"
+                                        className="group relative block w-full bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:from-gray-600 hover:via-gray-700 hover:to-gray-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                        <span className="relative text-sm sm:text-base">
+                                            <span className="hidden sm:inline">Browse Other Mosques</span>
+                                            <span className="sm:hidden">Browse Mosques</span>
+                                        </span>
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -335,332 +370,407 @@ const AdminApplicationPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full filter blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
+            {/* Modern Islamic 3D Background Effects */}
+            <div className="absolute inset-0 opacity-30">
+                <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-green-300/40 via-emerald-400/30 to-teal-300/20 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+                <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-80 sm:h-80 bg-gradient-to-br from-emerald-300/30 via-teal-400/25 to-green-300/20 rounded-full filter blur-2xl transform translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute top-1/2 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-teal-200/20 to-green-200/15 rounded-full filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-1/3 right-1/4 w-24 h-24 sm:w-36 sm:h-36 bg-gradient-to-br from-green-200/15 to-emerald-200/10 rounded-full filter blur-lg animate-pulse" style={{ animationDelay: '3s' }}></div>
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 py-8">
-                {/* Navigation */}
-                <div className="mb-8">
+            <div className="relative z-10 container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+                {/* Modern Islamic Navigation */}
+                <div className="mb-4 sm:mb-8">
                     <Link
                         to={`/mosques/${id}`}
-                        className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl text-blue-600 hover:text-blue-700 font-medium transition-all duration-300 hover:bg-white/90 shadow-lg"
+                        className="group inline-flex items-center px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-lg sm:rounded-xl text-green-600 hover:text-green-700 font-medium transition-all duration-300 hover:bg-white/90 shadow-xl hover:shadow-2xl transform hover:scale-105"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Mosque
+                        <div className="relative mr-2">
+                            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg blur-sm opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                            <ArrowLeft className="relative w-3 h-3 sm:w-4 sm:h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
+                        </div>
+                        <span className="text-sm sm:text-base">
+                            <span className="hidden sm:inline">Back to Mosque</span>
+                            <span className="sm:hidden">Back</span>
+                        </span>
                     </Link>
                 </div>
 
                 <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-                            Mosque Admin Access
-                        </h1>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                            Login or register to manage mosque prayer times and information
-                        </p>
+                    <div className="text-center mb-6 sm:mb-12">
+                        <div className="relative mb-4 sm:mb-6">
+                            <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 via-emerald-100/10 to-teal-100/20 rounded-2xl blur-3xl"></div>
+                            <div className="relative">
+                                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 sm:mb-4 px-2">
+                                    <span className="hidden sm:inline">Mosque Admin Access</span>
+                                    <span className="sm:hidden">Admin Access</span>
+                                </h1>
+                                <p className="text-sm sm:text-lg lg:text-xl text-gray-600 max-w-md sm:max-w-2xl mx-auto leading-relaxed px-2">
+                                    <span className="hidden sm:inline">Login or register to manage mosque prayer times and information</span>
+                                    <span className="sm:hidden">Manage mosque prayer times</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="grid lg:grid-cols-2 gap-8">
-                        {/* Contact Info Card */}
+                    <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                        {/* Modern Islamic Contact Info Card */}
                         {mosqueInfo && (
-                            <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
-                                <div className="flex items-center mb-6">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
-                                        <Phone className="w-6 h-6 text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                        Need Verification Code?
-                                    </h3>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
-                                        <span className="font-semibold text-gray-800 block mb-1">Mosque:</span>
-                                        <p className="text-gray-700 font-medium">{mosqueInfo.name}</p>
-                                    </div>
-                                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
-                                        <span className="font-semibold text-gray-800 block mb-1">Location:</span>
-                                        <p className="text-gray-700">{mosqueInfo.location}</p>
-                                    </div>
-                                    {mosqueInfo.contact_phone && (
-                                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 flex items-center">
-                                            <Phone className="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" />
-                                            <div>
-                                                <span className="font-semibold text-gray-800 block">Phone:</span>
-                                                <p className="text-gray-700">{mosqueInfo.contact_phone}</p>
+                            <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 overflow-hidden">
+                                {/* 3D Background Effects */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-3xl"></div>
+                                <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                                <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                                <div className="relative z-10">
+                                    <div className="flex items-center mb-4 sm:mb-6">
+                                        <div className="relative mr-3 sm:mr-4">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg sm:rounded-xl blur-sm opacity-30"></div>
+                                            <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                                                <Phone className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                                             </div>
                                         </div>
-                                    )}
-                                    {mosqueInfo.contact_email && (
-                                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 flex items-center">
-                                            <Mail className="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" />
-                                            <div>
-                                                <span className="font-semibold text-gray-800 block">Email:</span>
-                                                <p className="text-gray-700">{mosqueInfo.contact_email}</p>
-                                            </div>
+                                        <h3 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                            <span className="hidden sm:inline">Need Verification Code?</span>
+                                            <span className="sm:hidden">Verification Code?</span>
+                                        </h3>
+                                    </div>
+                                    <div className="space-y-3 sm:space-y-4">
+                                        <div className="bg-gradient-to-r from-green-50/50 to-emerald-50/30 border border-green-100/50 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                                            <span className="font-semibold text-gray-800 block mb-1 text-sm sm:text-base">Mosque:</span>
+                                            <p className="text-gray-700 font-medium text-sm sm:text-base break-words">{mosqueInfo.name}</p>
                                         </div>
-                                    )}
-                                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
-                                        <p className="text-amber-800 text-sm leading-relaxed">
-                                            {mosqueInfo.admin_instructions}
-                                        </p>
+                                        <div className="bg-gradient-to-r from-green-50/50 to-emerald-50/30 border border-green-100/50 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                                            <span className="font-semibold text-gray-800 block mb-1 text-sm sm:text-base">Location:</span>
+                                            <p className="text-gray-700 text-sm sm:text-base break-words leading-relaxed">{mosqueInfo.location}</p>
+                                        </div>
+                                        <div className="bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-2 border-amber-200/50 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                                            <p className="text-amber-800 text-xs sm:text-sm leading-relaxed">
+                                                {mosqueInfo.admin_instructions}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         )}
-                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
-                            {/* Mode Toggle */}
-                            <div className="flex mb-8 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-2">
-                                <button
-                                    onClick={() => setMode('register')}
-                                    className={`flex-1 py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${mode === 'register'
-                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
-                                        : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
-                                        }`}
-                                >
-                                    Register
-                                </button>
-                                <button
-                                    onClick={() => setMode('login')}
-                                    className={`flex-1 py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${mode === 'login'
-                                        ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg transform scale-105'
-                                        : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
-                                        }`}
-                                >
-                                    Login
-                                </button>
-                            </div>
+                        <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 overflow-hidden">
+                            {/* 3D Background Effects */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-3xl"></div>
+                            <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                            <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
 
-                            {/* Error Message */}
-                            {error && (
-                                <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4 mb-6">
-                                    <p className="text-red-700 font-medium">{error}</p>
+                            <div className="relative z-10">
+                                {/* Modern Islamic Mode Toggle */}
+                                <div className="flex mb-4 sm:mb-6 lg:mb-8 bg-gradient-to-r from-gray-100/80 via-green-50/50 to-emerald-50/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 sm:p-2 border border-white/30">
+                                    <button
+                                        onClick={() => setMode('register')}
+                                        className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${mode === 'register'
+                                            ? 'bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 text-white shadow-lg transform scale-105'
+                                            : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                                            }`}
+                                    >
+                                        <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
+                                        <span className="hidden sm:inline">Register</span>
+                                        <span className="sm:hidden">Register</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setMode('login')}
+                                        className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${mode === 'login'
+                                            ? 'bg-gradient-to-r from-emerald-500 via-green-600 to-teal-600 text-white shadow-lg transform scale-105'
+                                            : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                                            }`}
+                                    >
+                                        <LogIn className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
+                                        <span className="hidden sm:inline">Login</span>
+                                        <span className="sm:hidden">Login</span>
+                                    </button>
                                 </div>
-                            )}
 
-                            {/* Register Form */}
-                            {mode === 'register' && (
-                                <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-6">
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <User className="w-4 h-4 mr-2 text-blue-600" />
-                                            Full Name
-                                        </label>
-                                        <input
-                                            {...registerForm.register('name')}
-                                            type="text"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="Enter your full name"
-                                        />
-                                        {registerForm.formState.errors.name && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {registerForm.formState.errors.name.message}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Mail className="w-4 h-4 mr-2 text-blue-600" />
-                                            Email Address
-                                        </label>
-                                        <input
-                                            {...registerForm.register('email')}
-                                            type="email"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="Enter your email"
-                                        />
-                                        {registerForm.formState.errors.email && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {registerForm.formState.errors.email.message}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Lock className="w-4 h-4 mr-2 text-blue-600" />
-                                            Password
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                {...registerForm.register('password')}
-                                                type={showPassword ? 'text' : 'password'}
-                                                className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                                placeholder="Create a password"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                            >
-                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                            </button>
+                                {/* Modern Islamic Error Message */}
+                                {error && (
+                                    <div className="bg-gradient-to-r from-red-50/80 via-rose-50/60 to-pink-50/40 border-2 border-red-200/50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm">
+                                        <div className="flex items-center">
+                                            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 sm:mr-3 flex-shrink-0" />
+                                            <p className="text-red-700 font-medium text-sm sm:text-base leading-relaxed">{error}</p>
                                         </div>
-                                        {password && (
-                                            <div className="mt-2">
-                                                <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                                                    <span>Strength: {passwordStrength.label}</span>
-                                                    <span>{passwordStrength.strength}/4</span>
+                                    </div>
+                                )}
+
+                                {/* Modern Islamic Register Form */}
+                                {mode === 'register' && (
+                                    <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4 sm:space-y-6">
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <User className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                                                 </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div
-                                                        className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                                                        style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
-                                                    ></div>
+                                                <span className="hidden sm:inline">Full Name</span>
+                                                <span className="sm:hidden">Name</span>
+                                            </label>
+                                            <input
+                                                {...registerForm.register('name')}
+                                                type="text"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                placeholder="Enter your full name"
+                                            />
+                                            {registerForm.formState.errors.name && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {registerForm.formState.errors.name.message}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Mail className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                                                 </div>
+                                                <span className="hidden sm:inline">Email Address</span>
+                                                <span className="sm:hidden">Email</span>
+                                            </label>
+                                            <input
+                                                {...registerForm.register('email')}
+                                                type="email"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                placeholder="Enter your email"
+                                            />
+                                            {registerForm.formState.errors.email && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {registerForm.formState.errors.email.message}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                                </div>
+                                                <span>Password</span>
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    {...registerForm.register('password')}
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                    placeholder="Create a password"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors p-1"
+                                                >
+                                                    {showPassword ? <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" /> : <Eye className="w-3 h-3 sm:w-4 sm:h-4" />}
+                                                </button>
                                             </div>
-                                        )}
-                                        {registerForm.formState.errors.password && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {registerForm.formState.errors.password.message}
+                                            {password && (
+                                                <div className="mt-2">
+                                                    <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                                        <span className="text-xs">Strength: {passwordStrength.label}</span>
+                                                        <span className="text-xs">{passwordStrength.strength}/4</span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200/50 backdrop-blur-sm rounded-full h-1.5 sm:h-2 border border-gray-300/30">
+                                                        <div
+                                                            className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                                                            style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {registerForm.formState.errors.password && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {registerForm.formState.errors.password.message}
+                                                </p>
+                                            )}
+                                            <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+                                                <span className="hidden sm:inline">Use letters, numbers, special characters, and capital letters for maximum security</span>
+                                                <span className="sm:hidden">Use letters, numbers, symbols for security</span>
                                             </p>
-                                        )}
-                                        <p className="mt-1 text-xs text-gray-500">
-                                            Use letters, numbers, special characters, and capital letters for maximum security
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Lock className="w-4 h-4 mr-2 text-blue-600" />
-                                            Confirm Password
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                {...registerForm.register('confirm_password')}
-                                                type={showConfirmPassword ? 'text' : 'password'}
-                                                className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                                placeholder="Confirm your password"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                            >
-                                                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                            </button>
                                         </div>
-                                        {registerForm.formState.errors.confirm_password && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {registerForm.formState.errors.confirm_password.message}
+
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                                </div>
+                                                <span className="hidden sm:inline">Confirm Password</span>
+                                                <span className="sm:hidden">Confirm</span>
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    {...registerForm.register('confirm_password')}
+                                                    type={showConfirmPassword ? 'text' : 'password'}
+                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                    placeholder="Confirm your password"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                    className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors p-1"
+                                                >
+                                                    {showConfirmPassword ? <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" /> : <Eye className="w-3 h-3 sm:w-4 sm:h-4" />}
+                                                </button>
+                                            </div>
+                                            {registerForm.formState.errors.confirm_password && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {registerForm.formState.errors.confirm_password.message}
+                                                </p>
+                                            )}
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                <span className="hidden sm:inline">Must match the password entered above</span>
+                                                <span className="sm:hidden">Must match password above</span>
                                             </p>
-                                        )}
-                                        <p className="mt-1 text-xs text-gray-500">
-                                            Must match the password entered above
-                                        </p>
-                                    </div>
+                                        </div>
 
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Phone className="w-4 h-4 mr-2 text-blue-600" />
-                                            Phone Number
-                                        </label>
-                                        <input
-                                            {...registerForm.register('phone')}
-                                            type="tel"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="+923001234567"
-                                        />
-                                        {registerForm.formState.errors.phone && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {registerForm.formState.errors.phone.message}
-                                            </p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Phone className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                                </div>
+                                                <span className="hidden sm:inline">Phone Number</span>
+                                                <span className="sm:hidden">Phone</span>
+                                            </label>
+                                            <input
+                                                {...registerForm.register('phone')}
+                                                type="tel"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                placeholder="+923001234567"
+                                            />
+                                            {registerForm.formState.errors.phone && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {registerForm.formState.errors.phone.message}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Shield className="w-4 h-4 mr-2 text-blue-600" />
-                                            Mosque Verification Code
-                                        </label>
-                                        <input
-                                            {...registerForm.register('mosque_verification_code')}
-                                            type="text"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="Enter verification code"
-                                        />
-                                        {registerForm.formState.errors.mosque_verification_code && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {registerForm.formState.errors.mosque_verification_code.message}
-                                            </p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Shield className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                                </div>
+                                                <span className="hidden sm:inline">Mosque Verification Code</span>
+                                                <span className="sm:hidden">Verification Code</span>
+                                            </label>
+                                            <input
+                                                {...registerForm.register('mosque_verification_code')}
+                                                type="text"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                placeholder="Enter verification code"
+                                            />
+                                            {registerForm.formState.errors.mosque_verification_code && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {registerForm.formState.errors.mosque_verification_code.message}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <FileText className="w-4 h-4 mr-2 text-blue-600" />
-                                            Application Notes (Optional)
-                                        </label>
-                                        <textarea
-                                            {...registerForm.register('application_notes')}
-                                            rows={4}
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100 resize-none"
-                                            placeholder="Any additional information..."
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                                    <FileText className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                                </div>
+                                                <span className="hidden sm:inline">Application Notes (Optional)</span>
+                                                <span className="sm:hidden">Notes (Optional)</span>
+                                            </label>
+                                            <textarea
+                                                {...registerForm.register('application_notes')}
+                                                rows={3}
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm resize-none text-sm sm:text-base"
+                                                placeholder="Any additional information..."
+                                            />
+                                        </div>
 
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-blue-300 disabled:to-purple-300 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg disabled:transform-none"
-                                    >
-                                        {loading ? 'Submitting...' : 'Submit Application'}
-                                    </button>
-                                </form>
-                            )}
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="group relative w-full bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 disabled:from-green-300 disabled:via-emerald-300 disabled:to-teal-300 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl disabled:transform-none overflow-hidden text-sm sm:text-base"
+                                        >
+                                            <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                            <div className="relative flex items-center justify-center">
+                                                <UserPlus className="w-4 h-4 mr-2" />
+                                                <span className="hidden sm:inline">{loading ? 'Submitting Application...' : 'Submit Application'}</span>
+                                                <span className="sm:hidden">{loading ? 'Submitting...' : 'Submit'}</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                )}
 
-                            {/* Login Form */}
-                            {mode === 'login' && (
-                                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-6">
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Mail className="w-4 h-4 mr-2 text-emerald-600" />
-                                            Email Address
-                                        </label>
-                                        <input
-                                            {...loginForm.register('email')}
-                                            type="email"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="Enter your email"
-                                        />
-                                        {loginForm.formState.errors.email && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {loginForm.formState.errors.email.message}
-                                            </p>
-                                        )}
-                                    </div>
+                                {/* Modern Islamic Login Form */}
+                                {mode === 'login' && (
+                                    <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4 sm:space-y-6">
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Mail className="relative w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
+                                                </div>
+                                                <span className="hidden sm:inline">Email Address</span>
+                                                <span className="sm:hidden">Email</span>
+                                            </label>
+                                            <input
+                                                {...loginForm.register('email')}
+                                                type="email"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                placeholder="Enter your email"
+                                            />
+                                            {loginForm.formState.errors.email && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {loginForm.formState.errors.email.message}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                            <Lock className="w-4 h-4 mr-2 text-emerald-600" />
-                                            Password
-                                        </label>
-                                        <input
-                                            {...loginForm.register('password')}
-                                            type="password"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
-                                            placeholder="Enter your password"
-                                        />
-                                        {loginForm.formState.errors.password && (
-                                            <p className="text-red-500 text-sm mt-2 font-medium">
-                                                {loginForm.formState.errors.password.message}
-                                            </p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                                <div className="relative mr-2">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full blur-sm opacity-30"></div>
+                                                    <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
+                                                </div>
+                                                <span>Password</span>
+                                            </label>
+                                            <input
+                                                {...loginForm.register('password')}
+                                                type="password"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                placeholder="Enter your password"
+                                            />
+                                            {loginForm.formState.errors.password && (
+                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                                    {loginForm.formState.errors.password.message}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 disabled:from-emerald-300 disabled:to-green-300 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg disabled:transform-none"
-                                    >
-                                        {loading ? 'Logging in...' : 'Login'}
-                                    </button>
-                                </form>
-                            )}
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="group relative w-full bg-gradient-to-r from-emerald-500 via-green-600 to-teal-600 hover:from-emerald-600 hover:via-green-700 hover:to-teal-700 disabled:from-emerald-300 disabled:via-green-300 disabled:to-teal-300 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl disabled:transform-none overflow-hidden text-sm sm:text-base"
+                                        >
+                                            <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                            <div className="relative flex items-center justify-center">
+                                                <LogIn className="w-4 h-4 mr-2" />
+                                                <span>{loading ? 'Logging in...' : 'Login'}</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

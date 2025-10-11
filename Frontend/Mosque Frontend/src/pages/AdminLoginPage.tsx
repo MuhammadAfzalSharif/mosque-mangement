@@ -217,193 +217,231 @@ const AdminLoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-                <div className="absolute top-40 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-                <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
+            {/* Modern Islamic 3D Background Effects */}
+            <div className="absolute inset-0 opacity-30">
+                <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-green-300/40 via-emerald-400/30 to-teal-300/20 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+                <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-80 sm:h-80 bg-gradient-to-br from-emerald-300/30 via-teal-400/25 to-green-300/20 rounded-full filter blur-2xl transform translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute top-1/2 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-teal-200/20 to-green-200/15 rounded-full filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-1/3 right-1/4 w-24 h-24 sm:w-36 sm:h-36 bg-gradient-to-br from-green-200/15 to-emerald-200/10 rounded-full filter blur-lg animate-pulse" style={{ animationDelay: '3s' }}></div>
             </div>
 
-            {/* Navigation Header */}
-            <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4 sm:py-6">
+            {/* Modern Islamic Navigation Header */}
+            <nav className="bg-gradient-to-r from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-b border-white/40 shadow-xl sticky top-0 z-50">
+                <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-60"></div>
+                <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+                    <div className="flex justify-between items-center py-2 sm:py-3 lg:py-4">
                         <div className="flex items-center">
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-2 mr-3">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
+                            <div className="relative mr-2 sm:mr-3">
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg sm:rounded-xl blur-sm opacity-30"></div>
+                                <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl p-1.5 sm:p-2 shadow-lg">
+                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
                             </div>
-                            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                Mosque Finder
+                            <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                <span className="hidden sm:inline">Mosque Finder</span>
+                                <span className="sm:hidden">Mosque</span>
                             </span>
                         </div>
-                        <div className="flex items-center space-x-3 sm:space-x-4">
+                        <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
                             <Link
-                                to="/"
-                                className="flex items-center px-4 py-2 text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+                                to="/mosques"
+                                className="group flex items-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-green-600 hover:text-green-700 rounded-lg hover:bg-green-50 transition-all duration-300 text-xs sm:text-sm font-medium transform hover:scale-105"
                             >
-                                <ArrowLeft className="w-4 h-4 mr-2" />
-                                Back to Home
+                                <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:-translate-x-0.5 transition-transform duration-200" />
+                                <span className="hidden sm:inline">Back to Home</span>
+                                <span className="sm:hidden">Back</span>
                             </Link>
                         </div>
                     </div>
                 </div>
             </nav>
 
-            {/* Main Content */}
-            <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-12">
-                <div className="w-full max-w-md">
-                    {/* Login Card */}
-                    <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
-                        {/* Header */}
-                        <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                <LogIn className="w-8 h-8 text-white" />
-                            </div>
-                            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                                Admin Login
-                            </h1>
-                            <p className="text-gray-600 text-sm">
-                                Access your mosque management dashboard
-                            </p>
-                        </div>
+            {/* Modern Islamic Main Content */}
+            <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] px-2 sm:px-4 py-6 sm:py-12">
+                <div className="w-full max-w-xs sm:max-w-md">
+                    {/* Islamic Login Card */}
+                    <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 overflow-hidden">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-3xl"></div>
+                        <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                        <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
 
-                        {/* Error Message */}
-                        {error && (
-                            <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4 mb-6">
-                                <div className="flex items-center">
-                                    <div className="flex-shrink-0">
-                                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div className="ml-3 flex-1">
-                                        <p className="text-sm text-red-800">{error}</p>
-                                        {hadTimeout && (
-                                            <button
-                                                onClick={() => window.location.href = '/admin/dashboard'}
-                                                className="mt-2 inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-                                            >
-                                                Check if Login Succeeded
-                                            </button>
-                                        )}
+                        <div className="relative z-10">
+                            {/* Modern Islamic Header */}
+                            <div className="text-center mb-4 sm:mb-6 lg:mb-8">
+                                <div className="relative mb-3 sm:mb-4">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl sm:rounded-2xl blur-lg opacity-30"></div>
+                                    <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto shadow-2xl">
+                                        <LogIn className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                                     </div>
                                 </div>
+                                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1 sm:mb-2">
+                                    <span className="hidden sm:inline">Admin Login</span>
+                                    <span className="sm:hidden">Admin Login</span>
+                                </h1>
+                                <p className="text-gray-600 text-xs sm:text-sm">
+                                    <span className="hidden sm:inline">Access your mosque management dashboard</span>
+                                    <span className="sm:hidden">Mosque Dashboard Access</span>
+                                </p>
                             </div>
-                        )}
 
-                        {/* Login Form */}
-                        <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
-                            {/* Email Field */}
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Mail className="h-5 w-5 text-gray-400" />
+                            {/* Modern Islamic Error Message */}
+                            {error && (
+                                <div className="bg-gradient-to-r from-red-50/80 via-rose-50/60 to-pink-50/40 border-2 border-red-200/50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm">
+                                    <div className="flex items-start">
+                                        <div className="flex-shrink-0">
+                                            <div className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 sm:mr-3"></div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs sm:text-sm text-red-800 leading-relaxed">{error}</p>
+                                            {hadTimeout && (
+                                                <button
+                                                    onClick={() => window.location.href = '/admin/dashboard'}
+                                                    className="mt-2 inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 border border-red-300/50 text-xs font-medium rounded-md text-red-700 bg-red-50/80 hover:bg-red-100/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500/50 transition-all duration-300 backdrop-blur-sm"
+                                                >
+                                                    <span className="hidden sm:inline">Check if Login Succeeded</span>
+                                                    <span className="sm:hidden">Check Login</span>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        className={`block w-full pl-10 pr-3 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white/50'
-                                            }`}
-                                        placeholder="Enter your email"
-                                        {...register('email')}
-                                    />
                                 </div>
-                                {errors.email && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                                )}
-                            </div>
+                            )}
 
-                            {/* Password Field */}
-                            <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Lock className="h-5 w-5 text-gray-400" />
+                            {/* Modern Islamic Login Form */}
+                            <form onSubmit={handleSubmit(handleLogin)} className="space-y-4 sm:space-y-6">
+                                {/* Email Field */}
+                                <div>
+                                    <label htmlFor="email" className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                                        <div className="relative mr-2">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                            <Mail className="relative h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                                        </div>
+                                        <span className="hidden sm:inline">Email Address</span>
+                                        <span className="sm:hidden">Email</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            autoComplete="email"
+                                            className={`block w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base ${errors.email ? 'border-red-300/50 bg-red-50/40' : 'border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-green-50/40 hover:bg-gray-100/80'
+                                                }`}
+                                            placeholder="Enter your email"
+                                            {...register('email')}
+                                        />
                                     </div>
-                                    <input
-                                        id="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        autoComplete="current-password"
-                                        className={`block w-full pl-10 pr-10 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white/50'
-                                            }`}
-                                        placeholder="Enter your password"
-                                        {...register('password')}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? (
-                                            <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                    {errors.email && (
+                                        <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                                            <div className="w-3 h-3 mr-1 flex-shrink-0"></div>
+                                            {errors.email.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Password Field */}
+                                <div>
+                                    <label htmlFor="password" className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                                        <div className="relative mr-2">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
+                                            <Lock className="relative h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                                        </div>
+                                        <span>Password</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            autoComplete="current-password"
+                                            className={`block w-full px-3 sm:px-4 pr-10 sm:pr-12 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base ${errors.password ? 'border-red-300/50 bg-red-50/40' : 'border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-green-50/40 hover:bg-gray-100/80'
+                                                }`}
+                                            placeholder="Enter your password"
+                                            {...register('password')}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors p-1"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
+                                            ) : (
+                                                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                            )}
+                                        </button>
+                                    </div>
+                                    {errors.password && (
+                                        <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
+                                            <div className="w-3 h-3 mr-1 flex-shrink-0"></div>
+                                            {errors.password.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Islamic Submit Button */}
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="group relative w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden text-sm sm:text-base"
+                                >
+                                    <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                    <div className="relative flex items-center justify-center">
+                                        {loading ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span className="hidden sm:inline">Signing In...</span>
+                                                <span className="sm:hidden">Signing In...</span>
+                                            </>
                                         ) : (
-                                            <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                            <>
+                                                <LogIn className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                                                <span className="hidden sm:inline">Sign In</span>
+                                                <span className="sm:hidden">Sign In</span>
+                                            </>
                                         )}
-                                    </button>
+                                    </div>
+                                </button>
+                            </form>
+
+                            {/* Modern Islamic Additional Links */}
+                            <div className="mt-4 sm:mt-6 lg:mt-8 text-center space-y-2 sm:space-y-3">
+                                <p className="text-xs sm:text-sm text-gray-600">
+                                    <Link
+                                        to="/admin/status"
+                                        className="font-medium text-green-600 hover:text-green-500 transition-colors"
+                                    >
+                                        <span className="hidden sm:inline">Check Account Status</span>
+                                        <span className="sm:hidden">Check Status</span>
+                                    </Link>
+                                </p>
+                                <p className="text-xs sm:text-sm text-gray-600">
+                                    <span className="hidden sm:inline">Don't have an account? </span>
+                                    <Link
+                                        to="/mosques"
+                                        className="font-medium text-green-600 hover:text-green-500 transition-colors"
+                                    >
+                                        <span className="hidden sm:inline">Find a mosque to apply</span>
+                                        <span className="sm:hidden">Find Mosque</span>
+                                    </Link>
+                                </p>
+                                <div className="flex items-center justify-center space-x-2 sm:space-x-4 text-xs sm:text-sm">
+                                    <Link
+                                        to="/superadmin/login"
+                                        className="text-emerald-600 hover:text-emerald-500 font-medium transition-colors"
+                                    >
+                                        <span className="hidden sm:inline">Super Admin Login</span>
+                                        <span className="sm:hidden">Super Admin</span>
+                                    </Link>
                                 </div>
-                                {errors.password && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                                )}
-                            </div>
-
-                            {/* Submit Button */}
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                            >
-                                {loading ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Signing In...
-                                    </>
-                                ) : (
-                                    <>
-                                        <LogIn className="w-5 h-5 mr-2" />
-                                        Sign In
-                                    </>
-                                )}
-                            </button>
-                        </form>
-
-                        {/* Additional Links */}
-                        <div className="mt-8 text-center space-y-3">
-                            <p className="text-sm text-gray-600">
-                                <Link
-                                    to="/admin/status"
-                                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-                                >
-                                    Check Account Status
-                                </Link>
-                            </p>
-                            <p className="text-sm text-gray-600">
-                                Don't have an account?{' '}
-                                <Link
-                                    to="/mosques"
-                                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-                                >
-                                    Find a mosque to apply
-                                </Link>
-                            </p>
-                            <div className="flex items-center justify-center space-x-4 text-sm">
-                                <Link
-                                    to="/superadmin/login"
-                                    className="text-purple-600 hover:text-purple-500 font-medium transition-colors"
-                                >
-                                    Super Admin Login
-                                </Link>
                             </div>
                         </div>
                     </div>

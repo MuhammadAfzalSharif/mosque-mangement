@@ -1,8 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { mosqueApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
 import MosqueCard from '../components/MosqueCard';
+import { SiWhatsapp } from 'react-icons/si';
+import {
+    Search,
+    MapPin,
+    Heart,
+    Users,
+    Clock,
+    Star,
+    Filter,
+    ChevronLeft,
+    ChevronRight,
+    Home,
+    User,
+    AlertTriangle,
+    RefreshCw,
+    X,
+    MessageCircle,
+    Flag
+} from 'react-feather';
 
 interface Mosque {
     id: string;
@@ -22,13 +41,14 @@ const MosqueFinderPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [favorites, setFavorites] = useState<string[]>([]);
     const [pagination, setPagination] = useState<PaginationInfo>({
         page: 1,
         limit: 10,
         total: 0
     });
 
-    const fetchMosques = async (search: string = '', page: number = 1) => {
+    const fetchMosques = useCallback(async (search: string = '', page: number = 1) => {
         setLoading(true);
         setError(null);
 
@@ -39,7 +59,16 @@ const MosqueFinderPage: React.FC = () => {
                 limit: 6
             });
 
-            setMosques(response.data.mosques);
+            // Sort favorites to the top
+            const sortedMosques = response.data.mosques.sort((a: Mosque, b: Mosque) => {
+                const aIsFav = favorites.includes(a.id);
+                const bIsFav = favorites.includes(b.id);
+                if (aIsFav && !bIsFav) return -1;
+                if (!aIsFav && bIsFav) return 1;
+                return 0;
+            });
+
+            setMosques(sortedMosques);
             setPagination({
                 page: response.data.pagination.page,
                 limit: response.data.pagination.limit,
@@ -51,11 +80,11 @@ const MosqueFinderPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [favorites]);
 
     useEffect(() => {
         fetchMosques();
-    }, []);
+    }, [fetchMosques]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -63,7 +92,33 @@ const MosqueFinderPage: React.FC = () => {
         }, 500);
 
         return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
+    }, [searchTerm, fetchMosques]);
+
+    useEffect(() => {
+        // Load favorites from localStorage
+        const storedFavorites = JSON.parse(localStorage.getItem('favoriteMosques') || '[]');
+        setFavorites(storedFavorites);
+    }, []);
+
+    const toggleFavorite = (mosqueId: string) => {
+        const updatedFavorites = favorites.includes(mosqueId)
+            ? favorites.filter(id => id !== mosqueId)
+            : [...favorites, mosqueId];
+
+        setFavorites(updatedFavorites);
+        localStorage.setItem('favoriteMosques', JSON.stringify(updatedFavorites));
+
+        // Re-sort mosques to put favorites at the top
+        setMosques(prevMosques => {
+            return [...prevMosques].sort((a, b) => {
+                const aIsFav = updatedFavorites.includes(a.id);
+                const bIsFav = updatedFavorites.includes(b.id);
+                if (aIsFav && !bIsFav) return -1;
+                if (!aIsFav && bIsFav) return 1;
+                return 0;
+            });
+        });
+    };
 
     const handlePageChange = (newPage: number) => {
         fetchMosques(searchTerm, newPage);
@@ -72,154 +127,298 @@ const MosqueFinderPage: React.FC = () => {
     const totalPages = Math.ceil(pagination.total / pagination.limit);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
-            {/* Navigation Header */}
-            <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4 sm:py-6">
-                        <div className="flex items-center">
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-2 mr-3">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                Mosque Finder
-                            </span>
-                        </div>
-                        <div className="flex items-center space-x-3 sm:space-x-4">
-                            <Link
-                                to="/"
-                                className="hidden sm:flex items-center px-4 py-2 text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
-                            >
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                </svg>
-                                Home
-                            </Link>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20">
+            {/* Modern Islamic Navigation Header */}
+            <nav className="bg-gradient-to-r from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-b border-white/40 shadow-xl sticky top-0 z-50">
+                {/* 3D Background Effects */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-60"></div>
+                <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
 
+                <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+                    <div className="flex justify-between items-center py-2 sm:py-3 lg:py-4">
+                        <div className="flex items-center">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg sm:rounded-xl blur-sm opacity-30"></div>
+                                <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl p-1.5 sm:p-2 lg:p-3 mr-2 sm:mr-3 shadow-lg">
+                                    <Home className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
+                                </div>
+                            </div>
+                            <div>
+                                <span className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                    <span className="hidden sm:inline">Mosque Finder</span>
+                                    <span className="sm:hidden">Masjid</span>
+                                </span>
+                                <p className="text-xs text-green-600 font-medium hidden lg:block">Find Your Spiritual Home</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+                            <Link
+                                to="/admin/login"
+                                className="group relative bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                            >
+                                <div className="flex items-center">
+                                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-200" />
+                                    <span className="hidden sm:inline">Admin Login</span>
+                                    <span className="sm:hidden">Admin</span>
+                                </div>
+                                <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                            </Link>
                         </div>
                     </div>
                 </div>
             </nav>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-                {/* Hero Header */}
-                <div className="text-center mb-12 sm:mb-16">
-                    <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full text-sm font-medium text-blue-800 mb-6">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Discover Your Spiritual Community
+            <div className="max-w-7xl mx-auto px-1 sm:px-3 lg:px-6 py-2 sm:py-4 lg:py-8">
+                {/* Modern Islamic Hero Header */}
+                <div className="relative text-center mb-4 sm:mb-6 lg:mb-12">
+                    {/* 3D Background Effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 via-emerald-100/10 to-teal-100/20 rounded-2xl blur-3xl"></div>
+                    <div className="absolute -top-4 -right-4 sm:-top-8 sm:-right-8 w-16 h-16 sm:w-32 sm:h-32 bg-gradient-to-br from-green-200/30 to-transparent rounded-full blur-2xl"></div>
+                    <div className="absolute -bottom-4 -left-4 sm:-bottom-8 sm:-left-8 w-12 h-12 sm:w-24 sm:h-24 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-xl"></div>
+
+                    <div className="relative z-10 p-2 sm:p-4 lg:p-6">
+                        {/* Islamic Badge */}
+                        <div className="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 bg-gradient-to-r from-green-100 via-emerald-100 to-teal-100 border-2 border-green-200/50 rounded-full text-xs sm:text-sm lg:text-base font-semibold text-green-800 mb-2 sm:mb-4 lg:mb-6 shadow-lg backdrop-blur-sm">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-20"></div>
+                                <MapPin className="relative w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-600" />
+                            </div>
+                            <span className="hidden sm:inline">Discover Your Spiritual Community</span>
+                            <span className="sm:hidden">Find Your Masjid</span>
+                        </div>
+
+                        {/* Main Title */}
+                        <h1 className="text-xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-2 sm:mb-4 lg:mb-6 leading-tight">
+                            <span className="block mb-1 sm:mb-2">
+                                <span className="hidden sm:inline">Find Your Local </span>
+                                <span className="sm:hidden">Find </span>
+                            </span>
+                            <span className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent font-extrabold">
+                                <span className="hidden sm:inline">Mosque</span>
+                                <span className="sm:hidden">Masjid</span>
+                            </span>
+                        </h1>
+
+                        {/* Subtitle */}
+                        <p className="text-xs sm:text-base lg:text-lg xl:text-xl text-gray-600 leading-relaxed max-w-2xl lg:max-w-3xl mx-auto mb-3 sm:mb-6 lg:mb-8 px-2">
+                            <span className="hidden sm:inline">Connect with mosques in your area, check accurate prayer times, and join your Islamic community.</span>
+                            <span className="sm:hidden">Connect with local mosques and prayer times</span>
+                        </p>
+
+                        {/* Stats or Features */}
+                        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 text-xs sm:text-sm text-green-700">
+                            <div className="flex items-center bg-green-50 px-2 sm:px-3 py-1 rounded-full border border-green-200">
+                                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-600" />
+                                <span className="hidden sm:inline">Prayer Times</span>
+                                <span className="sm:hidden">Times</span>
+                            </div>
+                            <div className="flex items-center bg-emerald-50 px-2 sm:px-3 py-1 rounded-full border border-emerald-200">
+                                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-emerald-600" />
+                                <span className="hidden sm:inline">Community</span>
+                                <span className="sm:hidden">Community</span>
+                            </div>
+                            <div className="flex items-center bg-teal-50 px-2 sm:px-3 py-1 rounded-full border border-teal-200">
+                                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-teal-600" />
+                                <span className="hidden sm:inline">Locations</span>
+                                <span className="sm:hidden">Near You</span>
+                            </div>
+                        </div>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                        <span className="block">Find Your Local</span>
-                        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Mosque</span>
-                    </h1>
-                    <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto mb-8">
-                        Connect with mosques in your area, check accurate prayer times, and join your Islamic community.
-                    </p>
                 </div>
 
-                {/* Enhanced Search Bar */}
-                <div className="max-w-4xl mx-auto mb-12">
-                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/20">
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Search mosques by name, location, or area..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="block w-full pl-12 pr-4 py-4 text-lg bg-white/90 border border-gray-200/50 rounded-xl leading-5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-lg"
-                            />
-                            {searchTerm && (
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                                    <button
-                                        onClick={() => setSearchTerm('')}
-                                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
+                {/* Modern Islamic Search Bar */}
+                <div className="max-w-4xl mx-auto mb-3 sm:mb-6 lg:mb-12">
+                    <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-2 sm:p-4 lg:p-6 shadow-2xl">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                        <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                        <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                        <div className="relative z-10">
+                            <div className="relative group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 rounded-lg sm:rounded-xl blur-sm group-focus-within:blur-md transition-all duration-300"></div>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 lg:pl-4 flex items-center pointer-events-none">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full blur-sm opacity-30"></div>
+                                            <Search className="relative h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-green-600 group-focus-within:text-emerald-600 group-focus-within:scale-110 transition-all duration-300" />
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search mosques by name, location..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="block w-full pl-8 sm:pl-10 lg:pl-12 pr-8 sm:pr-10 lg:pr-12 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg bg-white/90 backdrop-blur-sm border-2 border-gray-200/50 rounded-lg sm:rounded-xl leading-5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 focus:bg-white transition-all duration-300 shadow-lg font-medium"
+                                    />
+                                    {searchTerm && (
+                                        <div className="absolute inset-y-0 right-0 pr-2 sm:pr-3 lg:pr-4 flex items-center">
+                                            <button
+                                                onClick={() => setSearchTerm('')}
+                                                className="group/btn relative bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white p-1 sm:p-1.5 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg"
+                                            >
+                                                <X className="h-3 w-3 sm:h-4 sm:w-4 group-hover/btn:rotate-90 transition-transform duration-300" />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Search Tips */}
+                            <div className="mt-2 sm:mt-3 flex flex-wrap justify-center gap-1 sm:gap-2 text-xs text-gray-600">
+                                <span className="hidden sm:inline-flex items-center bg-gray-100 px-2 py-1 rounded-full">
+                                    <Filter className="w-3 h-3 mr-1 text-gray-500" />
+                                    Try: 'Farida Masjid or Hira masjid'
+                                </span>
+                                <span className="sm:hidden flex items-center bg-gray-100 px-2 py-1 rounded-full">
+                                    <Filter className="w-3 h-3 mr-1 text-gray-500" />
+                                    Try: mosque name or area
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Loading State */}
+                {/* Modern Islamic Loading State */}
                 {loading && (
-                    <div className="text-center py-16">
-                        <div className="relative">
-                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
+                    <div className="relative text-center py-6 sm:py-12 lg:py-16">
+                        <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-2xl max-w-md mx-auto">
+                            {/* 3D Background Effects */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                            <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                            <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                            <div className="relative z-10">
+                                {/* Loading Spinner */}
+                                <div className="relative mb-3 sm:mb-4 lg:mb-6">
+                                    <div className="inline-block animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-4 border-green-200 border-t-green-600 shadow-lg"></div>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full blur-sm opacity-30"></div>
+                                            <Home className="relative w-4 h-4 sm:w-6 sm:h-6 text-green-600 animate-pulse" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Loading Text */}
+                                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-800 mb-1 sm:mb-2">
+                                    <span className="hidden sm:inline">Discovering mosques in your area...</span>
+                                    <span className="sm:hidden">Finding mosques...</span>
+                                </h3>
+                                <p className="text-xs sm:text-sm text-green-600 mb-2 sm:mb-4">Please wait while we search</p>
+
+                                {/* Loading Dots */}
+                                <div className="flex justify-center space-x-1">
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full animate-bounce shadow-sm"></div>
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0.1s' }}></div>
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-teal-500 to-green-600 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0.2s' }}></div>
+                                </div>
                             </div>
-                        </div>
-                        <p className="mt-6 text-lg text-gray-600 font-medium">Discovering mosques in your area...</p>
-                        <div className="mt-4 flex justify-center space-x-1">
-                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                     </div>
                 )}
 
-                {/* Error State */}
+                {/* Modern Islamic Error State */}
                 {error && (
-                    <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200/50 rounded-2xl p-6 sm:p-8 mb-8 shadow-lg">
-                        <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                                <div className="bg-red-500 rounded-xl p-2">
-                                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                    </svg>
+                    <div className="relative bg-gradient-to-br from-white via-red-50/50 to-rose-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 shadow-2xl">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                        <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-red-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                        <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-rose-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center">
+                            <div className="flex-shrink-0 mb-3 sm:mb-0 sm:mr-4">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-rose-600 rounded-xl blur-sm opacity-30"></div>
+                                    <div className="relative bg-gradient-to-r from-red-500 to-rose-600 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-lg">
+                                        <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="ml-4">
-                                <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Mosques</h3>
-                                <p className="text-red-700 mb-4">{error}</p>
+                            <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-red-800 mb-1 sm:mb-2">
+                                    <span className="hidden sm:inline">Unable to Load Mosques</span>
+                                    <span className="sm:hidden">Loading Error</span>
+                                </h3>
+                                <p className="text-xs sm:text-sm text-red-700 mb-2 sm:mb-3 lg:mb-4">
+                                    <span className="hidden sm:inline">{error}</span>
+                                    <span className="sm:hidden">Please try again</span>
+                                </p>
                                 <button
                                     onClick={() => fetchMosques(searchTerm, pagination.page)}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                                    className="group relative bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-semibold px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                                 >
-                                    Try Again
+                                    <div className="flex items-center">
+                                        <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:rotate-180 transition-transform duration-500" />
+                                        <span>Try Again</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Results Section */}
+                {/* Modern Islamic Results Section */}
                 {!loading && !error && (
                     <>
                         {mosques.length > 0 ? (
                             <>
-                                {/* Results Header */}
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 bg-white/60 backdrop-blur-lg rounded-xl p-4 sm:p-6 border border-white/20">
-                                    <div>
-                                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                                            {searchTerm ? `Search Results for "${searchTerm}"` : 'All Mosques'}
-                                        </h2>
-                                        <p className="text-gray-600">
-                                            Found {pagination.total} mosque{pagination.total !== 1 ? 's' : ''}
-                                            {searchTerm && ' matching your search'}
-                                        </p>
-                                    </div>
-                                    <div className="mt-4 sm:mt-0 flex items-center space-x-2 text-sm text-gray-500">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                        </svg>
-                                        <span>Page {pagination.page} of {totalPages}</span>
+                                {/* Modern Results Header */}
+                                <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 mb-3 sm:mb-6 lg:mb-8 shadow-xl">
+                                    {/* 3D Background Effects */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                                    <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                                    <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                                    <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                                        <div className="flex-1 mb-2 sm:mb-0">
+                                            <h2 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center">
+                                                <div className="relative mr-2 sm:mr-3">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full blur-sm opacity-30"></div>
+                                                    <MapPin className="relative w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-600" />
+                                                </div>
+                                                <span className="bg-gradient-to-r from-gray-800 via-green-700 to-emerald-700 bg-clip-text text-transparent">
+                                                    {searchTerm ? (
+                                                        <>
+                                                            <span className="hidden sm:inline">Search Results for </span>
+                                                            <span className="sm:hidden">Results: </span>
+                                                            <span className="font-extrabold">"{searchTerm.length > 10 ? `${searchTerm.substring(0, 10)}...` : searchTerm}"</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <span className="hidden sm:inline">All Mosques</span>
+                                                            <span className="sm:hidden">All Masjids</span>
+                                                        </>
+                                                    )}
+                                                </span>
+                                            </h2>
+                                            <p className="text-xs sm:text-sm lg:text-base text-gray-600 flex items-center">
+                                                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                                                <span className="hidden sm:inline">
+                                                    Found {pagination.total} mosque{pagination.total !== 1 ? 's' : ''}
+                                                    {searchTerm && ' matching your search'}
+                                                </span>
+                                                <span className="sm:hidden">
+                                                    {pagination.total} found
+                                                </span>
+                                            </p>
+                                        </div>
+
+                                        {/* Page Info Badge */}
+                                        <div className="mt-2 sm:mt-0 flex items-center">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg blur-sm opacity-30"></div>
+                                                <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-semibold text-xs sm:text-sm shadow-lg">
+                                                    <div className="flex items-center space-x-1 sm:space-x-2">
+                                                        <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                        <span className="hidden sm:inline">Page {pagination.page} of {totalPages}</span>
+                                                        <span className="sm:hidden">{pagination.page}/{totalPages}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -232,29 +431,45 @@ const MosqueFinderPage: React.FC = () => {
                                             name={mosque.name}
                                             location={mosque.location}
                                             description={mosque.description}
+                                            isFavorited={favorites.includes(mosque.id)}
+                                            onToggleFavorite={toggleFavorite}
                                         />
                                     ))}
                                 </div>
 
-                                {/* Enhanced Pagination */}
+                                {/* Modern Islamic Pagination */}
                                 {totalPages > 1 && (
-                                    <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-                                        <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-                                            <div className="text-sm text-gray-600">
-                                                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+                                    <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 shadow-2xl">
+                                        {/* 3D Background Effects */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                                        <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                                        <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                                        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+                                            {/* Results Info */}
+                                            <div className="text-xs sm:text-sm text-gray-600 flex items-center order-2 sm:order-1">
+                                                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-600" />
+                                                <span className="hidden sm:inline">
+                                                    Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+                                                </span>
+                                                <span className="sm:hidden">
+                                                    {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+                                                </span>
                                             </div>
-                                            <div className="flex items-center space-x-2">
+
+                                            {/* Pagination Controls */}
+                                            <div className="flex items-center space-x-1 sm:space-x-2 order-1 sm:order-2">
+                                                {/* Previous Button */}
                                                 <button
                                                     onClick={() => handlePageChange(pagination.page - 1)}
                                                     disabled={pagination.page === 1}
-                                                    className="flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white/80 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                                                    className="group relative flex items-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white/80 backdrop-blur-sm border-2 border-gray-300 rounded-lg sm:rounded-xl hover:bg-green-50 hover:border-green-400 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:hover:scale-100"
                                                 >
-                                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                                                    </svg>
-                                                    Previous
+                                                    <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1 group-hover:-translate-x-0.5 transition-transform duration-200" />
+                                                    <span className="hidden sm:inline">Prev</span>
                                                 </button>
 
+                                                {/* Page Numbers */}
                                                 <div className="hidden sm:flex items-center space-x-1">
                                                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                                         const page = i + Math.max(1, pagination.page - 2);
@@ -264,26 +479,33 @@ const MosqueFinderPage: React.FC = () => {
                                                             <button
                                                                 key={page}
                                                                 onClick={() => handlePageChange(page)}
-                                                                className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${pagination.page === page
-                                                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                                                                    : 'text-gray-700 bg-white/80 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm'
+                                                                className={`group relative px-3 py-2 text-sm font-bold rounded-lg transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg ${pagination.page === page
+                                                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
+                                                                    : 'text-gray-700 bg-white/80 border-2 border-gray-300 hover:bg-green-50 hover:border-green-400 hover:text-green-700'
                                                                     }`}
                                                             >
-                                                                {page}
+                                                                <span className="relative z-10">{page}</span>
+                                                                {pagination.page === page && (
+                                                                    <div className="absolute inset-0 bg-white/20 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                                                )}
                                                             </button>
                                                         );
                                                     })}
                                                 </div>
 
+                                                {/* Mobile Page Indicator */}
+                                                <div className="sm:hidden flex items-center px-2 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 rounded-lg">
+                                                    <span className="text-xs font-semibold text-green-700">{pagination.page}/{totalPages}</span>
+                                                </div>
+
+                                                {/* Next Button */}
                                                 <button
                                                     onClick={() => handlePageChange(pagination.page + 1)}
                                                     disabled={pagination.page === totalPages}
-                                                    className="flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white/80 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                                                    className="group relative flex items-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white/80 backdrop-blur-sm border-2 border-gray-300 rounded-lg sm:rounded-xl hover:bg-green-50 hover:border-green-400 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:hover:scale-100"
                                                 >
-                                                    Next
-                                                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                                    </svg>
+                                                    <span className="hidden sm:inline">Next</span>
+                                                    <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-0 sm:ml-1 group-hover:translate-x-0.5 transition-transform duration-200" />
                                                 </button>
                                             </div>
                                         </div>
@@ -291,62 +513,153 @@ const MosqueFinderPage: React.FC = () => {
                                 )}
                             </>
                         ) : (
-                            <div className="text-center py-16">
-                                <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-white/20 shadow-lg max-w-lg mx-auto">
-                                    <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                                        <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
+                            <div className="text-center py-4 sm:py-8 lg:py-16">
+                                <div className="relative bg-gradient-to-br from-white via-gray-50/50 to-green-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-8 lg:p-12 shadow-2xl max-w-sm sm:max-w-lg mx-auto">
+                                    {/* 3D Background Effects */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                                    <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                                    <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-green-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                                    <div className="relative z-10">
+                                        <div className="relative mb-3 sm:mb-4 lg:mb-6">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full blur-md opacity-30"></div>
+                                            <div className="relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-full w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 flex items-center justify-center mx-auto shadow-lg">
+                                                <Search className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-gray-500" />
+                                            </div>
+                                        </div>
+
+                                        <h3 className="text-sm sm:text-base lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2 lg:mb-3">
+                                            {searchTerm ? (
+                                                <>
+                                                    <span className="hidden sm:inline">No Mosques Found</span>
+                                                    <span className="sm:hidden">No Results</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="hidden sm:inline">No Mosques Available</span>
+                                                    <span className="sm:hidden">None Available</span>
+                                                </>
+                                            )}
+                                        </h3>
+
+                                        <p className="text-xs sm:text-sm lg:text-base text-gray-600 mb-3 sm:mb-4 lg:mb-6 px-2">
+                                            {searchTerm ? (
+                                                <>
+                                                    <span className="hidden sm:inline">Try adjusting your search terms or browse all available mosques.</span>
+                                                    <span className="sm:hidden">Try different search terms</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="hidden sm:inline">No mosques are currently registered in our database.</span>
+                                                    <span className="sm:hidden">No mosques registered yet</span>
+                                                </>
+                                            )}
+                                        </p>
+
+                                        {searchTerm && (
+                                            <button
+                                                onClick={() => setSearchTerm('')}
+                                                className="group relative bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                            >
+                                                <div className="flex items-center">
+                                                    <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                                                    <span className="hidden sm:inline">Clear Search</span>
+                                                    <span className="sm:hidden">Clear</span>
+                                                </div>
+                                                <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                            </button>
+                                        )}
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">
-                                        {searchTerm ? 'No Mosques Found' : 'No Mosques Available'}
-                                    </h3>
-                                    <p className="text-gray-600 mb-6">
-                                        {searchTerm
-                                            ? 'Try adjusting your search terms or browse all available mosques.'
-                                            : 'No mosques are currently registered in our database.'
-                                        }
-                                    </p>
-                                    {searchTerm && (
-                                        <button
-                                            onClick={() => setSearchTerm('')}
-                                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                        >
-                                            Clear Search
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         )}
                     </>
                 )}
 
-                {/* Navigation Footer */}
-                <div className="text-center mt-16">
-                    <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-lg">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">Need Help Finding Your Mosque?</h3>
-                        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                            Can't find your local mosque? We're constantly adding new locations to help connect the Islamic community.
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                            <Link
-                                to="/"
-                                className="inline-flex items-center text-blue-600 hover:text-blue-500 font-medium px-6 py-3 rounded-lg hover:bg-blue-50 transition-all duration-200"
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                </svg>
-                                Back to Home
-                            </Link>
-                            <Link
-                                to="/"
-                                className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                            >
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Register Your Mosque
-                            </Link>
+                {/* Modern Islamic Footer */}
+                <div className="text-center mt-4 sm:mt-8 lg:mt-16">
+                    <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-2xl">
+                        {/* 3D Background Effects */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-2xl"></div>
+                        <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
+                        <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
+
+                        <div className="relative z-10">
+                            {/* Header */}
+                            <div className="mb-3 sm:mb-4 lg:mb-6">
+                                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center justify-center">
+                                    <div className="relative mr-2 sm:mr-3">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full blur-sm opacity-30"></div>
+                                        <Heart className="relative w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-600" />
+                                    </div>
+                                    <span className="bg-gradient-to-r from-gray-800 via-green-700 to-emerald-700 bg-clip-text text-transparent">
+                                        <span className="hidden sm:inline">Help Improve Our App</span>
+                                        <span className="sm:hidden">Improve App</span>
+                                    </span>
+                                </h3>
+                                <p className="text-xs sm:text-sm lg:text-base text-gray-600 max-w-xl sm:max-w-2xl mx-auto px-2">
+                                    <span className="hidden sm:inline">Report issues or share your ideas to make the mosque finder better for everyone.</span>
+                                    <span className="sm:hidden">Help us make this app better for all Muslims</span>
+                                </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 lg:gap-4">
+                                {/* Report Issues */}
+                                <a
+                                    href="YOUR_GOOGLE_FORM_LINK_HERE"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative w-full sm:w-auto bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <Flag className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                        <span className="hidden sm:inline">Report Issues</span>
+                                        <span className="sm:hidden">Report</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                </a>
+
+                                {/* WhatsApp Share Ideas */}
+                                <a
+                                    href="https://wa.me/923442390406"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <SiWhatsapp className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                        <span className="hidden sm:inline">Share Ideas</span>
+                                        <span className="sm:hidden">Ideas</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                </a>
+
+                                {/* Website Feedback */}
+                                <a
+                                    href="YOUR_FEEDBACK_FORM_LINK_HERE"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                        <span className="hidden sm:inline">Website Feedback</span>
+                                        <span className="sm:hidden">Feedback</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                                </a>
+                            </div>
+
+                            {/* Islamic Footer Note */}
+                            <div className="mt-3 sm:mt-4 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-green-200/50">
+                                <p className="text-xs text-green-600 flex items-center justify-center">
+                                    <Star className="w-3 h-3 mr-1 text-green-500" />
+                                    <span className="hidden sm:inline">Serving the Muslim Community with Technology</span>
+                                    <span className="sm:hidden">Serving Muslims</span>
+                                    <Star className="w-3 h-3 ml-1 text-green-500" />
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

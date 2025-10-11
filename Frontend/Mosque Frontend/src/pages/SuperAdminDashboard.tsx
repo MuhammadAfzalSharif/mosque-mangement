@@ -181,11 +181,11 @@ const SuperAdminDashboard: React.FC = () => {
         }
     });
 
-    const fetchStats = useCallback(async () => {
+    const fetchStats = useCallback(async (isInitialLoad = false) => {
         try {
             // Don't show loading spinner for background updates
             // Only show loading on initial load
-            if (!stats) {
+            if (isInitialLoad) {
                 setLoading(true);
             } else {
                 setIsRefreshing(true);
@@ -197,17 +197,17 @@ const SuperAdminDashboard: React.FC = () => {
         } catch (err) {
             console.error('Failed to fetch stats:', err);
             // Only set error on initial load, not background updates
-            if (!stats) {
+            if (isInitialLoad) {
                 setError(getErrorMessage(err));
             }
         } finally {
             setLoading(false);
             setIsRefreshing(false);
         }
-    }, [stats]);
+    }, []);
 
     // Toggle auto-refresh functionality
-    const toggleAutoRefresh = () => {
+    const toggleAutoRefresh = useCallback(() => {
         if (isAutoRefreshEnabled) {
             // Stop auto-refresh
             if (autoRefreshIntervalRef.current) {
@@ -220,11 +220,11 @@ const SuperAdminDashboard: React.FC = () => {
             // Start auto-refresh
             setIsAutoRefreshEnabled(true);
             autoRefreshIntervalRef.current = setInterval(() => {
-                fetchStats();
+                fetchStats(false);
             }, 30000); // 30 seconds
             setToast({ show: true, type: 'success', message: 'Auto-refresh enabled - updates every 30 seconds' });
         }
-    };
+    }, [isAutoRefreshEnabled, fetchStats]);
 
     useEffect(() => {
         // Check if super admin is logged in
@@ -236,12 +236,8 @@ const SuperAdminDashboard: React.FC = () => {
             return;
         }
 
-        fetchStats();
-
-        // Start auto-refresh by default (30 seconds)
-        autoRefreshIntervalRef.current = setInterval(() => {
-            fetchStats();
-        }, 30000); // 30 seconds
+        // Initial fetch
+        fetchStats(true);
 
         // Cleanup interval on component unmount
         return () => {
@@ -252,13 +248,35 @@ const SuperAdminDashboard: React.FC = () => {
 
     }, [navigate, fetchStats]);
 
+    // Separate effect to handle auto-refresh setup
+    useEffect(() => {
+        if (isAutoRefreshEnabled && stats) {
+            // Start auto-refresh only if enabled and after initial load
+            autoRefreshIntervalRef.current = setInterval(() => {
+                fetchStats(false);
+            }, 30000); // 30 seconds
+        } else {
+            // Clear interval if auto-refresh is disabled
+            if (autoRefreshIntervalRef.current) {
+                clearInterval(autoRefreshIntervalRef.current);
+                autoRefreshIntervalRef.current = null;
+            }
+        }
+
+        return () => {
+            if (autoRefreshIntervalRef.current) {
+                clearInterval(autoRefreshIntervalRef.current);
+            }
+        };
+    }, [isAutoRefreshEnabled, stats, fetchStats]);
+
     // Handler functions for pending requests
     const handleApproveAdmin = async (id: string, notes?: string) => {
         try {
             console.log('Approving admin ID:', id, 'with notes:', notes);
             const response = await superAdminApi.approveAdmin(id, { super_admin_notes: notes });
             console.log('Approval response:', response);
-            await fetchStats(); // Refresh stats
+            await fetchStats(false); // Refresh stats
             setToast({ show: true, type: 'success', message: 'Admin approved successfully!' });
         } catch (err) {
             console.error('Failed to approve admin:', err);
@@ -273,7 +291,7 @@ const SuperAdminDashboard: React.FC = () => {
             console.log('Rejecting admin ID:', id, 'with reason:', reason);
             const response = await superAdminApi.rejectAdmin(id, { reason });
             console.log('Rejection response:', response);
-            await fetchStats(); // Refresh stats
+            await fetchStats(false); // Refresh stats
             setToast({ show: true, type: 'success', message: 'Admin rejected successfully!' });
         } catch (err) {
             console.error('Failed to reject admin:', err);
@@ -552,7 +570,7 @@ const SuperAdminDashboard: React.FC = () => {
     const renderActiveTab = () => {
         switch (activeTab) {
             case 'dashboard':
-                return <DashboardOverview stats={stats} onRefresh={fetchStats} />;
+                return <DashboardOverview stats={stats} onRefresh={() => fetchStats(false)} />;
             case 'pending':
                 return (
                     <PendingRequests
@@ -673,7 +691,7 @@ const SuperAdminDashboard: React.FC = () => {
             case 'superadmin':
                 return <SuperAdminManagement />;
             default:
-                return <DashboardOverview stats={stats} onRefresh={fetchStats} />;
+                return <DashboardOverview stats={stats} onRefresh={() => fetchStats(false)} />;
         }
     };
 
@@ -694,7 +712,7 @@ const SuperAdminDashboard: React.FC = () => {
                 {/* Universal Toggle Button - Works for all screen sizes */}
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="fixed top-2 left-2 z-[10000] bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    className="fixed top-3 left-3 z-[10000] bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}
                 >
                     {isSidebarOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
@@ -716,45 +734,35 @@ const SuperAdminDashboard: React.FC = () => {
                     transition-all duration-300 ease-in-out overflow-hidden
                     flex flex-col
                 `}>
-                    {/* Header Section */}
-                    <div className={`${isSidebarOpen ? 'pt-12 sm:pt-14' : 'pt-16 sm:pt-18 lg:pt-20'} p-3 sm:p-4 lg:p-6 border-b border-gray-200 flex-shrink-0`}>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg mr-2 sm:mr-3">
-                                    <FaBuilding className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h1 className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                        Super Admin
-                                    </h1>
-                                    <p className="text-gray-600 text-xs sm:text-sm lg:text-sm mt-0.5 sm:mt-1 hidden sm:block">Mosque Management System</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-1 sm:space-x-2">
-                                {isRefreshing && (
-                                    <div className="flex items-center text-blue-600" title="Auto-refreshing stats...">
-                                        <Activity className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                                    </div>
-                                )}
+                    {/* Header Section - Simplified without logo and text */}
+                    <div className={`${isSidebarOpen ? 'pt-16 sm:pt-18' : 'pt-16 sm:pt-18 lg:pt-20'} p-4 sm:p-5 lg:p-6 border-b border-gray-200 flex-shrink-0`}>
+                        <div className="flex flex-col items-center space-y-4">
+                            {/* Auto-refresh Toggle Button */}
+                            <div className="flex items-center justify-center">
                                 <button
                                     onClick={toggleAutoRefresh}
-                                    className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${isAutoRefreshEnabled
-                                        ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                    title={isAutoRefreshEnabled ? 'Disable auto-refresh' : 'Enable auto-refresh (30s intervals)'}
+                                    className={`
+                                        relative p-3 sm:p-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2
+                                        ${isAutoRefreshEnabled
+                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white focus:ring-green-500'
+                                            : 'bg-gradient-to-r from-gray-500 to-slate-600 hover:from-gray-600 hover:to-slate-700 text-white focus:ring-gray-500'
+                                        }
+                                    `}
+                                    title={isAutoRefreshEnabled ? 'Click to disable auto-refresh' : 'Click to enable auto-refresh (30s intervals)'}
                                 >
-                                    <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    {/* Status indicator dot */}
+                                    <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${isAutoRefreshEnabled ? 'bg-green-300 animate-pulse' : 'bg-gray-300'}`}></span>
                                 </button>
                             </div>
-                        </div>
 
-                        {/* Real-time Status Indicator */}
-                        <div className="flex items-center mt-2 sm:mt-3 lg:mt-4">
-                            <div className={`w-2 h-2 rounded-full mr-2 ${isRefreshing ? 'bg-yellow-400 animate-pulse' : isAutoRefreshEnabled ? 'bg-green-400' : 'bg-gray-400'}`}></div>
-                            <span className="text-xs text-gray-500">
-                                {isRefreshing ? 'Updating...' : isAutoRefreshEnabled ? 'Live Dashboard (Auto)' : 'Live Dashboard'}
-                            </span>
+                            {/* Status Text */}
+                            <div className="flex items-center space-x-2">
+                                <div className={`w-2.5 h-2.5 rounded-full ${isRefreshing ? 'bg-yellow-400 animate-pulse' : isAutoRefreshEnabled ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+                                <span className="text-sm font-medium text-gray-600">
+                                    {isRefreshing ? 'Updating Dashboard...' : isAutoRefreshEnabled ? 'Auto Refresh ON' : 'Auto Refresh OFF'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -823,7 +831,7 @@ const SuperAdminDashboard: React.FC = () => {
                     flex-1 min-h-screen transition-all duration-300 ease-in-out
                     ${isSidebarOpen ? 'lg:ml-80 xl:ml-80' : 'ml-0'}
                 `}>
-                    <div className={`h-screen overflow-y-auto p-2 sm:p-3 lg:p-6 ${isSidebarOpen ? 'pt-12 sm:pt-14 lg:pt-6' : 'pt-20 sm:pt-22 lg:pt-16'}`}>
+                    <div className={`h-screen overflow-y-auto p-2 sm:p-3 lg:p-6 ${isSidebarOpen ? 'pt-16 sm:pt-18 lg:pt-6' : 'pt-20 sm:pt-22 lg:pt-16'}`}>
                         {error && (
                             <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                                 <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>

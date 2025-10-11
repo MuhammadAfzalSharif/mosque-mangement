@@ -131,20 +131,20 @@ const SuperAdminRegisterPage: React.FC = () => {
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-20">
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full filter blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
+                    <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+                    <div className="absolute bottom-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full filter blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
                 </div>
 
-                <div className="relative z-10 container mx-auto px-4 py-16">
-                    <div className="max-w-lg mx-auto">
-                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                                <Shield className="w-10 h-10 text-white" />
+                <div className="relative z-10 container mx-auto px-2 sm:px-4 py-8 sm:py-16">
+                    <div className="max-w-sm sm:max-w-lg mx-auto">
+                        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 text-center">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+                                <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
+                            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2 sm:mb-3">
                                 Super Admin Registered Successfully!
                             </h2>
-                            <p className="text-gray-600 mb-8 leading-relaxed">
+                            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                                 Redirecting to login page...
                             </p>
                         </div>
@@ -162,107 +162,112 @@ const SuperAdminRegisterPage: React.FC = () => {
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full filter blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 py-8">
+            <div className="relative z-10 container mx-auto px-2 sm:px-4 py-4 sm:py-8">
                 {/* Navigation */}
-                <div className="mb-8">
+                <div className="mb-4 sm:mb-8">
                     <Link
-                        to="/"
-                        className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl text-blue-600 hover:text-blue-700 font-medium transition-all duration-300 hover:bg-white/90 shadow-lg"
+                        to="/mosques"
+                        className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-lg border border-white/20 rounded-lg sm:rounded-xl text-blue-600 hover:text-blue-700 font-medium transition-all duration-300 hover:bg-white/90 shadow-lg text-sm sm:text-base"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Home
+                        <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Back to Home</span>
+                        <span className="sm:hidden">Back</span>
                     </Link>
                 </div>
 
-                <div className="max-w-lg mx-auto">
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-                            Super Admin Registration
+                <div className="max-w-sm sm:max-w-lg mx-auto">
+                    <div className="text-center mb-6 sm:mb-12">
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2 sm:mb-4">
+                            <span className="hidden sm:inline">Super Admin Registration</span>
+                            <span className="sm:hidden">Super Admin</span>
                         </h1>
-                        <p className="text-xl text-gray-600 leading-relaxed">
-                            Create your super admin account to manage the mosque system
+                        <p className="text-sm sm:text-xl text-gray-600 leading-relaxed px-2">
+                            <span className="hidden sm:inline">Create your super admin account to manage the mosque system</span>
+                            <span className="sm:hidden">Create your account</span>
                         </p>
                     </div>
 
-                    <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
+                    <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8">
                         {/* Error Message */}
                         {error && (
-                            <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4 mb-6">
-                                <p className="text-red-700 font-medium">{error}</p>
+                            <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                                <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>
                             </div>
                         )}
 
-                        <form onSubmit={form.handleSubmit(handleRegister)} className="space-y-6">
+                        <form onSubmit={form.handleSubmit(handleRegister)} className="space-y-4 sm:space-y-6">
                             <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                    <User className="w-4 h-4 mr-2 text-blue-600" />
-                                    Full Name
+                                <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                                    <span className="hidden sm:inline">Full Name</span>
+                                    <span className="sm:hidden">Name</span>
                                 </label>
                                 <input
                                     {...form.register('name')}
                                     type="text"
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100 text-sm sm:text-base"
                                     placeholder="Enter your full name"
                                 />
                                 {form.formState.errors.name && (
-                                    <p className="text-red-500 text-sm mt-2 font-medium">
+                                    <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
                                         {form.formState.errors.name.message}
                                     </p>
                                 )}
                             </div>
                             <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                    <Mail className="w-4 h-4 mr-2 text-blue-600" />
-                                    Email Address
+                                <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                                    <span className="hidden sm:inline">Email Address</span>
+                                    <span className="sm:hidden">Email</span>
                                 </label>
                                 <input
                                     {...form.register('email')}
                                     type="email"
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100 text-sm sm:text-base"
                                     placeholder="Enter your email"
                                 />
                                 {form.formState.errors.email && (
-                                    <p className="text-red-500 text-sm mt-2 font-medium">
+                                    <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
                                         {form.formState.errors.email.message}
                                     </p>
                                 )}
                             </div>
 
                             <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                    <Lock className="w-4 h-4 mr-2 text-blue-600" />
+                                <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                    <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
                                     Password
                                 </label>
                                 <div className="relative">
                                     <input
                                         {...form.register('password')}
                                         type={showPassword ? 'text' : 'password'}
-                                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                        className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100 text-sm sm:text-base"
                                         placeholder="Create a secure password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
                                     >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        {showPassword ? <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" /> : <Eye className="w-3 h-3 sm:w-4 sm:h-4" />}
                                     </button>
                                 </div>
                                 {password && (
-                                    <div className="mt-2">
-                                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                    <div className="mt-2 sm:mt-3">
+                                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600 mb-1">
                                             <span>Strength: {passwordStrength.label}</span>
                                             <span>{passwordStrength.strength}/4</span>
                                         </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                                             <div
-                                                className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                                                className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                                                 style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
                                             ></div>
                                         </div>
                                         {!passwordStrength.canSubmit && (
                                             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                                                <p className="text-red-700 text-xs font-medium">
+                                                <p className="text-red-700 text-xs sm:text-sm font-medium">
                                                     Password must include: lowercase letters, uppercase letters, numbers, and special characters
                                                 </p>
                                             </div>
@@ -270,41 +275,42 @@ const SuperAdminRegisterPage: React.FC = () => {
                                     </div>
                                 )}
                                 {form.formState.errors.password && (
-                                    <p className="text-red-500 text-sm mt-2 font-medium">
+                                    <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
                                         {form.formState.errors.password.message}
                                     </p>
                                 )}
-                                <p className="mt-1 text-xs text-gray-500">
+                                <p className="mt-1 text-xs sm:text-sm text-gray-500">
                                     Must include lowercase, uppercase, numbers, and special characters
                                 </p>
                             </div>
 
                             <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                                    <Lock className="w-4 h-4 mr-2 text-blue-600" />
-                                    Confirm Password
+                                <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                    <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                                    <span className="hidden sm:inline">Confirm Password</span>
+                                    <span className="sm:hidden">Confirm</span>
                                 </label>
                                 <div className="relative">
                                     <input
                                         {...form.register('confirm_password')}
                                         type={showConfirmPassword ? 'text' : 'password'}
-                                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100"
+                                        className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 hover:bg-gray-100 text-sm sm:text-base"
                                         placeholder="Confirm your password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
                                     >
-                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        {showConfirmPassword ? <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" /> : <Eye className="w-3 h-3 sm:w-4 sm:h-4" />}
                                     </button>
                                 </div>
                                 {form.formState.errors.confirm_password && (
-                                    <p className="text-red-500 text-sm mt-2 font-medium">
+                                    <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
                                         {form.formState.errors.confirm_password.message}
                                     </p>
                                 )}
-                                <p className="mt-1 text-xs text-gray-500">
+                                <p className="mt-1 text-xs sm:text-sm text-gray-500">
                                     Must match the password entered above
                                 </p>
                             </div>
@@ -312,14 +318,15 @@ const SuperAdminRegisterPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={loading || !passwordStrength.canSubmit}
-                                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none shadow-lg"
+                                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none shadow-lg text-sm sm:text-base"
                             >
-                                {loading ? 'Creating Account...' : 'Create Super Admin Account'}
+                                <span className="hidden sm:inline">{loading ? 'Creating Account...' : 'Create Super Admin Account'}</span>
+                                <span className="sm:hidden">{loading ? 'Creating...' : 'Create Account'}</span>
                             </button>
                         </form>
 
-                        <div className="mt-6 text-center">
-                            <p className="text-gray-600">
+                        <div className="mt-4 sm:mt-6 text-center">
+                            <p className="text-xs sm:text-sm text-gray-600">
                                 Already have an account?{' '}
                                 <Link
                                     to="/superadmin/login"

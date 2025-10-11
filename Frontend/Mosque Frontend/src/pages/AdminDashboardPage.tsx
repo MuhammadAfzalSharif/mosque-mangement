@@ -4,7 +4,11 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { mosqueApi, authApi } from '../lib/api';
-import { Search, AlertTriangle, BarChart, Home, Bell, TrendingUp, Settings, Zap, Users, Moon } from 'react-feather';
+import {
+    Search, AlertTriangle, BarChart, Home, Bell, TrendingUp, Settings,
+    Zap, Users, Clock, MapPin, FileText, Shield, LogOut, Upload,
+    Star, Activity, Award, X
+} from 'react-feather';
 
 // Validation schemas
 const prayerTimesSchema = z.object({
@@ -24,6 +28,91 @@ const mosqueInfoSchema = z.object({
 
 type PrayerTimesFormData = z.infer<typeof prayerTimesSchema>;
 type MosqueInfoFormData = z.infer<typeof mosqueInfoSchema>;
+
+// Confirmation Modal Component
+interface ConfirmationModalProps {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    cancelText: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+    isLoading?: boolean;
+}
+
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+    isOpen,
+    title,
+    message,
+    confirmText,
+    cancelText,
+    onConfirm,
+    onCancel,
+    isLoading = false
+}) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onCancel}></div>
+
+                <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+                <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 backdrop-blur-xl shadow-2xl rounded-2xl border border-green-200/50 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    {/* Islamic background orbs */}
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
+                    <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+
+                    <div className="relative">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                                <AlertTriangle className="w-5 h-5 text-amber-500 mr-2" />
+                                {title}
+                            </h3>
+                            <button
+                                onClick={onCancel}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <p className="text-gray-600 mb-6">{message}</p>
+
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <button
+                                onClick={onCancel}
+                                disabled={isLoading}
+                                className="w-full sm:w-auto px-4 py-2 text-gray-700 bg-white/70 backdrop-blur-sm border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50"
+                            >
+                                {cancelText}
+                            </button>
+                            <button
+                                onClick={onConfirm}
+                                disabled={isLoading}
+                                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none flex items-center justify-center"
+                            >
+                                {isLoading ? (
+                                    <div className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </div>
+                                ) : (
+                                    confirmText
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 interface AdminUser {
     id: string;
@@ -89,6 +178,8 @@ const AdminDashboardPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<string>('overview');
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [logoutLoading, setLogoutLoading] = useState(false);
 
     const prayerTimesForm = useForm<PrayerTimesFormData>({
         resolver: zodResolver(prayerTimesSchema),
@@ -171,6 +262,7 @@ const AdminDashboardPage: React.FC = () => {
     }, [user, prayerTimesForm, mosqueInfoForm]);
 
     const handleLogout = async () => {
+        setLogoutLoading(true);
         try {
             await authApi.logout();
         } catch (err) {
@@ -178,6 +270,8 @@ const AdminDashboardPage: React.FC = () => {
         } finally {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            setLogoutLoading(false);
+            setShowLogoutModal(false);
             navigate('/');
         }
     };
@@ -262,12 +356,22 @@ const AdminDashboardPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-                <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-gray-100">
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 flex items-center justify-center p-4">
+                {/* Islamic background orbs */}
+                <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
+                <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-emerald-400/10 to-teal-500/10 rounded-full blur-xl animate-pulse delay-500"></div>
+
+                <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 border border-green-200/50">
                     <div className="flex flex-col items-center">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-                        <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Dashboard</h2>
-                        <p className="text-gray-600 text-center">Preparing your mosque management interface...</p>
+                        <div className="relative mb-6">
+                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200"></div>
+                            <div className="absolute top-0 left-0 animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-green-600"></div>
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
+                            Loading Dashboard
+                        </h2>
+                        <p className="text-gray-600 text-center text-sm">Preparing your mosque management interface...</p>
                     </div>
                 </div>
             </div>
@@ -276,18 +380,27 @@ const AdminDashboardPage: React.FC = () => {
 
     if (!user || !mosque) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 flex items-center justify-center">
-                <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-red-100">
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 flex items-center justify-center p-4">
+                {/* Islamic background orbs */}
+                <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-red-400/20 to-rose-500/20 rounded-full blur-2xl animate-pulse"></div>
+                <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+
+                <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 border border-red-200/50">
                     <div className="text-center">
-                        <div className="mb-4">
-                            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto" />
+                        <div className="mb-6">
+                            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                                <AlertTriangle className="w-8 h-8 text-white" />
+                            </div>
                         </div>
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Unable to load dashboard</h2>
-                        <p className="text-gray-600 mb-6">There was a problem loading your dashboard. Please try logging in again.</p>
+                        <h2 className="text-xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-red-700 to-rose-600 bg-clip-text text-transparent">
+                            Unable to load dashboard
+                        </h2>
+                        <p className="text-gray-600 mb-6 text-sm">There was a problem loading your dashboard. Please try logging in again.</p>
                         <Link
-                            to="/"
-                            className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                            to="/mosques"
+                            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                         >
+                            <Home className="w-4 h-4 mr-2" />
                             Go to Home
                         </Link>
                     </div>
@@ -297,154 +410,188 @@ const AdminDashboardPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20">
+            {/* Islamic background orbs */}
+            <div className="fixed top-20 right-20 w-96 h-96 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="fixed bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-teal-400/10 to-green-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-emerald-400/5 to-teal-500/5 rounded-full blur-2xl animate-pulse delay-500"></div>
+
             {/* Header */}
-            <div className="bg-white shadow-lg border-b border-gray-200">
+            <div className="relative bg-white/70 backdrop-blur-xl shadow-xl border-b border-green-200/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4 sm:py-6">
                         <div className="flex items-center min-w-0 flex-1">
-                            <Link to="/" className="flex items-center min-w-0">
-                                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-2 mr-2 sm:mr-3 flex-shrink-0">
-                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
+                            <Link to="/mosques" className="flex items-center min-w-0 group">
+                                <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-2 mr-2 sm:mr-3 flex-shrink-0 shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
+                                    <Home className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                                 </div>
-                                <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
+                                <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent truncate">
                                     Mosque Finder
                                 </span>
                             </Link>
                         </div>
                         <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                             <Link
-                                to="/"
-                                className="hidden sm:flex text-gray-600 hover:text-blue-600 px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium items-center"
+                                to="/mosques"
+                                className="hidden sm:flex text-gray-600 hover:text-green-600 px-3 sm:px-4 py-2 rounded-xl hover:bg-green-50/70 backdrop-blur-sm transition-all duration-200 text-sm font-medium items-center group"
                             >
-                                <Search className="w-4 h-4 mr-1" /> <span className="ml-1 hidden md:inline">Find Mosques</span>
+                                <Search className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />
+                                <span className="ml-1 hidden md:inline">Find Mosques</span>
                             </Link>
                             {/* Mobile menu for Find Mosques */}
                             <Link
-                                to="/mosque-finder"
-                                className="sm:hidden text-gray-600 hover:text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                to="/mosques"
+                                className="sm:hidden text-gray-600 hover:text-green-600 p-2 rounded-xl hover:bg-green-50/70 backdrop-blur-sm transition-all duration-200 group"
                                 title="Find Mosques"
                             >
-                                <Search className="w-5 h-5" />
+                                <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
                             </Link>
                             <button
-                                onClick={handleLogout}
-                                className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                onClick={() => setShowLogoutModal(true)}
+                                className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-3 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
                             >
+                                <LogOut className="w-4 h-4 sm:mr-2" />
                                 <span className="hidden sm:inline">Logout</span>
-                                <span className="sm:hidden">Exit</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8 max-w-7xl">
+            <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-6 lg:py-8 max-w-7xl">
                 {/* Success/Error Messages */}
                 {successMessage && (
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6 shadow-sm">
-                        <div className="flex items-center">
+                    <div className="relative bg-gradient-to-r from-green-50 to-emerald-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-lg overflow-hidden">
+                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse"></div>
+                        <div className="relative flex items-center">
                             <div className="flex-shrink-0">
-                                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
+                                <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                                    <svg className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-green-800">{successMessage}</p>
+                            <div className="ml-3 flex-1 min-w-0">
+                                <p className="text-xs sm:text-sm font-semibold text-green-800 break-words">{successMessage}</p>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {error && (
-                    <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl p-4 mb-6 shadow-sm">
-                        <div className="flex items-center">
+                    <div className="relative bg-gradient-to-r from-red-50 to-rose-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-lg overflow-hidden">
+                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-red-400/20 to-rose-500/20 rounded-full blur-lg animate-pulse"></div>
+                        <div className="relative flex items-center">
                             <div className="flex-shrink-0">
-                                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                </svg>
+                                <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center">
+                                    <AlertTriangle className="h-3 w-3 text-white" />
+                                </div>
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-red-800">{error}</p>
+                            <div className="ml-3 flex-1 min-w-0">
+                                <p className="text-xs sm:text-sm font-semibold text-red-800 break-words">{error}</p>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* Welcome Section */}
-                <div className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-blue-100">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 sm:mb-6">
+                <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-green-200/50">
+                    {/* Local Islamic orbs for this section */}
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
+                    <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+
+                    <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 sm:mb-6">
                         <div>
-                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                                Welcome back, {user.name}! 👋
+                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-2 flex items-center">
+                                <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 mr-3 animate-pulse" />
+                                Welcome back, {user.name}!
                             </h2>
-                            <p className="text-gray-600 text-sm sm:text-base lg:text-lg">Manage your mosque efficiently with our comprehensive dashboard</p>
+                            <p className="text-gray-600 text-sm sm:text-base lg:text-lg">Manage your mosque efficiently with our comprehensive Islamic dashboard</p>
                         </div>
                         <div className="mt-4 lg:mt-0">
-                            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-                                <div className="text-sm text-gray-500 mb-1">Admin since</div>
-                                <div className="text-lg font-semibold text-gray-900">Today</div>
+                            <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-4 shadow-lg border border-green-200/50 backdrop-blur-sm">
+                                <div className="text-sm text-green-600 mb-1 font-medium flex items-center">
+                                    <Shield className="w-4 h-4 mr-1" />
+                                    Admin since
+                                </div>
+                                <div className="text-lg font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">Today</div>
                             </div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/50 shadow-lg">
+                        <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-green-200/50 shadow-xl">
+                            <div className="absolute -top-2 -right-2 w-16 h-16 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse"></div>
+
                             <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center">
-                                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
+                                <Home className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-2" />
                                 Mosque Information
                             </h3>
-                            <div className="space-y-2 sm:space-y-3">
-                                <div className="flex items-start">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-3 mt-0.5">Name</span>
-                                    <span className="text-gray-700 font-medium break-words">{mosque.name}</span>
+                            <div className="space-y-3 sm:space-y-4">
+                                <div className="flex items-start group">
+                                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl mr-3 mt-0.5 group-hover:scale-110 transition-transform">
+                                        <FileText className="w-4 h-4 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-medium text-green-600 mb-1">Name</div>
+                                        <span className="text-gray-700 font-semibold break-words">{mosque.name}</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-start">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-3 mt-0.5">Location</span>
-                                    <span className="text-gray-700 break-words">{mosque.location}</span>
+                                <div className="flex items-start group">
+                                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl mr-3 mt-0.5 group-hover:scale-110 transition-transform">
+                                        <MapPin className="w-4 h-4 text-emerald-600" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-medium text-emerald-600 mb-1">Location</div>
+                                        <span className="text-gray-700 break-words">{mosque.location}</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-start">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mr-3 mt-0.5">About</span>
-                                    <span className="text-gray-700 break-words">{mosque.description || 'No description available'}</span>
+                                <div className="flex items-start group">
+                                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-teal-100 to-green-100 rounded-xl mr-3 mt-0.5 group-hover:scale-110 transition-transform">
+                                        <FileText className="w-4 h-4 text-teal-600" />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-medium text-teal-600 mb-1">About</div>
+                                        <span className="text-gray-700 break-words">{mosque.description || 'No description available'}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-                            <h3 className="text-xl font-bold mb-4 flex items-center">
-                                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                                Admin Verification Code
-                            </h3>
-                            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 mb-4">
-                                <div className="text-2xl lg:text-3xl font-mono font-bold mb-2 tracking-wider break-all">
-                                    {mosque.verification_code}
+                        <div className="relative bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 text-white shadow-2xl overflow-hidden">
+                            <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+                            <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-white/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+
+                            <div className="relative">
+                                <h3 className="text-xl font-bold mb-4 flex items-center">
+                                    <Shield className="w-6 h-6 mr-2" />
+                                    Admin Verification Code
+                                </h3>
+                                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-white/20">
+                                    <div className="text-2xl lg:text-3xl font-mono font-bold mb-2 tracking-wider break-all">
+                                        {mosque.verification_code}
+                                    </div>
+                                    <div className="text-green-100 text-sm">
+                                        Share this code with trusted individuals who want to become admins
+                                    </div>
                                 </div>
-                                <div className="text-blue-100 text-sm">
-                                    Share this code with trusted individuals who want to become admins
+                                <div className="flex items-start text-green-100 text-sm">
+                                    <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                    <span>Keep this code secure and share only with authorized personnel</span>
                                 </div>
-                            </div>
-                            <div className="flex items-center text-blue-100 text-sm">
-                                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Keep this code secure and share only with authorized personnel
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="bg-white rounded-2xl shadow-xl mb-8 border border-gray-100">
-                    <div className="border-b border-gray-200">
+                <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl mb-8 border border-green-200/50 overflow-hidden">
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+
+                    <div className="border-b border-green-200/50">
                         {/* Mobile/Desktop responsive tab navigation */}
                         <nav
-                            className="flex overflow-x-auto"
+                            className="flex overflow-x-auto relative z-10"
                             style={{
                                 scrollbarWidth: 'none',
                                 msOverflowStyle: 'none',
@@ -460,7 +607,7 @@ const AdminDashboardPage: React.FC = () => {
                             }} />
                             {[
                                 { id: 'overview', name: 'Overview', icon: BarChart, description: 'Dashboard overview' },
-                                { id: 'prayer-times', name: 'Prayer Times', icon: Moon, description: 'Manage prayer schedules' },
+                                { id: 'prayer-times', name: 'Prayer Times', icon: Clock, description: 'Manage prayer schedules' },
                                 { id: 'mosque-info', name: 'Mosque Info', icon: Home, description: 'Update mosque details' },
                                 { id: 'notifications', name: 'Notifications', icon: Bell, description: 'Manage alerts' },
                                 { id: 'users', name: 'Users', icon: Users, description: 'User management' },
@@ -470,18 +617,18 @@ const AdminDashboardPage: React.FC = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`group relative flex-shrink-0 whitespace-nowrap px-3 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm font-medium text-center hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 min-w-max ${activeTab === tab.id
-                                        ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                    className={`group relative flex-shrink-0 whitespace-nowrap px-3 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm font-medium text-center hover:bg-green-50/70 backdrop-blur-sm focus:z-10 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 min-w-max ${activeTab === tab.id
+                                        ? 'text-green-700 border-b-2 border-green-500 bg-green-50/70'
+                                        : 'text-gray-500 hover:text-green-600'
                                         }`}
                                 >
                                     <div className="flex flex-col items-center">
-                                        <tab.icon className="w-6 h-6 mb-1" />
-                                        <span className="font-semibold">{tab.name}</span>
-                                        <span className="text-xs text-gray-400 hidden lg:block mt-1">{tab.description}</span>
+                                        <tab.icon className={`w-6 h-6 mb-1 transition-all duration-200 ${activeTab === tab.id ? 'scale-110 text-green-600' : 'group-hover:scale-105'}`} />
+                                        <span className={`font-semibold ${activeTab === tab.id ? 'text-green-700' : ''}`}>{tab.name}</span>
+                                        <span className={`text-xs hidden lg:block mt-1 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}`}>{tab.description}</span>
                                     </div>
                                     {activeTab === tab.id && (
-                                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                                        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-t-full"></div>
                                     )}
                                 </button>
                             ))}
@@ -491,64 +638,71 @@ const AdminDashboardPage: React.FC = () => {
                     {/* Tab Content */}
                     <div className="p-4 sm:p-6 lg:p-8">
                         {activeTab === 'overview' && (
-                            <div className="space-y-4 sm:space-y-6">
-                                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Dashboard Overview</h3>
+                            <div className="relative space-y-4 sm:space-y-6">
+                                {/* Local Islamic orbs */}
+                                <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+
+                                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-4 sm:mb-6 flex items-center">
+                                    <BarChart className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 mr-3" />
+                                    Dashboard Overview
+                                </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 rounded-xl border border-blue-200 shadow-sm">
-                                        <div className="flex items-center justify-between">
+                                    <div className="relative bg-gradient-to-br from-green-50 to-emerald-100 p-4 sm:p-6 rounded-2xl border border-green-200/50 shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse"></div>
+                                        <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-blue-600 text-xs sm:text-sm font-medium">Total Visitors</p>
-                                                <p className="text-xl sm:text-2xl font-bold text-blue-900">1,234</p>
+                                                <p className="text-green-700 text-xs sm:text-sm font-semibold mb-1">Total Visitors</p>
+                                                <p className="text-xl sm:text-2xl font-bold text-green-900">1,234</p>
                                             </div>
-                                            <div className="bg-blue-500 p-2 sm:p-3 rounded-lg flex-shrink-0">
-                                                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                                                </svg>
+                                            <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                                                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
-                                        <div className="flex items-center justify-between">
+                                    <div className="relative bg-gradient-to-br from-emerald-50 to-teal-100 p-4 sm:p-6 rounded-2xl border border-emerald-200/50 shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-full blur-lg animate-pulse delay-200"></div>
+                                        <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-green-600 text-sm font-medium">Prayer Times Updated</p>
-                                                <p className="text-2xl font-bold text-green-900">Today</p>
+                                                <p className="text-emerald-700 text-xs sm:text-sm font-semibold mb-1">Prayer Times Updated</p>
+                                                <p className="text-xl sm:text-2xl font-bold text-emerald-900">Today</p>
                                             </div>
-                                            <div className="bg-green-500 p-3 rounded-lg">
-                                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                                                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-sm">
-                                        <div className="flex items-center justify-between">
+                                    <div className="relative bg-gradient-to-br from-teal-50 to-green-100 p-4 sm:p-6 rounded-2xl border border-teal-200/50 shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-lg animate-pulse delay-400"></div>
+                                        <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-purple-600 text-sm font-medium">Admin Status</p>
-                                                <p className="text-2xl font-bold text-purple-900">Active</p>
+                                                <p className="text-teal-700 text-xs sm:text-sm font-semibold mb-1">Admin Status</p>
+                                                <p className="text-xl sm:text-2xl font-bold text-teal-900">Active</p>
                                             </div>
-                                            <div className="bg-purple-500 p-3 rounded-lg">
-                                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                            <div className="bg-gradient-to-br from-teal-500 to-green-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                                                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200 shadow-sm">
-                                        <div className="flex items-center justify-between">
+                                    <div className="relative bg-gradient-to-br from-green-50 to-emerald-100 p-4 sm:p-6 rounded-2xl border border-green-200/50 shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse delay-600"></div>
+                                        <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-orange-600 text-sm font-medium">Mosque Rating</p>
-                                                <p className="text-2xl font-bold text-orange-900">4.8★</p>
+                                                <p className="text-green-700 text-xs sm:text-sm font-semibold mb-1">Mosque Rating</p>
+                                                <p className="text-xl sm:text-2xl font-bold text-green-900 flex items-center">
+                                                    4.8
+                                                    <Star className="w-5 h-5 text-yellow-500 ml-1 fill-current" />
+                                                </p>
                                             </div>
-                                            <div className="bg-orange-500 p-3 rounded-lg">
-                                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                                </svg>
+                                            <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                                                <Award className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 rounded-xl p-6 text-center">
-                                    <p className="text-gray-600">Quick actions and recent activity will appear here</p>
+                                <div className="relative bg-gradient-to-br from-green-50/50 to-emerald-100/50 backdrop-blur-sm rounded-2xl p-6 text-center border border-green-200/30 shadow-lg">
+                                    <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+                                    <Activity className="w-12 h-12 text-green-600 mx-auto mb-3 animate-pulse" />
+                                    <p className="text-gray-600 font-medium">Quick actions and recent activity will appear here</p>
                                 </div>
                             </div>
                         )}
@@ -556,32 +710,42 @@ const AdminDashboardPage: React.FC = () => {
                         {activeTab === 'prayer-times' && (
                             <div className="max-w-2xl mx-auto">
                                 <div className="text-center mb-8">
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Update Prayer Times</h3>
+                                    <h3 className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-2 flex items-center justify-center">
+                                        <Clock className="w-8 h-8 text-green-600 mr-3" />
+                                        Update Prayer Times
+                                    </h3>
                                     <p className="text-gray-600">Keep your community informed with accurate prayer schedules</p>
                                 </div>
-                                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8 border border-green-200 shadow-lg">
-                                    <form onSubmit={prayerTimesForm.handleSubmit(handleUpdatePrayerTimes)} className="space-y-4 sm:space-y-6">
+                                <div className="relative bg-gradient-to-br from-green-50 to-emerald-100/80 backdrop-blur-xl rounded-3xl p-8 border border-green-200/50 shadow-2xl overflow-hidden">
+                                    {/* Islamic background orbs */}
+                                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
+                                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+
+                                    <form onSubmit={prayerTimesForm.handleSubmit(handleUpdatePrayerTimes)} className="relative space-y-4 sm:space-y-6">
                                         {[
-                                            { name: 'fajr', label: 'Fajr', icon: '🌅' },
-                                            { name: 'dhuhr', label: 'Dhuhr', icon: '☀️' },
-                                            { name: 'asr', label: 'Asr', icon: '🌤️' },
-                                            { name: 'maghrib', label: 'Maghrib', icon: '🌅' },
-                                            { name: 'isha', label: 'Isha', icon: '🌙' },
-                                            { name: 'jummah', label: 'Jummah', icon: '🕌' },
+                                            { name: 'fajr', label: 'Fajr', icon: Clock, color: 'green' },
+                                            { name: 'dhuhr', label: 'Dhuhr', icon: Clock, color: 'emerald' },
+                                            { name: 'asr', label: 'Asr', icon: Clock, color: 'teal' },
+                                            { name: 'maghrib', label: 'Maghrib', icon: Clock, color: 'green' },
+                                            { name: 'isha', label: 'Isha', icon: Clock, color: 'emerald' },
+                                            { name: 'jummah', label: 'Jummah', icon: Home, color: 'teal' },
                                         ].map((prayer) => (
                                             <div key={prayer.name} className="group">
-                                                <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                                    <span className="mr-2 text-base sm:text-lg">{prayer.icon}</span>
+                                                <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
+                                                    <div className={`flex items-center justify-center w-8 h-8 bg-gradient-to-br from-${prayer.color}-100 to-${prayer.color}-200 rounded-xl mr-3 group-hover:scale-110 transition-transform shadow-sm`}>
+                                                        <prayer.icon className={`w-4 h-4 text-${prayer.color}-600`} />
+                                                    </div>
                                                     {prayer.label}
                                                 </label>
                                                 <input
                                                     {...prayerTimesForm.register(prayer.name as keyof PrayerTimesFormData)}
                                                     type="text"
                                                     placeholder="Example: 05:30 AM"
-                                                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-sm"
+                                                    className="w-full px-4 py-3 text-sm sm:text-base bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-lg hover:shadow-xl font-mono"
                                                 />
                                                 {prayerTimesForm.formState.errors[prayer.name as keyof PrayerTimesFormData] && (
-                                                    <p className="text-red-500 text-xs mt-1 ml-1">
+                                                    <p className="text-red-500 text-xs mt-2 ml-2 flex items-center">
+                                                        <AlertTriangle className="w-3 h-3 mr-1" />
                                                         {prayerTimesForm.formState.errors[prayer.name as keyof PrayerTimesFormData]?.message}
                                                     </p>
                                                 )}
@@ -590,7 +754,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <button
                                             type="submit"
                                             disabled={updateLoading}
-                                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:hover:shadow-lg"
+                                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 disabled:transform-none disabled:hover:shadow-xl border border-green-400/20"
                                         >
                                             {updateLoading ? (
                                                 <div className="flex items-center justify-center">
@@ -602,9 +766,7 @@ const AdminDashboardPage: React.FC = () => {
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center justify-center">
-                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                    </svg>
+                                                    <Upload className="w-5 h-5 mr-2" />
                                                     Update Prayer Times
                                                 </div>
                                             )}
@@ -617,67 +779,76 @@ const AdminDashboardPage: React.FC = () => {
                         {activeTab === 'mosque-info' && (
                             <div className="max-w-2xl mx-auto">
                                 <div className="text-center mb-8">
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Update Mosque Information</h3>
+                                    <h3 className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-2 flex items-center justify-center">
+                                        <Home className="w-8 h-8 text-green-600 mr-3" />
+                                        Update Mosque Information
+                                    </h3>
                                     <p className="text-gray-600">Keep your mosque details current and accurate</p>
                                 </div>
-                                <div className="bg-gradient-to-br from-purple-50 to-indigo-100 rounded-2xl p-8 border border-purple-200 shadow-lg">
-                                    <form onSubmit={mosqueInfoForm.handleSubmit(handleUpdateMosqueInfo)} className="space-y-6">
+                                <div className="relative bg-gradient-to-br from-green-50 to-emerald-100/80 backdrop-blur-xl rounded-3xl p-8 border border-green-200/50 shadow-2xl overflow-hidden">
+                                    {/* Islamic background orbs */}
+                                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
+                                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+
+                                    <form onSubmit={mosqueInfoForm.handleSubmit(handleUpdateMosqueInfo)} className="relative space-y-6">
                                         <div className="group">
-                                            <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                                <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
+                                            <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
+                                                <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-green-100 to-emerald-200 rounded-xl mr-3 group-hover:scale-110 transition-transform shadow-sm">
+                                                    <Home className="w-4 h-4 text-green-600" />
+                                                </div>
                                                 Mosque Name
                                             </label>
                                             <input
                                                 {...mosqueInfoForm.register('name')}
                                                 type="text"
-                                                className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-sm"
+                                                className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-lg hover:shadow-xl"
                                                 placeholder="Enter mosque name"
                                             />
                                             {mosqueInfoForm.formState.errors.name && (
-                                                <p className="text-red-500 text-xs mt-1 ml-1">
+                                                <p className="text-red-500 text-xs mt-2 ml-2 flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1" />
                                                     {mosqueInfoForm.formState.errors.name.message}
                                                 </p>
                                             )}
                                         </div>
 
                                         <div className="group">
-                                            <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                                <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
+                                            <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
+                                                <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-xl mr-3 group-hover:scale-110 transition-transform shadow-sm">
+                                                    <MapPin className="w-4 h-4 text-emerald-600" />
+                                                </div>
                                                 Location
                                             </label>
                                             <input
                                                 {...mosqueInfoForm.register('location')}
                                                 type="text"
-                                                className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-sm"
+                                                className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-lg hover:shadow-xl"
                                                 placeholder="Enter mosque location"
                                             />
                                             {mosqueInfoForm.formState.errors.location && (
-                                                <p className="text-red-500 text-xs mt-1 ml-1">
+                                                <p className="text-red-500 text-xs mt-2 ml-2 flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1" />
                                                     {mosqueInfoForm.formState.errors.location.message}
                                                 </p>
                                             )}
                                         </div>
 
                                         <div className="group">
-                                            <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                                <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
-                                                </svg>
+                                            <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
+                                                <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-teal-100 to-green-200 rounded-xl mr-3 group-hover:scale-110 transition-transform shadow-sm">
+                                                    <FileText className="w-4 h-4 text-teal-600" />
+                                                </div>
                                                 Description
                                             </label>
                                             <textarea
                                                 {...mosqueInfoForm.register('description')}
                                                 rows={4}
-                                                className="w-full px-4 py-3 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-sm resize-none"
+                                                className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-green-200/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all duration-200 group-hover:bg-white/90 shadow-lg hover:shadow-xl resize-none"
                                                 placeholder="Enter mosque description (optional)"
                                             />
                                             {mosqueInfoForm.formState.errors.description && (
-                                                <p className="text-red-500 text-xs mt-1 ml-1">
+                                                <p className="text-red-500 text-xs mt-2 ml-2 flex items-center">
+                                                    <AlertTriangle className="w-3 h-3 mr-1" />
                                                     {mosqueInfoForm.formState.errors.description.message}
                                                 </p>
                                             )}
@@ -686,7 +857,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <button
                                             type="submit"
                                             disabled={updateLoading}
-                                            className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:hover:shadow-lg"
+                                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 disabled:transform-none disabled:hover:shadow-xl border border-green-400/20"
                                         >
                                             {updateLoading ? (
                                                 <div className="flex items-center justify-center">
@@ -698,9 +869,7 @@ const AdminDashboardPage: React.FC = () => {
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center justify-center">
-                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                    </svg>
+                                                    <Upload className="w-5 h-5 mr-2" />
                                                     Update Mosque Information
                                                 </div>
                                             )}
@@ -714,14 +883,27 @@ const AdminDashboardPage: React.FC = () => {
                         {['notifications', 'users', 'analytics', 'settings'].map((tabId) => (
                             activeTab === tabId && (
                                 <div key={tabId} className="text-center py-12">
-                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 border border-gray-200">
-                                        <div className="mb-4">
-                                            <Zap className="w-16 h-16 text-gray-400 mx-auto" />
+                                    <div className="relative bg-gradient-to-br from-green-50/50 to-emerald-100/50 backdrop-blur-sm rounded-3xl p-12 border border-green-200/30 shadow-xl overflow-hidden">
+                                        {/* Islamic background orbs */}
+                                        <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+                                        <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-teal-400/10 to-green-500/10 rounded-full blur-lg animate-pulse delay-1000"></div>
+
+                                        <div className="relative mb-6">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-2xl">
+                                                <Zap className="w-10 h-10 text-white animate-pulse" />
+                                            </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-gray-800 mb-4 capitalize">{tabId.replace('-', ' ')} Feature</h3>
-                                        <p className="text-gray-600 mb-6">This feature is coming soon! We're working hard to bring you the best mosque management experience.</p>
-                                        <div className="bg-white rounded-lg p-4 inline-block border border-gray-200 shadow-sm">
-                                            <p className="text-sm text-gray-500">Feature in development</p>
+                                        <h3 className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-4 capitalize">
+                                            {tabId.replace('-', ' ')} Feature
+                                        </h3>
+                                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                                            This feature is coming soon! We're working hard to bring you the best Islamic mosque management experience.
+                                        </p>
+                                        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 inline-block border border-green-200/50 shadow-lg">
+                                            <p className="text-sm text-green-600 font-medium flex items-center">
+                                                <Settings className="w-4 h-4 mr-2 animate-spin" />
+                                                Feature in development
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -730,6 +912,18 @@ const AdminDashboardPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showLogoutModal}
+                title="Confirm Logout"
+                message="Are you sure you want to logout? You will need to sign in again to access your dashboard."
+                confirmText="Yes, Logout"
+                cancelText="Cancel"
+                onConfirm={handleLogout}
+                onCancel={() => setShowLogoutModal(false)}
+                isLoading={logoutLoading}
+            />
         </div>
     );
 };

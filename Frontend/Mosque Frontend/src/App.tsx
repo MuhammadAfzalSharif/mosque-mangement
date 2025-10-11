@@ -2,7 +2,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Import pages
-import WelcomePage from './pages/WelcomePage';
 import MosqueFinderPage from './pages/MosqueFinderPage';
 import MosqueDetailPage from './pages/MosqueDetailPage';
 import AdminApplicationPage from './pages/AdminApplicationPage';
@@ -20,7 +19,7 @@ function App() {
       <div className="App">
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<WelcomePage />} />
+          <Route path="/" element={<MosqueFinderPage />} />
           <Route path="/mosques" element={<MosqueFinderPage />} />
           <Route path="/mosques/:id" element={<MosqueDetailPage />} />
           <Route path="/mosques/:id/apply" element={<AdminApplicationPage />} />
@@ -37,7 +36,7 @@ function App() {
           <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
           {/* Catch all route - redirect to home */}
-          <Route path="*" element={<WelcomePage />} />
+          <Route path="*" element={<MosqueFinderPage />} />
         </Routes>
       </div>
     </Router>
