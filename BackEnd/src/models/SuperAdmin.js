@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const superAdminSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -7,4 +7,4 @@ const superAdminSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('SuperAdmin', superAdminSchema);
+export default mongoose.model('SuperAdmin', superAdminSchema);

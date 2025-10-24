@@ -1,5 +1,5 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
+import nodemailer from 'nodemailer';
+import 'dotenv/config';
 
 // Gmail SMTP Transporter (Production-Level)
 const transporter = nodemailer.createTransport({
@@ -132,7 +132,7 @@ const verifyConnection = async () => {
   }
 };
 
-module.exports = {
+export {
   sendPasswordResetEmail,
   verifyConnection
 };

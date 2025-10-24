@@ -1,13 +1,13 @@
-const express = require('express');
-const Admin = require('../models/Admin');
-const SuperAdmin = require('../models/SuperAdmin');
-const Mosque = require('../models/Mosque');
-const AuditLog = require('../models/AuditLog');
-const { auth, requireSuperAdmin } = require('../middleware/auth');
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
-const AuditLogger = require('../utils/auditLogger');
-const {
+import express from 'express';
+import Admin from '../models/Admin.js';
+import SuperAdmin from '../models/SuperAdmin.js';
+import Mosque from '../models/Mosque.js';
+import AuditLog from '../models/AuditLog.js';
+import { auth, requireSuperAdmin } from '../middleware/auth.js';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import AuditLogger from '../utils/auditLogger.js';
+import {
     validateEmail,
     validatePhone,
     validatePassword,
@@ -15,7 +15,7 @@ const {
     validateApplicationNotes,
     sanitizeEmail,
     sanitizeString
-} = require('../utils/validators');
+} from '../utils/validators.js';
 
 const router = express.Router();
 
@@ -1026,7 +1026,6 @@ router.get('/audit-logs', auth, requireSuperAdmin, async (req, res) => {
             sort_order = 'desc'
         } = req.query;
 
-        const AuditLog = require('../models/AuditLog');
         const query = {};
 
         // Filter by action type
@@ -1118,8 +1117,6 @@ router.get('/audit-logs', auth, requireSuperAdmin, async (req, res) => {
 // Get audit log statistics
 router.get('/audit-stats', auth, requireSuperAdmin, async (req, res) => {
     try {
-        const AuditLog = require('../models/AuditLog');
-
         // Get total actions count
         const totalActions = await AuditLog.countDocuments();
 
@@ -1197,8 +1194,6 @@ router.get('/audit-stats', auth, requireSuperAdmin, async (req, res) => {
 // Get action types summary for dashboard cards
 router.get('/action-types-summary', auth, requireSuperAdmin, async (req, res) => {
     try {
-        const AuditLog = require('../models/AuditLog');
-
         // Define action type metadata with colors and icons
         const actionTypeMetadata = {
             'mosque_created': {
@@ -1466,7 +1461,6 @@ router.get('/action-types-summary', auth, requireSuperAdmin, async (req, res) =>
 // Get specific audit log details
 router.get('/audit-logs/:id', auth, requireSuperAdmin, async (req, res) => {
     try {
-        const AuditLog = require('../models/AuditLog');
         const log = await AuditLog.findById(req.params.id);
 
         if (!log) {
@@ -1497,7 +1491,6 @@ router.get('/audit-logs/export/csv', auth, requireSuperAdmin, async (req, res) =
             log_ids
         } = req.query;
 
-        const AuditLog = require('../models/AuditLog');
         const query = {};
 
         // If specific log IDs are provided, only export those logs
@@ -1549,7 +1542,6 @@ router.get('/audit-logs/export/csv', auth, requireSuperAdmin, async (req, res) =
 router.delete('/audit-logs/cleanup', auth, requireSuperAdmin, async (req, res) => {
     try {
         const { days_old = 90, reason } = req.query;
-        const AuditLog = require('../models/AuditLog');
 
         // Validation for reason
         if (!reason || reason.trim().length < 10) {
@@ -1614,8 +1606,6 @@ router.delete('/audit-logs/bulk-delete', auth, requireSuperAdmin, async (req, re
         if (!reason || reason.trim().length < 10) {
             return res.status(400).json({ error: 'Reason is required and must be at least 10 characters long' });
         }
-
-        const AuditLog = require('../models/AuditLog');
 
         // Get the logs before deletion for audit logging
         const logsToDelete = await AuditLog.find({ _id: { $in: log_ids } });
@@ -3171,4 +3161,4 @@ router.post('/mosque/regenerate-multiple-codes', auth, requireSuperAdmin, async 
     }
 });
 
-module.exports = router;
+export default router;

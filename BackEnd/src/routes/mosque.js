@@ -1,9 +1,9 @@
-const express = require('express');
-const Mosque = require('../models/Mosque');
-const Admin = require('../models/Admin');
-const { auth, requireAdmin, requireSuperAdmin } = require('../middleware/auth');
-const crypto = require('crypto'); // Add this import for verification code generation
-const AuditLogger = require('../utils/auditLogger');
+import express from 'express';
+import Mosque from '../models/Mosque.js';
+import Admin from '../models/Admin.js';
+import { auth, requireAdmin, requireSuperAdmin } from '../middleware/auth.js';
+import crypto from 'crypto';
+import AuditLogger from '../utils/auditLogger.js';
 
 const router = express.Router();
 
@@ -377,4 +377,4 @@ router.post('/', auth, requireSuperAdmin, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

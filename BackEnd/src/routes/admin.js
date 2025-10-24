@@ -1,8 +1,9 @@
-const express = require('express');
-const Admin = require('../models/Admin');
-const Mosque = require('../models/Mosque');
-const { auth } = require('../middleware/auth');
-const AuditLogger = require('../utils/auditLogger');
+import express from 'express';
+import Admin from '../models/Admin.js';
+import Mosque from '../models/Mosque.js';
+import { auth } from '../middleware/auth.js';
+import AuditLogger from '../utils/auditLogger.js';
+import crypto from 'crypto';
 
 const router = express.Router();
 
@@ -193,7 +194,6 @@ router.post('/reapply', auth, async (req, res) => {
             });
 
             // Security: Regenerate verification code since it was breached
-            const crypto = require('crypto');
             const newCode = crypto.randomBytes(8).toString('hex').toUpperCase();
             const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
@@ -378,4 +378,4 @@ router.post('/reapply', auth, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

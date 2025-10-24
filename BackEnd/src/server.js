@@ -1,14 +1,14 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
+import 'dotenv/config';
+import express from 'express';
+import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const mosqueRoutes = require('./routes/mosque');
-const superadminRoutes = require('./routes/superadmin');
-const adminRoutes = require('./routes/admin');
+import authRoutes from './routes/auth.js';
+import mosqueRoutes from './routes/mosque.js';
+import superadminRoutes from './routes/superadmin.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -17,7 +17,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use(cors({
     origin: isProduction
         ? ['https://pakmasjid.vercel.app']
-        : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+        : ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
 }));
 
@@ -69,4 +69,4 @@ app.use(async (req, res, next) => {
     next();
 });
 
-module.exports = app;
+export default app;

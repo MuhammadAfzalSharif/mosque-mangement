@@ -1,4 +1,4 @@
-const AuditLog = require('../models/AuditLog');
+import AuditLog from '../models/AuditLog.js';
 
 class AuditLogger {
     constructor(req) {
@@ -601,4 +601,4 @@ class AuditLogger {
     }
 }
 
-module.exports = AuditLogger;
+export default AuditLogger;

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const passwordResetSchema = new mongoose.Schema({
   email: {
@@ -166,4 +166,4 @@ rateLimitSchema.index({ email: 1, userType: 1 });
 const PasswordReset = mongoose.model('PasswordReset', passwordResetSchema);
 const RateLimit = mongoose.model('PasswordResetRateLimit', rateLimitSchema);
 
-module.exports = PasswordReset;
+export default PasswordReset;

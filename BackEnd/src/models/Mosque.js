@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const mosqueSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -31,4 +31,4 @@ const mosqueSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Mosque', mosqueSchema);
+export default mongoose.model('Mosque', mosqueSchema);

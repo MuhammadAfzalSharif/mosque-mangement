@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
-const SuperAdmin = require('../models/SuperAdmin');
+import jwt from 'jsonwebtoken';
+import Admin from '../models/Admin.js';
+import SuperAdmin from '../models/SuperAdmin.js';
 
 const auth = async (req, res, next) => {
     // PRIORITY: Check Authorization header FIRST (for frontend localStorage tokens)
@@ -115,4 +115,4 @@ const requireNotRejected = async (req, res, next) => {
     }
 };
 
-module.exports = { auth, requireAdmin, requireSuperAdmin, requireNotRejected };
+export { auth, requireAdmin, requireSuperAdmin, requireNotRejected };

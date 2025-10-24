@@ -2,10 +2,16 @@ import axios from "axios";
 import type { PrayerTimes, MosqueData } from "./types";
 
 // Create axios instance with base configuration
+const baseURL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+
+console.log("🔗 Using API Base URL:", baseURL); // helpful for debugging
+
+// ✅ Create Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
-  timeout: 30000, // Increased from 10000 to 30000ms (30 seconds)
-  withCredentials: true, // Include cookies for JWT authentication
+  baseURL,
+  timeout: 30000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

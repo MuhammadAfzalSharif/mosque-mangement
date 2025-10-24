@@ -1,11 +1,15 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
-const SuperAdmin = require('../models/SuperAdmin');
-const Mosque = require('../models/Mosque');
-const { auth, requireSuperAdmin } = require('../middleware/auth');
-const AuditLogger = require('../utils/auditLogger');
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import Admin from '../models/Admin.js';
+import SuperAdmin from '../models/SuperAdmin.js';
+import Mosque from '../models/Mosque.js';
+import { auth, requireSuperAdmin } from '../middleware/auth.js';
+import AuditLogger from '../utils/auditLogger.js';
+import crypto from 'crypto';
+import PasswordReset from '../../models/PasswordReset.js';
+import { sendPasswordResetEmail } from '../../services/mailService.js';
+import fs from 'fs';
 
 const router = express.Router();
 
@@ -973,11 +977,6 @@ router.get('/admin/me', auth, async (req, res) => {
     }
 });
 
-// Import required modules for password reset
-const crypto = require('crypto');
-const PasswordReset = require('../../models/PasswordReset');
-const { sendPasswordResetEmail } = require('../../services/mailService');
-
 // Forgot Password Endpoint
 router.post('/forgot-password', async (req, res) => {
     try {
@@ -1091,7 +1090,6 @@ router.post('/forgot-password', async (req, res) => {
         console.log('✅ Reset record saved to database');
 
         // DEBUG: Write code to file for testing
-        const fs = require('fs');
         fs.writeFileSync('./last-reset-code.txt', code);
         console.log('📄 Code written to last-reset-code.txt:', code);
 
@@ -1349,4 +1347,4 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

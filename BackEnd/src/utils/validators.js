@@ -286,7 +286,7 @@ function sanitizeEmail(email) {
     return email ? email.trim().toLowerCase() : '';
 }
 
-module.exports = {
+export {
     ALLOWED_EMAIL_DOMAINS,
     PATTERNS,
     LENGTHS,
