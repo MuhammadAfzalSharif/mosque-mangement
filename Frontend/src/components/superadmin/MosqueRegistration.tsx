@@ -164,6 +164,9 @@ const MosqueRegistration: React.FC<Props> = ({ onRegister }) => {
         <div className="space-y-2 sm:space-y-4 lg:space-y-6">
             {/* Header */}
             <div className="text-center">
+                <div className="flex items-center justify-center mb-2 sm:mb-4">
+                    <img src="/images/logo.png" alt="Mosque Finder" className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain mr-2 sm:mr-3" />
+                </div>
                 <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-1 sm:mb-2">
                     Mosque Registration
                 </h1>

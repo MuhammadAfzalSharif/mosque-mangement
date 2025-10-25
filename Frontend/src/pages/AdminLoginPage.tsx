@@ -235,17 +235,10 @@ const AdminLoginPage: React.FC = () => {
                 <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
                     <div className="flex justify-between items-center py-2 sm:py-3 lg:py-4">
                         <div className="flex items-center">
-                            <div className="relative mr-2 sm:mr-3">
-                                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg sm:rounded-xl blur-sm opacity-30"></div>
-                                <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl p-1.5 sm:p-2 shadow-lg">
-                                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                </div>
-                            </div>
+                            <img src="/images/logo.png" alt="Mosque Finder" className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain mr-2 sm:mr-3" />
                             <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                 <span className="hidden sm:inline">Mosque Finder</span>
-                                <span className="sm:hidden">Mosque</span>
+                                <span className="sm:hidden">Mosque Finder</span>
                             </span>
                         </div>
                         <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
@@ -404,10 +397,7 @@ const AdminLoginPage: React.FC = () => {
                                     <div className="relative flex items-center justify-center">
                                         {loading ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
+                                                <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent mr-2 sm:mr-3"></div>
                                                 <span className="hidden sm:inline">Signing In...</span>
                                                 <span className="sm:hidden">Signing In...</span>
                                             </>

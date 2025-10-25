@@ -278,13 +278,9 @@ const MosqueDetailPage: React.FC = () => {
 
                         {/* Title Section */}
                         <div className="flex items-center">
-                            <div className="relative mr-2 sm:mr-3">
-                                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg sm:rounded-xl blur-sm opacity-30"></div>
-                                <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl p-1.5 sm:p-2 lg:p-3 shadow-lg">
-                                    <Home className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
-                                </div>
-                            </div>
-                            <div>
+                            <img src="/images/logo.png" alt="Mosque Finder" className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain mr-2 sm:mr-3" />
+
+                            <div className="flex flex-col items-start">
                                 <span className="text-sm sm:text-base lg:text-lg font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                     <span className="hidden sm:inline">Mosque Details</span>
                                     <span className="sm:hidden">Details</span>
@@ -309,10 +305,7 @@ const MosqueDetailPage: React.FC = () => {
                             <div className="mb-3 sm:mb-6 lg:mb-8">
                                 {/* Mosque Icon */}
                                 <div className="relative mb-3 sm:mb-4 lg:mb-6">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl sm:rounded-2xl blur-lg opacity-30"></div>
-                                    <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto shadow-2xl">
-                                        <Home className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white" />
-                                    </div>
+                                    <img src="/images/logo.png" alt="Mosque Finder" className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 object-contain mx-auto" />
                                 </div>
 
                                 {/* Mosque Name */}

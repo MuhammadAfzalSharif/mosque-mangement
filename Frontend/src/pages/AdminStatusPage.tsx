@@ -80,9 +80,11 @@ const AdminStatusPage: React.FC = () => {
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-emerald-400/10 to-teal-500/10 rounded-full blur-xl animate-pulse delay-500"></div>
 
                 <div className="relative text-center">
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 border-4 border-green-200/50 rounded-full mx-auto"></div>
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-transparent border-t-green-600 rounded-full animate-spin"></div>
+                    <div className="relative mb-6 w-16 h-16 mx-auto">
+                        {/* Base ring */}
+                        <div className="absolute inset-0 rounded-full border-4 border-green-200/50"></div>
+                        {/* Spinning arc (top border colored) */}
+                        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-green-600 animate-spin"></div>
                     </div>
                     <p className="text-gray-600 font-medium">Loading your status...</p>
                 </div>

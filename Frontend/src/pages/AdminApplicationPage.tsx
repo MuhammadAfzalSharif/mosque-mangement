@@ -403,6 +403,9 @@ const AdminApplicationPage: React.FC = () => {
                         <div className="relative mb-4 sm:mb-6">
                             <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 via-emerald-100/10 to-teal-100/20 rounded-2xl blur-3xl"></div>
                             <div className="relative">
+                                <div className="flex items-center justify-center mb-2 sm:mb-4">
+                                    <img src="/images/logo.png" alt="Mosque Finder" className="w-16 h-16 sm:w-20 sm:h-20 lg:w-28 lg:h-28 object-contain mr-2 sm:mr-3" />
+                                </div>
                                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 sm:mb-4 px-2">
                                     <span className="hidden sm:inline">Mosque Admin Access</span>
                                     <span className="sm:hidden">Admin Access</span>

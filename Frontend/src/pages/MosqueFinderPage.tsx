@@ -139,12 +139,7 @@ const MosqueFinderPage: React.FC = () => {
                 <div className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
                     <div className="flex justify-between items-center py-2 sm:py-3 lg:py-4">
                         <div className="flex items-center">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg sm:rounded-xl blur-sm opacity-30"></div>
-                                <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl p-1.5 sm:p-2 lg:p-3 mr-2 sm:mr-3 shadow-lg">
-                                    <Home className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-                                </div>
-                            </div>
+                            <img src="/images/logo.png" alt="Mosque Finder" className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain mr-2 sm:mr-3" />
                             <div>
                                 <span className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                     <span className="hidden sm:inline">Mosque Finder</span>
