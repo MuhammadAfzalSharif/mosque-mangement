@@ -6,33 +6,33 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      registerType: "autoUpdate",
+      injectRegister: "auto",
       manifest: {
-        name: 'PakMasjid',
-        short_name: 'PakMasjid',
-        description: 'Mosque Management System',
-        theme_color: '#10B981', // Islamic green
-        background_color: '#ffffff',
-        display: 'standalone',
-        scope: '/',
-        start_url: '/',
+        name: "PakMasjid",
+        short_name: "PakMasjid",
+        description: "Mosque Management System",
+        theme_color: "#10B981", // Islamic green
+        background_color: "#ffffff",
+        display: "standalone",
+        scope: "/",
+        start_url: "/",
         icons: [
           {
-            src: '/icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
           },
           {
-            src: '/icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
+            src: "/icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
           },
           {
-            src: '/icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
+            src: "/icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
           },
         ],
       },
