@@ -1,5 +1,5 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import SuperAdmin from '../models/SuperAdmin.js';
@@ -1093,14 +1093,7 @@ router.post('/forgot-password', async (req, res) => {
         fs.writeFileSync('./last-reset-code.txt', code);
         console.log('📄 Code written to last-reset-code.txt:', code);
 
-        // Send email
-        await sendPasswordResetEmail(email, user.name, code, userType);
-
-        // Log the action (simple console log for now)
-        console.log(`Password reset requested for ${email} (${userType}) at ${new Date().toISOString()}`);
-
-        console.log(`Password reset code sent to ${email} for ${userType}`);
-
+        // Send response immediately to user
         res.json({
             message: 'If your email exists in our system, you will receive a password reset code within a few minutes. The code expires in 15 minutes.',
             success: true,
@@ -1111,6 +1104,16 @@ router.post('/forgot-password', async (req, res) => {
                 resetTime: rateLimitResult.canRetryAt ? rateLimitResult.canRetryAt.toISOString() : new Date(Date.now() + 60 * 60 * 1000).toISOString()
             }
         });
+
+        // Send email asynchronously (fire-and-forget)
+        sendPasswordResetEmail(email, user.name, code, userType)
+            .catch(err => {
+                console.error(`Failed to send password reset email to ${email}:`, err);
+            });
+
+        // Log the action
+        console.log(`Password reset requested for ${email} (${userType}) at ${new Date().toISOString()}`);
+        console.log(`Password reset code sent to ${email} for ${userType}`);
 
     } catch (error) {
         console.error('Forgot password error:', error);

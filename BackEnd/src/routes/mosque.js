@@ -14,40 +14,28 @@ router.get('/', async (req, res) => {
         const query = {};
 
         if (search) {
-            query.$or = [
-                { name: new RegExp(search, 'i') },
-                { location: new RegExp(search, 'i') }
-            ];
+            query.$text = { $search: search };
         }
 
         const mosques = await Mosque.find(query)
+            .select('name location description contact_email contact_phone')
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
         const total = await Mosque.countDocuments(query);
 
-        // Transform the response to match API spec - return ALL fields
+        // Transform the response to match API spec - return only public-safe fields
         const transformedMosques = mosques.map(mosque => ({
             id: mosque._id,
             name: mosque.name,
             location: mosque.location,
             description: mosque.description || '',
-            verification_code: mosque.verification_code || '',
-            verification_code_expires: mosque.verification_code_expires || null,
             contact_email: mosque.contact_email || '',
-            contact_phone: mosque.contact_phone || '',
-            admin_instructions: mosque.admin_instructions || '',
-            createdAt: mosque.createdAt,
-            updatedAt: mosque.updatedAt,
-            prayer_times: mosque.prayer_times || {
-                fajr: null,
-                dhuhr: null,
-                asr: null,
-                maghrib: null,
-                isha: null,
-                jummah: null
-            }
+            contact_phone: mosque.contact_phone || ''
         }));
+
+        // Cache for 5 minutes on edge, revalidate in background for 10 minutes
+        res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
 
         res.json({
             mosques: transformedMosques,

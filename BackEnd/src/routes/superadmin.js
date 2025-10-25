@@ -5,7 +5,7 @@ import Mosque from '../models/Mosque.js';
 import AuditLog from '../models/AuditLog.js';
 import { auth, requireSuperAdmin } from '../middleware/auth.js';
 import crypto from 'crypto';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import AuditLogger from '../utils/auditLogger.js';
 import {
     validateEmail,
@@ -24,15 +24,30 @@ router.get('/dashboard/stats', auth, requireSuperAdmin, async (req, res) => {
     try {
         const totalMosques = await Mosque.countDocuments();
 
-        // Only count approved admins whose mosques still exist
-        const approvedAdmins = await Admin.find({ status: 'approved' }).populate('mosque_id');
-        const approvedMosques = approvedAdmins.filter(admin => admin.mosque_id && admin.mosque_id._id).length;
+        // Optimized: Count approved admins with existing mosques in one query
+        const approvedMosques = await Admin.countDocuments({
+            status: 'approved',
+            mosque_id: { $ne: null }
+        });
 
-        const pendingMosques = await Admin.countDocuments({ status: 'pending' });
-        const rejectedMosques = await Admin.countDocuments({ status: 'rejected' });
-        const mosqueDeletedAdmins = await Admin.countDocuments({ status: 'mosque_deleted' });
-        const adminRemovedAdmins = await Admin.countDocuments({ status: 'admin_removed' });
-        const codeRegeneratedAdmins = await Admin.countDocuments({ status: 'code_regenerated' });
+        // Optimized: Get all other admin status counts in one aggregation query
+        const adminStats = await Admin.aggregate([
+            { $match: { status: { $ne: 'approved' } } },
+            { $group: { _id: "$status", count: { $sum: 1 } } }
+        ]);
+
+        // Process aggregation results into counts
+        const statusCounts = {};
+        adminStats.forEach(stat => {
+            statusCounts[stat._id] = stat.count;
+        });
+
+        const pendingMosques = statusCounts.pending || 0;
+        const rejectedMosques = statusCounts.rejected || 0;
+        const mosqueDeletedAdmins = statusCounts.mosque_deleted || 0;
+        const adminRemovedAdmins = statusCounts.admin_removed || 0;
+        const codeRegeneratedAdmins = statusCounts.code_regenerated || 0;
+
         const totalSuperAdmins = await SuperAdmin.countDocuments();
         const totalAuditLogs = await AuditLog.countDocuments();
 

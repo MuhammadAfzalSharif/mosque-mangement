@@ -31,4 +31,7 @@ const mosqueSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Add text index for fast searching on name and location
+mosqueSchema.index({ name: 'text', location: 'text' });
+
 export default mongoose.model('Mosque', mosqueSchema);
