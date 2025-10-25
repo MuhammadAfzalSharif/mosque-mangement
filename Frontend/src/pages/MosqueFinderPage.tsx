@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { mosqueApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
 import MosqueCard from '../components/MosqueCard';
+import InstallButton from '../components/InstallButton';
 import { SiWhatsapp } from 'react-icons/si';
 import {
     Search,
@@ -153,6 +154,7 @@ const MosqueFinderPage: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+                            <InstallButton />
                             <Link
                                 to="/admin/login"
                                 className="group relative bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
