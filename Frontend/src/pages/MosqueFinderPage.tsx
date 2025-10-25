@@ -148,7 +148,7 @@ const MosqueFinderPage: React.FC = () => {
                             <div>
                                 <span className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                     <span className="hidden sm:inline">Mosque Finder</span>
-                                    <span className="sm:hidden">Masjid</span>
+                                    <span className="sm:hidden">Mosque Finder</span>
                                 </span>
                                 <p className="text-xs text-green-600 font-medium hidden lg:block">Find Your Spiritual Home</p>
                             </div>
@@ -187,7 +187,7 @@ const MosqueFinderPage: React.FC = () => {
                                 <MapPin className="relative w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-600" />
                             </div>
                             <span className="hidden sm:inline">Discover Your Spiritual Community</span>
-                            <span className="sm:hidden">Find Your Masjid</span>
+                            <span className="sm:hidden">Discover Your Spiritual Community</span>
                         </div>
 
                         {/* Main Title */}
@@ -198,7 +198,7 @@ const MosqueFinderPage: React.FC = () => {
                             </span>
                             <span className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent font-extrabold">
                                 <span className="hidden sm:inline">Mosque</span>
-                                <span className="sm:hidden">Masjid</span>
+                                <span className="sm:hidden">Mosque</span>
                             </span>
                         </h1>
 
@@ -271,7 +271,7 @@ const MosqueFinderPage: React.FC = () => {
                             <div className="mt-2 sm:mt-3 flex flex-wrap justify-center gap-1 sm:gap-2 text-xs text-gray-600">
                                 <span className="hidden sm:inline-flex items-center bg-gray-100 px-2 py-1 rounded-full">
                                     <Filter className="w-3 h-3 mr-1 text-gray-500" />
-                                    Try: 'Farida Masjid or Hira masjid'
+                                    Try: 'Farida Mosque or Hira Mosque'
                                 </span>
                                 <span className="sm:hidden flex items-center bg-gray-100 px-2 py-1 rounded-full">
                                     <Filter className="w-3 h-3 mr-1 text-gray-500" />
@@ -391,7 +391,7 @@ const MosqueFinderPage: React.FC = () => {
                                                     ) : (
                                                         <>
                                                             <span className="hidden sm:inline">All Mosques</span>
-                                                            <span className="sm:hidden">All Masjids</span>
+                                                            <span className="sm:hidden">All Mosques</span>
                                                         </>
                                                     )}
                                                 </span>

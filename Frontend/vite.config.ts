@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       injectRegister: "auto",
       manifest: {
-        name: "PakMasjid",
-        short_name: "PakMasjid",
+        name: "Mosque Finder",
+        short_name: "Mosque Finder",
         description: "Mosque Management System",
         theme_color: "#10B981", // Islamic green
         background_color: "#ffffff",
