@@ -13,6 +13,8 @@ import adminRoutes from './routes/admin.js';
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
 
+
+
 // 🧠 Configure CORS
 app.use(cors({
     origin: isProduction
@@ -24,6 +26,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// For Vercel serverless mode
+app.use(async (req, res, next) => {
+    if (!isConnected) await connectToDatabase();
+    next();
+});
+
 
 // ✅ Health route
 app.get('/api/health', (req, res) => {
@@ -63,10 +72,5 @@ if (!isProduction) {
     app.listen(PORT, () => console.log(`⚡ Server running locally on port ${PORT}`));
 }
 
-// For Vercel serverless mode
-app.use(async (req, res, next) => {
-    if (!isConnected) await connectToDatabase();
-    next();
-});
 
 export default app;
