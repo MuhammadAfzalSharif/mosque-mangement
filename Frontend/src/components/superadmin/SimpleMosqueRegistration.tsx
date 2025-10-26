@@ -99,7 +99,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                         <span className="hidden sm:inline">Simple Mosque Registration</span>
                         <span className="sm:hidden">Mosque Registration</span>
                     </h1>
-                    <p className="text-gray-600 text-xs sm:text-sm lg:text-base hidden sm:block">
+                    <p className="text-gray-600 text-sm sm:text-base hidden sm:block">
                         Register a new mosque with basic information. Admin can be assigned later.
                     </p>
                 </div>
@@ -113,11 +113,11 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                             </div>
                         </div>
                         <div className="ml-2 sm:ml-3 lg:ml-4">
-                            <h4 className="font-bold text-blue-900 mb-1 sm:mb-2 text-sm sm:text-base lg:text-lg">
+                            <h4 className="font-bold text-blue-900 mb-1 sm:mb-2 text-sm sm:text-base">
                                 <span className="hidden sm:inline">Registration Information</span>
                                 <span className="sm:hidden">Info</span>
                             </h4>
-                            <p className="text-xs sm:text-sm text-blue-800 leading-relaxed">
+                            <p className="text-sm sm:text-base text-blue-800 leading-relaxed">
                                 <span className="hidden sm:inline">This form creates a mosque entry <strong>without an admin</strong>. A verification code will be generated that can be shared with mosque management for later admin registration.</span>
                                 <span className="sm:hidden">Creates mosque entry without admin. Verification code will be generated.</span>
                             </p>
@@ -142,45 +142,45 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                 <div className="bg-white/80 rounded-md sm:rounded-lg p-2 sm:p-3 lg:p-4 backdrop-blur">
                                     <ul className="space-y-1 sm:space-y-2">
                                         {errors.name && (
-                                            <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                            <li className="flex items-start text-sm sm:text-base text-red-800">
                                                 <span className="font-semibold mr-1 sm:mr-2 text-red-600">Name:</span>
-                                                <span className="text-xs sm:text-sm">{errors.name.message}</span>
+                                                <span className="text-sm sm:text-base">{errors.name.message}</span>
                                             </li>
                                         )}
                                         {errors.location && (
-                                            <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                            <li className="flex items-start text-sm sm:text-base text-red-800">
                                                 <span className="font-semibold mr-1 sm:mr-2 text-red-600">Location:</span>
-                                                <span className="text-xs sm:text-sm">{errors.location.message}</span>
+                                                <span className="text-sm sm:text-base">{errors.location.message}</span>
                                             </li>
                                         )}
                                         {errors.description && (
-                                            <li className="flex items-start text-xs sm:text-sm text-red-800 hidden lg:flex">
+                                            <li className="flex items-start text-sm sm:text-base text-red-800 hidden lg:flex">
                                                 <span className="font-semibold mr-1 sm:mr-2 text-red-600">Description:</span>
-                                                <span className="text-xs sm:text-sm">{errors.description.message}</span>
+                                                <span className="text-sm sm:text-base">{errors.description.message}</span>
                                             </li>
                                         )}
                                         {errors.contact_phone && (
-                                            <li className="flex items-start text-xs sm:text-sm text-red-800 hidden sm:flex">
+                                            <li className="flex items-start text-sm sm:text-base text-red-800 hidden sm:flex">
                                                 <span className="font-semibold mr-1 sm:mr-2 text-red-600">Phone:</span>
-                                                <span className="text-xs sm:text-sm">{errors.contact_phone.message}</span>
+                                                <span className="text-sm sm:text-base">{errors.contact_phone.message}</span>
                                             </li>
                                         )}
                                         {errors.contact_email && (
-                                            <li className="flex items-start text-xs sm:text-sm text-red-800 hidden sm:flex">
+                                            <li className="flex items-start text-sm sm:text-base text-red-800 hidden sm:flex">
                                                 <span className="font-semibold mr-1 sm:mr-2 text-red-600">Email:</span>
-                                                <span className="text-xs sm:text-sm">{errors.contact_email.message}</span>
+                                                <span className="text-sm sm:text-base">{errors.contact_email.message}</span>
                                             </li>
                                         )}
                                         {errors.admin_instructions && (
-                                            <li className="flex items-start text-xs sm:text-sm text-red-800 hidden lg:flex">
+                                            <li className="flex items-start text-sm sm:text-base text-red-800 hidden lg:flex">
                                                 <span className="font-semibold mr-1 sm:mr-2 text-red-600">Instructions:</span>
-                                                <span className="text-xs sm:text-sm">{errors.admin_instructions.message}</span>
+                                                <span className="text-sm sm:text-base">{errors.admin_instructions.message}</span>
                                             </li>
                                         )}
                                     </ul>
                                 </div>
                                 <div className="mt-2 sm:mt-3 lg:mt-4 p-2 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-md sm:rounded-lg hidden sm:block">
-                                    <p className="text-xs sm:text-sm text-yellow-800 font-medium">
+                                    <p className="text-sm sm:text-base text-yellow-800 font-medium">
                                         Note: Please correct all errors above before submitting the form.
                                     </p>
                                 </div>
@@ -200,7 +200,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                         <div className="grid md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 xl:gap-6">
                             {/* Mosque Name */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                     Mosque Name *
                                 </label>
                                 <div className="relative">
@@ -208,7 +208,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     <input
                                         {...register('name')}
                                         type="text"
-                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-xs sm:text-sm lg:text-base ${errors.name
+                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base lg:text-base ${errors.name
                                             ? 'border-red-500 bg-red-50'
                                             : 'border-gray-200'
                                             }`}
@@ -216,16 +216,16 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     />
                                 </div>
                                 {errors.name && (
-                                    <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
+                                    <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
                                         <FaTimes className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                                        <span className="text-xs sm:text-sm">{errors.name.message}</span>
+                                        <span className="text-sm sm:text-base">{errors.name.message}</span>
                                     </p>
                                 )}
                             </div>
 
                             {/* Location */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                     Location *
                                 </label>
                                 <div className="relative">
@@ -233,7 +233,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     <input
                                         {...register('location')}
                                         type="text"
-                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-xs sm:text-sm lg:text-base ${errors.location
+                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base lg:text-base ${errors.location
                                             ? 'border-red-500 bg-red-50'
                                             : 'border-gray-200'
                                             }`}
@@ -241,9 +241,9 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     />
                                 </div>
                                 {errors.location && (
-                                    <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
+                                    <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
                                         <FaTimes className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                                        <span className="text-xs sm:text-sm">{errors.location.message}</span>
+                                        <span className="text-sm sm:text-base">{errors.location.message}</span>
                                     </p>
                                 )}
                             </div>
@@ -251,12 +251,12 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
 
                         {/* Description */}
                         <div className="hidden sm:block">
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                            <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                 Description (Optional)
                             </label>
                             <textarea
                                 {...register('description')}
-                                className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 border border-gray-200 rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-xs sm:text-sm lg:text-base"
+                                className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 border border-gray-200 rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base lg:text-base"
                                 rows={3}
                                 placeholder="Describe the mosque's facilities, prayer times, community services..."
                             />
@@ -272,7 +272,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                         <div className="grid md:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 xl:gap-6">
                             {/* Contact Phone */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                     Contact Phone
                                 </label>
                                 <div className="relative">
@@ -280,7 +280,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     <input
                                         {...register('contact_phone')}
                                         type="tel"
-                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-xs sm:text-sm lg:text-base ${errors.contact_phone
+                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base lg:text-base ${errors.contact_phone
                                             ? 'border-red-500 bg-red-50'
                                             : 'border-gray-200'
                                             }`}
@@ -288,16 +288,16 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     />
                                 </div>
                                 {errors.contact_phone && (
-                                    <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
+                                    <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
                                         <FaTimes className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                                        <span className="text-xs sm:text-sm">{errors.contact_phone.message}</span>
+                                        <span className="text-sm sm:text-base">{errors.contact_phone.message}</span>
                                     </p>
                                 )}
                             </div>
 
                             {/* Contact Email */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                     Contact Email
                                 </label>
                                 <div className="relative">
@@ -305,7 +305,7 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     <input
                                         {...register('contact_email')}
                                         type="email"
-                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-xs sm:text-sm lg:text-base ${errors.contact_email
+                                        className={`w-full pl-7 sm:pl-10 pr-2 sm:pr-4 py-2 sm:py-2.5 lg:py-3 border rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base lg:text-base ${errors.contact_email
                                             ? 'border-red-500 bg-red-50'
                                             : 'border-gray-200'
                                             }`}
@@ -313,9 +313,9 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     />
                                 </div>
                                 {errors.contact_email && (
-                                    <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
+                                    <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-700 flex items-center bg-red-50 px-2 sm:px-3 py-1 sm:py-2 rounded-md sm:rounded-lg">
                                         <FaTimes className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                                        <span className="text-xs sm:text-sm">{errors.contact_email.message}</span>
+                                        <span className="text-sm sm:text-base">{errors.contact_email.message}</span>
                                     </p>
                                 )}
                             </div>
@@ -329,16 +329,16 @@ const SimpleMosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                         </h2>
 
                         <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                            <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                 Instructions for Future Admin
                             </label>
                             <textarea
                                 {...register('admin_instructions')}
-                                className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 border border-gray-200 rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-xs sm:text-sm lg:text-base"
+                                className="w-full px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 border border-gray-200 rounded-md sm:rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base lg:text-base"
                                 rows={3}
                                 placeholder="Provide clear instructions for potential admins..."
                             />
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden xl:block">
+                            <p className="text-sm sm:text-base text-gray-500 mt-1 hidden xl:block">
                                 These instructions will be shown to potential admins. If left empty, default instructions will be generated.
                             </p>
                         </div>

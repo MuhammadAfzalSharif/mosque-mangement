@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, LogIn, ArrowLeft, Mail, Lock } from 'react-feather';
+import { Eye, EyeOff, LogIn, ArrowLeft, Mail, Lock, AlertTriangle } from 'react-feather';
 import { authApi } from '../lib/api';
 import { getErrorMessage } from '../lib/types';
 
@@ -244,7 +244,7 @@ const AdminLoginPage: React.FC = () => {
                         <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
                             <Link
                                 to="/mosques"
-                                className="group flex items-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-green-600 hover:text-green-700 rounded-lg hover:bg-green-50 transition-all duration-300 text-xs sm:text-sm font-medium transform hover:scale-105"
+                                className="group flex items-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-green-600 hover:text-green-700 rounded-lg hover:bg-green-50 transition-all duration-300 text-sm sm:text-base font-medium transform hover:scale-105"
                             >
                                 <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:-translate-x-0.5 transition-transform duration-200" />
                                 <span className="hidden sm:inline">Back to Home</span>
@@ -278,7 +278,7 @@ const AdminLoginPage: React.FC = () => {
                                     <span className="hidden sm:inline">Admin Login</span>
                                     <span className="sm:hidden">Admin Login</span>
                                 </h1>
-                                <p className="text-gray-600 text-xs sm:text-sm">
+                                <p className="text-gray-600 text-sm sm:text-base">
                                     <span className="hidden sm:inline">Access your mosque management dashboard</span>
                                     <span className="sm:hidden">Mosque Dashboard Access</span>
                                 </p>
@@ -292,11 +292,11 @@ const AdminLoginPage: React.FC = () => {
                                             <div className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 sm:mr-3"></div>
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-xs sm:text-sm text-red-800 leading-relaxed">{error}</p>
+                                            <p className="text-sm sm:text-base text-red-800 leading-relaxed">{error}</p>
                                             {hadTimeout && (
                                                 <button
                                                     onClick={() => window.location.href = '/admin/dashboard'}
-                                                    className="mt-2 inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 border border-red-300/50 text-xs font-medium rounded-md text-red-700 bg-red-50/80 hover:bg-red-100/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500/50 transition-all duration-300 backdrop-blur-sm"
+                                                    className="mt-2 inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 border border-red-300/50 text-sm font-medium rounded-md text-red-700 bg-red-50/80 hover:bg-red-100/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500/50 transition-all duration-300 backdrop-blur-sm"
                                                 >
                                                     <span className="hidden sm:inline">Check if Login Succeeded</span>
                                                     <span className="sm:hidden">Check Login</span>
@@ -311,7 +311,7 @@ const AdminLoginPage: React.FC = () => {
                             <form onSubmit={handleSubmit(handleLogin)} className="space-y-4 sm:space-y-6">
                                 {/* Email Field */}
                                 <div>
-                                    <label htmlFor="email" className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                                    <label htmlFor="email" className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2">
                                         <div className="relative mr-2">
                                             <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                             <Mail className="relative h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
@@ -330,17 +330,17 @@ const AdminLoginPage: React.FC = () => {
                                             {...register('email')}
                                         />
                                     </div>
-                                    {errors.email && (
-                                        <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
-                                            <div className="w-3 h-3 mr-1 flex-shrink-0"></div>
-                                            {errors.email.message}
+                                    {errors.password && (
+                                        <p className="mt-1 text-sm sm:text-base text-red-600 flex items-center">
+                                            <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                            {errors.password.message}
                                         </p>
                                     )}
                                 </div>
 
                                 {/* Password Field */}
                                 <div>
-                                    <label htmlFor="password" className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                                    <label htmlFor="password" className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2">
                                         <div className="relative mr-2">
                                             <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                             <Lock className="relative h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
@@ -380,7 +380,7 @@ const AdminLoginPage: React.FC = () => {
                                     <div className="text-right mt-2">
                                         <Link
                                             to="/forgot-password/admin"
-                                            className="text-xs sm:text-sm text-green-600 hover:text-green-500 font-medium transition-colors hover:underline"
+                                            className="text-sm sm:text-base text-green-600 hover:text-green-500 font-medium transition-colors hover:underline"
                                         >
                                             Forgot Password?
                                         </Link>
@@ -414,7 +414,7 @@ const AdminLoginPage: React.FC = () => {
 
                             {/* Modern Islamic Additional Links */}
                             <div className="mt-4 sm:mt-6 lg:mt-8 text-center space-y-2 sm:space-y-3">
-                                <p className="text-xs sm:text-sm text-gray-600">
+                                <p className="text-sm sm:text-base text-gray-600">
                                     <Link
                                         to="/admin/status"
                                         className="font-medium text-green-600 hover:text-green-500 transition-colors"
@@ -423,7 +423,7 @@ const AdminLoginPage: React.FC = () => {
                                         <span className="sm:hidden">Check Status</span>
                                     </Link>
                                 </p>
-                                <p className="text-xs sm:text-sm text-gray-600">
+                                <p className="text-sm sm:text-base text-gray-600">
                                     <span className="hidden sm:inline">Don't have an account? </span>
                                     <Link
                                         to="/mosques"
@@ -433,7 +433,7 @@ const AdminLoginPage: React.FC = () => {
                                         <span className="sm:hidden">Find Mosque</span>
                                     </Link>
                                 </p>
-                                <div className="flex items-center justify-center space-x-2 sm:space-x-4 text-xs sm:text-sm">
+                                <div className="flex items-center justify-center space-x-2 sm:space-x-4 text-sm sm:text-base">
                                     <Link
                                         to="/superadmin/login"
                                         className="text-emerald-600 hover:text-emerald-500 font-medium transition-colors"

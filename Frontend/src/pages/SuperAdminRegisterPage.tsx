@@ -29,7 +29,6 @@ const SuperAdminRegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -104,10 +103,14 @@ const SuperAdminRegisterPage: React.FC = () => {
 
         try {
             await authApi.registerSuperAdmin(data);
-            setSuccess(true);
-            setTimeout(() => {
-                navigate('/superadmin/login');
-            }, 2000);
+
+            // Redirect to email verification page with user data
+            navigate('/email-verification', {
+                state: {
+                    email: data.email,
+                    userType: 'superadmin'
+                }
+            });
         } catch (err: unknown) {
             console.log('Super admin registration error:', err);
             let errorMessage = getErrorMessage(err);
@@ -125,47 +128,6 @@ const SuperAdminRegisterPage: React.FC = () => {
             setLoading(false);
         }
     };
-
-    // Success Screen with Islamic Theme
-    if (success) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
-                {/* Islamic Background Pattern */}
-                <div className="absolute inset-0 opacity-20">
-                    <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full filter blur-3xl animate-pulse"></div>
-                    <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-80 sm:h-80 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-full filter blur-2xl animate-pulse delay-1000"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-emerald-400/10 to-teal-500/10 rounded-full filter blur-xl animate-pulse delay-500"></div>
-                </div>
-
-                <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
-                    <div className="max-w-md w-full">
-                        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 text-center border border-green-200/50 overflow-hidden">
-                            {/* Local Islamic orbs */}
-                            <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse"></div>
-                            <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-lg animate-pulse delay-500"></div>
-
-                            <div className="relative">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg animate-bounce">
-                                    <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                                </div>
-                                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-3">
-                                    Super Admin Registered Successfully!
-                                </h2>
-                                <p className="text-base sm:text-lg text-gray-700 mb-6">
-                                    Your account has been created. Redirecting to login page...
-                                </p>
-                                <div className="flex justify-center space-x-1">
-                                    <div className="w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full animate-bounce shadow-sm"></div>
-                                    <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0.1s' }}></div>
-                                    <div className="w-2 h-2 bg-gradient-to-r from-teal-500 to-green-600 rounded-full animate-bounce shadow-sm" style={{ animationDelay: '0.2s' }}></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
@@ -208,7 +170,7 @@ const SuperAdminRegisterPage: React.FC = () => {
                                     <span className="hidden sm:inline">Super Admin Registration</span>
                                     <span className="sm:hidden">Super Admin</span>
                                 </h1>
-                                <p className="text-sm sm:text-lg lg:text-xl text-gray-600 leading-relaxed px-2">
+                                <p className="text-base sm:text-sm lg:text-xl text-gray-600 leading-relaxed px-2">
                                     <span className="hidden sm:inline">Create your account to manage the mosque system</span>
                                     <span className="sm:hidden">Create your account</span>
                                 </p>

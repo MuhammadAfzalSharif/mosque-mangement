@@ -79,7 +79,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                             </button>
                         </div>
 
-                        <p className="text-gray-600 mb-6">{message}</p>
+                        <p className="text-gray-600 text-base">{message}</p>
 
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <button
@@ -368,7 +368,7 @@ const AdminDashboardPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
                             Loading Dashboard
                         </h2>
-                        <p className="text-gray-600 text-center text-sm">Preparing your mosque management interface...</p>
+                        <p className="text-gray-600 text-center text-base">Preparing your mosque management interface...</p>
                     </div>
                 </div>
             </div>
@@ -392,7 +392,7 @@ const AdminDashboardPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-red-700 to-rose-600 bg-clip-text text-transparent">
                             Unable to load dashboard
                         </h2>
-                        <p className="text-gray-600 mb-6 text-sm">There was a problem loading your dashboard. Please try logging in again.</p>
+                        <p className="text-gray-600 mb-6 text-base">There was a problem loading your dashboard. Please try logging in again.</p>
                         <Link
                             to="/mosques"
                             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -428,7 +428,7 @@ const AdminDashboardPage: React.FC = () => {
                         <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                             <Link
                                 to="/mosques"
-                                className="hidden sm:flex text-gray-600 hover:text-green-600 px-3 sm:px-4 py-2 rounded-xl hover:bg-green-50/70 backdrop-blur-sm transition-all duration-200 text-sm font-medium items-center group"
+                                className="hidden sm:flex text-gray-600 hover:text-green-600 px-3 sm:px-4 py-2 rounded-xl hover:bg-green-50/70 backdrop-blur-sm transition-all duration-200 text-base font-medium items-center group"
                             >
                                 <Search className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />
                                 <span className="ml-1 hidden md:inline">Find Mosques</span>
@@ -443,7 +443,7 @@ const AdminDashboardPage: React.FC = () => {
                             </Link>
                             <button
                                 onClick={() => setShowLogoutModal(true)}
-                                className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-3 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
+                                className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-3 sm:px-6 py-2 rounded-xl text-sm sm:text-base font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
                             >
                                 <LogOut className="w-4 h-4 sm:mr-2" />
                                 <span className="hidden sm:inline">Logout</span>
@@ -467,7 +467,7 @@ const AdminDashboardPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className="ml-3 flex-1 min-w-0">
-                                <p className="text-xs sm:text-sm font-semibold text-green-800 break-words">{successMessage}</p>
+                                <p className="text-sm sm:text-base font-semibold text-green-800 break-words">{successMessage}</p>
                             </div>
                         </div>
                     </div>
@@ -483,7 +483,7 @@ const AdminDashboardPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className="ml-3 flex-1 min-w-0">
-                                <p className="text-xs sm:text-sm font-semibold text-red-800 break-words">{error}</p>
+                                <p className="text-sm sm:text-base font-semibold text-red-800 break-words">{error}</p>
                             </div>
                         </div>
                     </div>
@@ -501,11 +501,11 @@ const AdminDashboardPage: React.FC = () => {
                                 <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 mr-3 animate-pulse" />
                                 Welcome back, {user.name}!
                             </h2>
-                            <p className="text-gray-600 text-sm sm:text-base lg:text-lg">Manage your mosque efficiently with our comprehensive Islamic dashboard</p>
+                            <p className="text-gray-600 text-base sm:text-sm lg:text-xl">Manage your mosque efficiently with our comprehensive Islamic dashboard</p>
                         </div>
                         <div className="mt-4 lg:mt-0">
                             <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-4 shadow-lg border border-green-200/50 backdrop-blur-sm">
-                                <div className="text-sm text-green-600 mb-1 font-medium flex items-center">
+                                <div className="text-base text-green-600 mb-1 font-medium flex items-center">
                                     <Shield className="w-4 h-4 mr-1" />
                                     Admin since
                                 </div>
@@ -528,7 +528,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <FileText className="w-4 h-4 text-green-600" />
                                     </div>
                                     <div>
-                                        <div className="text-xs font-medium text-green-600 mb-1">Name</div>
+                                        <div className="text-sm font-medium text-green-600 mb-1">Name</div>
                                         <span className="text-gray-700 font-semibold break-words">{mosque.name}</span>
                                     </div>
                                 </div>
@@ -537,7 +537,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <MapPin className="w-4 h-4 text-emerald-600" />
                                     </div>
                                     <div>
-                                        <div className="text-xs font-medium text-emerald-600 mb-1">Location</div>
+                                        <div className="text-sm font-medium text-emerald-600 mb-1">Location</div>
                                         <span className="text-gray-700 break-words">{mosque.location}</span>
                                     </div>
                                 </div>
@@ -546,7 +546,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <FileText className="w-4 h-4 text-teal-600" />
                                     </div>
                                     <div>
-                                        <div className="text-xs font-medium text-teal-600 mb-1">About</div>
+                                        <div className="text-sm font-medium text-teal-600 mb-1">About</div>
                                         <span className="text-gray-700 break-words">{mosque.description || 'No description available'}</span>
                                     </div>
                                 </div>
@@ -566,11 +566,11 @@ const AdminDashboardPage: React.FC = () => {
                                     <div className="text-2xl lg:text-3xl font-mono font-bold mb-2 tracking-wider break-all">
                                         {mosque.verification_code}
                                     </div>
-                                    <div className="text-green-100 text-sm">
+                                    <div className="text-green-100 text-base">
                                         Share this code with trusted individuals who want to become admins
                                     </div>
                                 </div>
-                                <div className="flex items-start text-green-100 text-sm">
+                                <div className="flex items-start text-green-100 text-base">
                                     <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
                                     <span>Keep this code secure and share only with authorized personnel</span>
                                 </div>
@@ -612,7 +612,7 @@ const AdminDashboardPage: React.FC = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`group relative flex-shrink-0 whitespace-nowrap px-3 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm font-medium text-center hover:bg-green-50/70 backdrop-blur-sm focus:z-10 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 min-w-max ${activeTab === tab.id
+                                    className={`group relative flex-shrink-0 whitespace-nowrap px-3 sm:px-6 py-4 sm:py-6 text-sm sm:text-base font-medium text-center hover:bg-green-50/70 backdrop-blur-sm focus:z-10 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 min-w-max ${activeTab === tab.id
                                         ? 'text-green-700 border-b-2 border-green-500 bg-green-50/70'
                                         : 'text-gray-500 hover:text-green-600'
                                         }`}
@@ -620,7 +620,7 @@ const AdminDashboardPage: React.FC = () => {
                                     <div className="flex flex-col items-center">
                                         <tab.icon className={`w-6 h-6 mb-1 transition-all duration-200 ${activeTab === tab.id ? 'scale-110 text-green-600' : 'group-hover:scale-105'}`} />
                                         <span className={`font-semibold ${activeTab === tab.id ? 'text-green-700' : ''}`}>{tab.name}</span>
-                                        <span className={`text-xs hidden lg:block mt-1 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}`}>{tab.description}</span>
+                                        <span className={`text-sm hidden lg:block mt-1 ${activeTab === tab.id ? 'text-green-600' : 'text-gray-400'}`}>{tab.description}</span>
                                     </div>
                                     {activeTab === tab.id && (
                                         <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-t-full"></div>
@@ -646,7 +646,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse"></div>
                                         <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-green-700 text-xs sm:text-sm font-semibold mb-1">Total Visitors</p>
+                                                <p className="text-green-700 text-sm sm:text-base font-semibold mb-1">Total Visitors</p>
                                                 <p className="text-xl sm:text-2xl font-bold text-green-900">1,234</p>
                                             </div>
                                             <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
@@ -658,7 +658,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-full blur-lg animate-pulse delay-200"></div>
                                         <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-emerald-700 text-xs sm:text-sm font-semibold mb-1">Prayer Times Updated</p>
+                                                <p className="text-emerald-700 text-sm sm:text-base font-semibold mb-1">Prayer Times Updated</p>
                                                 <p className="text-xl sm:text-2xl font-bold text-emerald-900">Today</p>
                                             </div>
                                             <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
@@ -670,7 +670,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-teal-400/20 to-green-500/20 rounded-full blur-lg animate-pulse delay-400"></div>
                                         <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-teal-700 text-xs sm:text-sm font-semibold mb-1">Admin Status</p>
+                                                <p className="text-teal-700 text-sm sm:text-base font-semibold mb-1">Admin Status</p>
                                                 <p className="text-xl sm:text-2xl font-bold text-teal-900">Active</p>
                                             </div>
                                             <div className="bg-gradient-to-br from-teal-500 to-green-600 p-2 sm:p-3 rounded-xl flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
@@ -682,7 +682,7 @@ const AdminDashboardPage: React.FC = () => {
                                         <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full blur-lg animate-pulse delay-600"></div>
                                         <div className="relative flex items-center justify-between">
                                             <div>
-                                                <p className="text-green-700 text-xs sm:text-sm font-semibold mb-1">Mosque Rating</p>
+                                                <p className="text-green-700 text-sm sm:text-base font-semibold mb-1">Mosque Rating</p>
                                                 <p className="text-xl sm:text-2xl font-bold text-green-900 flex items-center">
                                                     4.8
                                                     <Star className="w-5 h-5 text-yellow-500 ml-1 fill-current" />
@@ -697,7 +697,7 @@ const AdminDashboardPage: React.FC = () => {
                                 <div className="relative bg-gradient-to-br from-green-50/50 to-emerald-100/50 backdrop-blur-sm rounded-2xl p-6 text-center border border-green-200/30 shadow-lg">
                                     <div className="absolute -top-4 -left-4 w-16 h-16 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
                                     <Activity className="w-12 h-12 text-green-600 mx-auto mb-3 animate-pulse" />
-                                    <p className="text-gray-600 font-medium">Quick actions and recent activity will appear here</p>
+                                    <p className="text-gray-600 font-medium text-base">Quick actions and recent activity will appear here</p>
                                 </div>
                             </div>
                         )}

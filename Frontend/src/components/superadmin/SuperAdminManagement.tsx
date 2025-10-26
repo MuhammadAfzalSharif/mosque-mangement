@@ -179,7 +179,7 @@ const SuperAdminManagement: React.FC = () => {
                             <h1 className="text-lg sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-800 bg-clip-text text-transparent mb-1 sm:mb-2">
                                 Super Admin Management
                             </h1>
-                            <p className="text-gray-600 text-xs sm:text-sm lg:text-base">Manage and monitor all super administrator accounts</p>
+                            <p className="text-gray-600 text-sm sm:text-base">Manage and monitor all super administrator accounts</p>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 lg:gap-3">
                             <button
@@ -189,13 +189,13 @@ const SuperAdminManagement: React.FC = () => {
                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                 <span className="relative flex items-center justify-center space-x-1 sm:space-x-2">
                                     <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
-                                    <span className="text-xs sm:text-sm lg:text-base">Refresh</span>
+                                    <span className="text-sm sm:text-base">Refresh</span>
                                 </span>
                             </button>
                             <div className="flex items-center justify-center space-x-1 sm:space-x-2 lg:space-x-3 px-2 sm:px-3 lg:px-4 py-1 sm:py-2 bg-purple-100/80 backdrop-blur-sm border border-purple-200 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg w-full sm:w-auto">
                                 <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-pulse"></div>
                                 <Shield className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-purple-600" />
-                                <span className="text-purple-700 font-semibold text-xs sm:text-sm lg:text-base">{superAdmins.length} Super Admins</span>
+                                <span className="text-purple-700 font-semibold text-sm sm:text-base">{superAdmins.length} Super Admins</span>
                             </div>
                         </div>
                     </div>
@@ -214,8 +214,8 @@ const SuperAdminManagement: React.FC = () => {
                                             <Shield className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-white" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h2 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold">Create New Super Admin</h2>
-                                            <p className="text-purple-100 text-xs sm:text-sm mt-1 hidden sm:block">
+                                            <h2 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold">Create New Super Admin</h2>
+                                            <p className="text-purple-100 text-sm sm:text-base mt-1 hidden sm:block">
                                                 Add new super admin accounts with secure credentials
                                             </p>
                                         </div>
@@ -226,7 +226,7 @@ const SuperAdminManagement: React.FC = () => {
                             <form onSubmit={form.handleSubmit(handleCreateSuperAdmin)} className="space-y-3 sm:space-y-4 lg:space-y-6">
                                 {/* Name Field */}
                                 <div className="group">
-                                    <label className="block text-xs sm:text-sm lg:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
+                                    <label className="block text-sm sm:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
                                         Full Name <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
@@ -235,7 +235,7 @@ const SuperAdminManagement: React.FC = () => {
                                             <input
                                                 {...form.register('name')}
                                                 type="text"
-                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
                                                 placeholder="Enter full name"
                                             />
                                             <div className="absolute right-2 sm:right-3 lg:right-4 top-1/2 transform -translate-y-1/2 z-10">
@@ -245,8 +245,18 @@ const SuperAdminManagement: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
+
+
+
+
+
+
+
+
+
+
                                     {form.formState.errors.name && (
-                                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600 flex items-center gap-1 sm:gap-2">
+                                        <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-600 flex items-center gap-1 sm:gap-2">
                                             <FaExclamationTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {form.formState.errors.name.message}
                                         </p>
@@ -255,7 +265,7 @@ const SuperAdminManagement: React.FC = () => {
 
                                 {/* Email Field */}
                                 <div className="group">
-                                    <label className="block text-xs sm:text-sm lg:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
+                                    <label className="block text-sm sm:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
                                         Email Address <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
@@ -264,7 +274,7 @@ const SuperAdminManagement: React.FC = () => {
                                             <input
                                                 {...form.register('email')}
                                                 type="email"
-                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
                                                 placeholder="Enter email address"
                                             />
                                             <div className="absolute right-2 sm:right-3 lg:right-4 top-1/2 transform -translate-y-1/2 z-10">
@@ -275,13 +285,13 @@ const SuperAdminManagement: React.FC = () => {
                                         </div>
                                     </div>
                                     {form.formState.errors.email && (
-                                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600 flex items-center gap-1 sm:gap-2">
+                                        <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-600 flex items-center gap-1 sm:gap-2">
                                             <FaExclamationTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {form.formState.errors.email.message}
                                         </p>
                                     )}
                                     <div className="mt-1 sm:mt-2 p-1.5 sm:p-2 lg:p-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-lg sm:rounded-xl">
-                                        <p className="text-xs sm:text-sm text-blue-600 font-medium">
+                                        <p className="text-sm sm:text-base text-blue-600 font-medium">
                                             Allowed domains: gmail.com, outlook.com, yahoo.com, hotmail.com
                                         </p>
                                     </div>
@@ -289,7 +299,7 @@ const SuperAdminManagement: React.FC = () => {
 
                                 {/* Password Field */}
                                 <div className="group">
-                                    <label className="block text-xs sm:text-sm lg:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
+                                    <label className="block text-sm sm:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
                                         Password <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
@@ -298,7 +308,7 @@ const SuperAdminManagement: React.FC = () => {
                                             <input
                                                 {...form.register('password')}
                                                 type={showPassword ? 'text' : 'password'}
-                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
                                                 placeholder="Enter password"
                                             />
                                             <button
@@ -311,7 +321,7 @@ const SuperAdminManagement: React.FC = () => {
                                         </div>
                                     </div>
                                     {form.formState.errors.password && (
-                                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600 flex items-center gap-1 sm:gap-2">
+                                        <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-600 flex items-center gap-1 sm:gap-2">
                                             <FaExclamationTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {form.formState.errors.password.message}
                                         </p>
@@ -327,7 +337,7 @@ const SuperAdminManagement: React.FC = () => {
                                                         style={{ width: `${(passwordStrength.strength / 4) * 100}%` }}
                                                     ></div>
                                                 </div>
-                                                <span className={`px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 rounded-lg sm:rounded-xl text-xs font-bold ${passwordStrength.strength === 1 ? 'bg-red-100 text-red-600' :
+                                                <span className={`px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 rounded-lg sm:rounded-xl text-sm font-bold ${passwordStrength.strength === 1 ? 'bg-red-100 text-red-600' :
                                                     passwordStrength.strength === 2 ? 'bg-blue-100 text-blue-600' :
                                                         passwordStrength.strength === 3 ? 'bg-purple-100 text-purple-600' :
                                                             'bg-green-100 text-green-600'
@@ -338,7 +348,7 @@ const SuperAdminManagement: React.FC = () => {
                                                             passwordStrength.strength === 3 ? 'Strong' : 'Super'}</span>
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-600 leading-relaxed hidden sm:block">
+                                            <p className="text-sm text-gray-600 leading-relaxed hidden sm:block">
                                                 <strong>Security Tip:</strong> Use at least 7 characters with letters, numbers, and special characters for maximum protection.
                                             </p>
                                         </div>
@@ -347,7 +357,7 @@ const SuperAdminManagement: React.FC = () => {
 
                                 {/* Confirm Password Field */}
                                 <div className="group">
-                                    <label className="block text-xs sm:text-sm lg:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
+                                    <label className="block text-sm sm:text-base font-bold text-gray-700 mb-1 sm:mb-2 lg:mb-3">
                                         Confirm Password <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
@@ -356,7 +366,7 @@ const SuperAdminManagement: React.FC = () => {
                                             <input
                                                 {...form.register('confirm_password')}
                                                 type={showConfirmPassword ? 'text' : 'password'}
-                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                                className="w-full pl-2 sm:pl-3 lg:pl-4 pr-8 sm:pr-10 lg:pr-12 xl:pr-14 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-base placeholder-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl"
                                                 placeholder="Confirm password"
                                             />
                                             <button
@@ -369,7 +379,7 @@ const SuperAdminManagement: React.FC = () => {
                                         </div>
                                     </div>
                                     {form.formState.errors.confirm_password && (
-                                        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600 flex items-center gap-1 sm:gap-2">
+                                        <p className="mt-1 sm:mt-2 text-sm sm:text-base text-red-600 flex items-center gap-1 sm:gap-2">
                                             <FaExclamationTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {form.formState.errors.confirm_password.message}
                                         </p>
@@ -388,7 +398,7 @@ const SuperAdminManagement: React.FC = () => {
                                             {loading ? (
                                                 <>
                                                     <div className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                                    <span className="text-xs sm:text-sm lg:text-base">
+                                                    <span className="text-sm sm:text-base">
                                                         <span className="hidden sm:inline">Creating Super Admin...</span>
                                                         <span className="sm:hidden">Creating...</span>
                                                     </span>
@@ -398,7 +408,7 @@ const SuperAdminManagement: React.FC = () => {
                                                     <div className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 bg-white/20 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center">
                                                         <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
                                                     </div>
-                                                    <span className="text-xs sm:text-sm lg:text-base xl:text-lg">Create Super Admin</span>
+                                                    <span className="text-sm sm:text-base xl:text-xl">Create Super Admin</span>
                                                 </>
                                             )}
                                         </span>
@@ -420,8 +430,8 @@ const SuperAdminManagement: React.FC = () => {
                                             <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-white" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h2 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold">Existing Super Admins</h2>
-                                            <p className="text-indigo-100 text-xs sm:text-sm mt-1 hidden sm:block">
+                                            <h2 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold">Existing Super Admins</h2>
+                                            <p className="text-indigo-100 text-sm sm:text-base mt-1 hidden sm:block">
                                                 Manage and monitor all super admin accounts
                                             </p>
                                         </div>
@@ -437,10 +447,10 @@ const SuperAdminManagement: React.FC = () => {
                                             <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg sm:rounded-2xl lg:rounded-3xl flex items-center justify-center mx-auto mb-2 sm:mb-4 lg:mb-6 shadow-lg">
                                                 <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 border-2 sm:border-3 lg:border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                                             </div>
-                                            <h3 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-1 sm:mb-2">
+                                            <h3 className="text-sm sm:text-base lg:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-1 sm:mb-2">
                                                 Loading Super Admins
                                             </h3>
-                                            <p className="text-gray-600 text-xs sm:text-sm">Please wait while we fetch the data...</p>
+                                            <p className="text-gray-600 text-sm sm:text-base">Please wait while we fetch the data...</p>
                                         </div>
                                     </div>
                                 </div>
@@ -452,8 +462,8 @@ const SuperAdminManagement: React.FC = () => {
                                             <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-lg sm:rounded-2xl lg:rounded-3xl flex items-center justify-center mx-auto mb-2 sm:mb-4 lg:mb-6 shadow-lg">
                                                 <Users className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white" />
                                             </div>
-                                            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-700 mb-1 sm:mb-2">No Super Admins Found</h3>
-                                            <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
+                                            <h3 className="text-sm sm:text-base lg:text-xl font-bold text-gray-700 mb-1 sm:mb-2">No Super Admins Found</h3>
+                                            <p className="text-gray-500 text-sm sm:text-base leading-relaxed">
                                                 Create your first super admin account to get started with system management.
                                             </p>
                                         </div>
@@ -478,7 +488,7 @@ const SuperAdminManagement: React.FC = () => {
                                                                 </h3>
                                                                 <div className="flex items-center space-x-1 sm:space-x-2 mt-1">
                                                                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                                                    <span className="text-xs text-green-600 font-medium">Active</span>
+                                                                    <span className="text-sm text-green-600 font-medium">Active</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -489,8 +499,8 @@ const SuperAdminManagement: React.FC = () => {
                                                                 <FaEnvelope className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                                                             </div>
                                                             <div className="min-w-0 flex-1">
-                                                                <p className="text-xs text-gray-500 font-medium">Email Address</p>
-                                                                <p className="text-xs sm:text-sm font-semibold text-gray-700 truncate">{admin.email}</p>
+                                                                <p className="text-sm text-gray-500 font-medium">Email Address</p>
+                                                                <p className="text-sm sm:text-base font-semibold text-gray-700 truncate">{admin.email}</p>
                                                             </div>
                                                         </div>
 
@@ -500,8 +510,8 @@ const SuperAdminManagement: React.FC = () => {
                                                                 <FaCalendarAlt className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-500 font-medium">Created</p>
-                                                                <p className="text-xs sm:text-sm font-semibold text-gray-700">
+                                                                <p className="text-sm text-gray-500 font-medium">Created</p>
+                                                                <p className="text-sm sm:text-base font-semibold text-gray-700">
                                                                     {new Date(admin.createdAt).toLocaleDateString('en-US', {
                                                                         year: 'numeric',
                                                                         month: 'short',
@@ -524,12 +534,12 @@ const SuperAdminManagement: React.FC = () => {
                                                                 {deletingId === admin._id ? (
                                                                     <>
                                                                         <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                                                        <span className="text-xs sm:text-sm font-bold">Deleting...</span>
+                                                                        <span className="text-sm sm:text-base font-bold">Deleting...</span>
                                                                     </>
                                                                 ) : (
                                                                     <>
                                                                         <FaTrash className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
-                                                                        <span className="text-xs sm:text-sm font-bold">Delete</span>
+                                                                        <span className="text-sm sm:text-base font-bold">Delete</span>
                                                                     </>
                                                                 )}
                                                             </span>
@@ -558,10 +568,10 @@ const SuperAdminManagement: React.FC = () => {
                                             <FaExclamationTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 text-white" />
                                         </div>
                                     </div>
-                                    <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-1 sm:mb-2 lg:mb-3 xl:mb-4">
+                                    <h3 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-1 sm:mb-2 lg:mb-3 xl:mb-4">
                                         Delete Super Admin
                                     </h3>
-                                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 leading-relaxed">
+                                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                                         Are you sure you want to delete{' '}
                                         <span className="font-bold text-red-600">"{adminToDelete.name}"</span>?{' '}
                                         This action cannot be undone.
@@ -573,9 +583,9 @@ const SuperAdminManagement: React.FC = () => {
                                     <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200/50 rounded-lg sm:rounded-xl lg:rounded-2xl p-2 sm:p-3 lg:p-4">
                                         <div className="flex items-start gap-1.5 sm:gap-2 lg:gap-3">
                                             <div className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <span className="text-white text-xs font-bold">!</span>
+                                                <span className="text-white text-sm font-bold">!</span>
                                             </div>
-                                            <p className="text-red-800 text-xs sm:text-sm leading-relaxed">
+                                            <p className="text-red-800 text-sm sm:text-base leading-relaxed">
                                                 This will permanently remove the super admin account and all associated permissions.
                                                 Make sure this action is intentional.
                                             </p>
@@ -586,14 +596,14 @@ const SuperAdminManagement: React.FC = () => {
                                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4">
                                     <button
                                         onClick={() => setShowDeleteModal(false)}
-                                        className="flex-1 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg sm:rounded-xl lg:rounded-2xl transition-all duration-200 transform hover:scale-105 text-xs sm:text-sm lg:text-base"
+                                        className="flex-1 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg sm:rounded-xl lg:rounded-2xl transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={confirmDeleteSuperAdmin}
                                         disabled={deletingId === adminToDelete._id}
-                                        className="group relative overflow-hidden flex-1 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-lg sm:rounded-xl lg:rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 text-xs sm:text-sm lg:text-base"
+                                        className="group relative overflow-hidden flex-1 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-lg sm:rounded-xl lg:rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
                                     >
                                         <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                         <span className="relative flex items-center space-x-1 sm:space-x-2">

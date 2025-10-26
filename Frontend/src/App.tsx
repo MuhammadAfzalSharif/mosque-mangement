@@ -14,6 +14,7 @@ import SuperAdminRegisterPage from './pages/SuperAdminRegisterPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import EmailVerificationPage from './pages/EmailVerificationPage';
 
 function App() {
   return (
@@ -40,6 +41,9 @@ function App() {
           {/* Password Reset Routes */}
           <Route path="/forgot-password/:userType" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:userType" element={<ResetPasswordPage />} />
+
+          {/* Email Verification Route */}
+          <Route path="/email-verification" element={<EmailVerificationPage />} />
 
           {/* Catch all route - redirect to home */}
           <Route path="*" element={<MosqueFinderPage />} />

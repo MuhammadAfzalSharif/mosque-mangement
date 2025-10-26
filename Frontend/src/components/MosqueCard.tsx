@@ -63,7 +63,7 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
                         </div>
                         <div className="flex items-center space-x-1 sm:space-x-2">
                             <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-300 rounded-full animate-pulse shadow-sm"></div>
-                            <span className="text-xs sm:text-sm text-green-100 font-medium">
+                            <span className="text-sm sm:text-base text-green-100 font-medium">
                                 <span className="hidden sm:inline">Active</span>
                                 <span className="sm:hidden">Open</span>
                             </span>
@@ -80,8 +80,8 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
                                 <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-sm opacity-0 group-hover/fav:opacity-100 transition-opacity duration-300"></div>
                                 <Star
                                     className={`relative w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300 ${isFavorited
-                                            ? 'text-yellow-400 fill-current drop-shadow-sm'
-                                            : 'text-white group-hover/fav:text-yellow-200'
+                                        ? 'text-yellow-400 fill-current drop-shadow-sm'
+                                        : 'text-white group-hover/fav:text-yellow-200'
                                         }`}
                                 />
                             </div>
@@ -90,7 +90,7 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
                         {/* Prayer Time Indicator */}
                         <div className="hidden sm:flex items-center bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
                             <Clock className="w-3 h-3 text-white mr-1" />
-                            <span className="text-xs text-white">5x</span>
+                            <span className="text-sm text-white">5x</span>
                         </div>
                     </div>
                 </div>
@@ -100,12 +100,12 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
             <div className="relative z-10 p-3 sm:p-4 lg:p-6 space-y-2 sm:space-y-3 lg:space-y-4">
                 {/* Mosque Name */}
                 <div className="space-y-1 sm:space-y-2">
-                    <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors duration-300 leading-tight line-clamp-2">
+                    <h3 className="text-base sm:text-sm lg:text-xl xl:text-2xl font-bold text-gray-900 group-hover:text-green-700 transition-colors duration-300 leading-tight line-clamp-2">
                         {capitalizedName}
                     </h3>
 
                     {/* Quick Stats - Mobile Hidden, Desktop Shown */}
-                    <div className="hidden sm:flex items-center space-x-3 text-xs text-gray-600">
+                    <div className="hidden sm:flex items-center space-x-3 text-sm text-gray-600">
                         <div className="flex items-center">
                             <Users className="w-3 h-3 mr-1 text-green-600" />
                             <span>Community</span>
@@ -126,10 +126,10 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm text-gray-700 leading-relaxed line-clamp-2 font-medium">
+                        <p className="text-sm sm:text-base text-gray-700 leading-relaxed line-clamp-2 font-medium">
                             {capitalizedLocation}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">
+                        <p className="text-sm text-gray-500 mt-0.5 hidden sm:block">
                             Tap for directions & details
                         </p>
                     </div>
@@ -146,7 +146,7 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
                                 <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full blur-sm opacity-30"></div>
                                 <Eye className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600 group-hover/btn:text-emerald-700 group-hover/btn:scale-110 transition-all duration-300" />
                             </div>
-                            <span className="text-xs sm:text-sm font-bold bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 bg-clip-text text-transparent">
+                            <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 bg-clip-text text-transparent">
                                 <span className="hidden sm:inline">View Details & Prayer Times</span>
                                 <span className="sm:hidden">View Details</span>
                             </span>
@@ -155,7 +155,7 @@ const MosqueCard: React.FC<MosqueCardProps> = ({ id, name, location, isFavorited
                 </div>
 
                 {/* Mobile-Only Quick Actions */}
-                <div className="sm:hidden flex items-center justify-between text-xs">
+                <div className="sm:hidden flex items-center justify-between text-sm">
                     <div className="flex items-center space-x-3">
                         <div className="flex items-center text-green-600">
                             <Clock className="w-3 h-3 mr-1" />

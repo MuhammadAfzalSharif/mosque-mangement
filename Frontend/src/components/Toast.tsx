@@ -37,7 +37,7 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose, duration = 5000 }
             shadow-lg p-2 sm:p-4 
             w-auto sm:min-w-[300px] sm:max-w-md 
             animate-slide-in
-            text-xs sm:text-sm
+            text-sm sm:text-base
         `}>
             <div className="flex-shrink-0">
                 <div className="w-4 h-4 sm:w-6 sm:h-6">
@@ -46,7 +46,7 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose, duration = 5000 }
                     {type === 'warning' && <AlertCircle className="w-full h-full text-yellow-500" />}
                 </div>
             </div>
-            <p className={`flex-1 ${textColors[type]} font-medium text-xs sm:text-sm leading-tight sm:leading-normal`}>
+            <p className={`flex-1 ${textColors[type]} font-medium text-sm sm:text-base leading-tight sm:leading-normal`}>
                 {message}
             </p>
             <button

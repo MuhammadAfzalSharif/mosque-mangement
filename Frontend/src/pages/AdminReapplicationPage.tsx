@@ -156,7 +156,7 @@ const AdminReapplicationPage: React.FC = () => {
                                 <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-3">
                                     Application Submitted!
                                 </h2>
-                                <p className="text-base sm:text-lg text-gray-700 mb-6">
+                                <p className="text-base sm:text-sm text-gray-700 mb-6">
                                     Your reapplication for <span className="font-semibold text-green-600">{mosqueName}</span> has been submitted successfully.
                                 </p>
 
@@ -168,7 +168,7 @@ const AdminReapplicationPage: React.FC = () => {
                                         </div>
                                         <span className="font-semibold text-gray-800 text-sm sm:text-base">Status: Pending Approval</span>
                                     </div>
-                                    <p className="text-xs sm:text-sm text-gray-700">
+                                    <p className="text-sm sm:text-base text-gray-700">
                                         The super admin will review your application soon.
                                     </p>
                                 </div>
@@ -176,11 +176,11 @@ const AdminReapplicationPage: React.FC = () => {
                                 {/* Redirecting Message */}
                                 <div className="flex items-center justify-center gap-3 text-gray-600 mb-4">
                                     <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                                    <p className="text-xs sm:text-sm">Redirecting to login page...</p>
+                                    <p className="text-sm sm:text-base">Redirecting to login page...</p>
                                 </div>
 
                                 {/* Manual Navigation */}
-                                <p className="text-xs sm:text-sm text-gray-500">
+                                <p className="text-sm sm:text-base text-gray-500">
                                     Login again to check your application status
                                 </p>
                             </div>
@@ -234,7 +234,7 @@ const AdminReapplicationPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-gray-800 mb-1 text-sm sm:text-base">Important Information</h3>
-                                    <ul className="text-xs sm:text-sm text-gray-700 space-y-1">
+                                    <ul className="text-sm sm:text-base text-gray-700 space-y-1">
                                         <li>• Get the verification code from the mosque administration</li>
                                         <li>• Ensure the mosque doesn't already have an admin</li>
                                         <li>• Your application will be pending until the super admin approves it</li>
@@ -260,11 +260,11 @@ const AdminReapplicationPage: React.FC = () => {
                                     value={verificationCode}
                                     onChange={(e) => setVerificationCode(e.target.value.toUpperCase())}
                                     placeholder="Enter verification code (e.g., ABC12345)"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-base sm:text-lg font-mono uppercase transition-all duration-300 bg-white/50 backdrop-blur-sm"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-base sm:text-sm font-mono uppercase transition-all duration-300 bg-white/50 backdrop-blur-sm"
                                     maxLength={16}
                                     required
                                 />
-                                <p className="mt-2 text-xs sm:text-sm text-gray-500">
+                                <p className="mt-2 text-sm sm:text-base text-gray-500">
                                     Enter the unique verification code provided by the mosque
                                 </p>
                             </div>
@@ -285,7 +285,7 @@ const AdminReapplicationPage: React.FC = () => {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none transition-all duration-300 bg-white/50 backdrop-blur-sm"
                                     maxLength={500}
                                 />
-                                <p className="mt-2 text-xs sm:text-sm text-gray-500">
+                                <p className="mt-2 text-sm sm:text-base text-gray-500">
                                     {applicationNotes.length}/500 characters
                                 </p>
                             </div>
@@ -296,10 +296,10 @@ const AdminReapplicationPage: React.FC = () => {
                                     <AlertCircle size={14} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-xs sm:text-sm font-semibold text-orange-900 mb-1">
+                                    <p className="text-sm sm:text-base font-semibold text-orange-900 mb-1">
                                         Reapplication Notice
                                     </p>
-                                    <p className="text-xs sm:text-sm text-orange-800">
+                                    <p className="text-sm sm:text-base text-orange-800">
                                         Please ensure you meet all requirements before submitting. Multiple rejections may result in a ban from the system.
                                     </p>
                                 </div>

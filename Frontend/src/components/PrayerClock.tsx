@@ -247,7 +247,7 @@ const PrayerClock: React.FC<PrayerClockProps> = ({ prayerTimes }) => {
                             </div>
                         </div>
                         <div>
-                            <div className="text-xs sm:text-sm lg:text-lg font-medium text-green-100">
+                            <div className="text-sm sm:text-base lg:text-lg font-medium text-green-100">
                                 <span className="hidden sm:inline">{formatDate(currentTime)}</span>
                                 <span className="sm:hidden">{currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                             </div>
@@ -261,7 +261,7 @@ const PrayerClock: React.FC<PrayerClockProps> = ({ prayerTimes }) => {
                                 <div className="absolute inset-0 bg-gray-700/30 rounded-full blur-sm"></div>
                                 <Clock className="relative w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 text-green-200" />
                             </div>
-                            <span className="text-xs sm:text-sm text-green-200 font-medium">
+                            <span className="text-sm sm:text-base text-green-200 font-medium">
                                 <span className="hidden sm:inline">Current Time</span>
                                 <span className="sm:hidden">Now</span>
                             </span>
@@ -280,7 +280,7 @@ const PrayerClock: React.FC<PrayerClockProps> = ({ prayerTimes }) => {
                                 <div className="absolute inset-0 bg-emerald-400/30 rounded-full blur-sm"></div>
                                 <Home className="relative w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-emerald-300" />
                             </div>
-                            <span className="text-emerald-200 font-medium text-xs sm:text-sm">
+                            <span className="text-emerald-200 font-medium text-sm sm:text-base">
                                 <span className="hidden sm:inline">Friday - Jummah Prayer Day</span>
                                 <span className="sm:hidden">Jummah Day</span>
                             </span>
@@ -307,7 +307,7 @@ const PrayerClock: React.FC<PrayerClockProps> = ({ prayerTimes }) => {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-xs sm:text-sm text-blue-100 font-medium">Next Prayer</div>
+                                <div className="text-sm sm:text-base text-blue-100 font-medium">Next Prayer</div>
                                 <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
                                     {nextPrayer.name}
                                 </div>
@@ -410,7 +410,7 @@ const PrayerClock: React.FC<PrayerClockProps> = ({ prayerTimes }) => {
 
                             {/* Time Display with Light Black Outline */}
                             <div className="text-right flex-shrink-0">
-                                <div className="text-base sm:text-lg lg:text-2xl font-mono font-bold text-gray-900 border border-gray-700/20 rounded-lg p-1 sm:p-2 bg-gray-900/5 backdrop-blur-sm shadow-sm group-hover:border-gray-600/30 transition-colors duration-300">
+                                <div className="text-base sm:text-sm lg:text-2xl font-mono font-bold text-gray-900 border border-gray-700/20 rounded-lg p-1 sm:p-2 bg-gray-900/5 backdrop-blur-sm shadow-sm group-hover:border-gray-600/30 transition-colors duration-300">
                                     {convertTo12Hour(prayer.time || '')}
                                 </div>
                                 {nextPrayer?.name === prayer.name && (

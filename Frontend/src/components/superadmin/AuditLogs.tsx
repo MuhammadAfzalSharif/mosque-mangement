@@ -480,7 +480,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                             fetchAuditLogs();
                             fetchAuditStats();
                         }}
-                        className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm lg:text-base font-semibold rounded-lg transition-colors"
+                        className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-semibold rounded-lg transition-colors"
                     >
                         <FaSync className="w-3 h-3 sm:w-4 h-4 mr-1 sm:mr-2" />
                         <span className="hidden sm:inline">Refresh</span>
@@ -488,7 +488,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                     </button>
                     <button
                         onClick={handleExportLogs}
-                        className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm lg:text-base font-semibold rounded-lg transition-colors"
+                        className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base font-semibold rounded-lg transition-colors"
                     >
                         <FaDownload className="w-3 h-3 sm:w-4 h-4 mr-1 sm:mr-2" />
                         <span className="hidden sm:inline">
@@ -499,7 +499,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                     {selectedLogs.length > 0 && (
                         <button
                             onClick={handleBulkDeleteLogs}
-                            className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm lg:text-base font-semibold rounded-lg transition-colors"
+                            className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base font-semibold rounded-lg transition-colors"
                         >
                             <FaTrash className="w-3 h-3 sm:w-4 h-4 mr-1 sm:mr-2" />
                             <span className="hidden sm:inline">Delete Selected ({selectedLogs.length})</span>
@@ -508,13 +508,13 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                     )}
                     <button
                         onClick={handleCleanupLogs}
-                        className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm lg:text-base font-semibold rounded-lg transition-colors"
+                        className="flex items-center justify-center px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm sm:text-base font-semibold rounded-lg transition-colors"
                     >
                         <FaTrash className="w-3 h-3 sm:w-4 h-4 mr-1 sm:mr-2" />
                         <span className="hidden sm:inline">Cleanup All</span>
                         <span className="sm:hidden">Cleanup</span>
                     </button>
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                    <span className="bg-purple-100 text-purple-800 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-sm sm:text-base font-semibold whitespace-nowrap">
                         {totalLogs} Total
                     </span>
                 </div>
@@ -536,7 +536,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                             placeholder="Search logs..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-6 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 text-xs sm:text-sm lg:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="w-full pl-6 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
                         {searchTerm && (
                             <button
@@ -553,7 +553,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                         <select
                             value={actionFilter}
                             onChange={(e) => setActionFilter(e.target.value)}
-                            className="pl-6 sm:pl-10 pr-6 sm:pr-8 py-1.5 sm:py-2 lg:py-3 text-xs sm:text-sm lg:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white w-full"
+                            className="pl-6 sm:pl-10 pr-6 sm:pr-8 py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white w-full"
                         >
                             <option value="all">All Actions</option>
                             <option value="mosque_created">Mosque Created</option>
@@ -735,7 +735,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                                 <div className="flex items-center space-x-2">
                                                     {getActionIcon(log.action_type)}
                                                     <span
-                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${getActionColor(
+                                                        className={`px-3 py-1 rounded-full text-sm sm:text-base font-semibold ${getActionColor(
                                                             log.action_type,
                                                             log.status
                                                         )}`}
@@ -748,7 +748,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                                 <p className="text-sm font-medium text-gray-900">
                                                     {log.performed_by.user_name}
                                                 </p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-sm sm:text-base text-gray-500">
                                                     {log.performed_by.user_type.replace('_', ' ')}
                                                 </p>
                                             </td>
@@ -777,7 +777,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                         <div className="lg:hidden">
                             <div className="p-2 border-b bg-gray-50">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-medium text-gray-700">Select All</span>
+                                    <span className="text-sm sm:text-base font-medium text-gray-700">Select All</span>
                                     <input
                                         type="checkbox"
                                         checked={selectedLogs.length === displayLogs.length && displayLogs.length > 0}
@@ -802,7 +802,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                                 />
                                                 {getActionIcon(log.action_type)}
                                                 <span
-                                                    className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${getActionColor(
+                                                    className={`px-1.5 py-0.5 rounded-full text-sm sm:text-base font-semibold ${getActionColor(
                                                         log.action_type,
                                                         log.status
                                                     )}`}
@@ -812,7 +812,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                             </div>
                                             <div className="flex items-center space-x-1">
                                                 {getResultIcon(log.status)}
-                                                <span className="text-xs capitalize text-gray-600">{log.status}</span>
+                                                <span className="text-sm sm:text-base capitalize text-gray-600">{log.status}</span>
                                             </div>
                                         </div>
 
@@ -821,13 +821,13 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                                 <p className="text-sm font-medium text-gray-900">
                                                     {log.performed_by.user_name}
                                                 </p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-sm sm:text-base text-gray-500">
                                                     {log.performed_by.user_type.replace('_', ' ')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-sm sm:text-base text-gray-500">
                                                     {formatTimestamp(log.timestamp)}
                                                 </p>
                                             </div>
@@ -835,7 +835,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                             <div className="flex justify-end">
                                                 <button
                                                     onClick={() => viewLogDetails(log)}
-                                                    className="text-purple-600 hover:text-purple-900 font-medium text-xs flex items-center"
+                                                    className="text-purple-600 hover:text-purple-900 font-medium text-sm sm:text-base flex items-center"
                                                 >
                                                     <FaEye className="w-3 h-3 mr-1" />
                                                     View
@@ -892,21 +892,21 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                         <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
-                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Action Type</h3>
+                                    <h3 className="text-sm sm:text-base font-semibold text-gray-500 mb-1">Action Type</h3>
                                     <p className="text-sm sm:text-base lg:text-lg font-medium">{getActionLabel(selectedLog.action_type)}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Status</h3>
-                                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${getActionColor(selectedLog.action_type, selectedLog.status)}`}>
+                                    <h3 className="text-sm sm:text-base font-semibold text-gray-500 mb-1">Status</h3>
+                                    <span className={`px-2 sm:px-3 py-1 rounded-full text-sm sm:text-base font-semibold ${getActionColor(selectedLog.action_type, selectedLog.status)}`}>
                                         {selectedLog.status}
                                     </span>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Timestamp</h3>
+                                    <h3 className="text-sm sm:text-base font-semibold text-gray-500 mb-1">Timestamp</h3>
                                     <p className="text-sm sm:text-base lg:text-lg font-medium">{formatTimestamp(selectedLog.timestamp)}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Performed By</h3>
+                                    <h3 className="text-sm sm:text-base font-semibold text-gray-500 mb-1">Performed By</h3>
                                     <p className="text-sm sm:text-base lg:text-lg font-medium">{selectedLog.performed_by.user_name}</p>
                                     <p className="text-sm text-gray-500">{selectedLog.performed_by.user_email}</p>
                                 </div>
@@ -916,11 +916,11 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                 <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-2 sm:mb-3">Target Information</h3>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <p className="text-xs sm:text-sm text-gray-500">Type</p>
+                                        <p className="text-sm sm:text-base text-gray-500">Type</p>
                                         <p className="font-medium text-sm sm:text-base">{selectedLog.target.target_type}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs sm:text-sm text-gray-500">Name</p>
+                                        <p className="text-sm sm:text-base text-gray-500">Name</p>
                                         <p className="font-medium text-sm sm:text-base">{selectedLog.target.target_name || 'N/A'}</p>
                                     </div>
                                 </div>
@@ -933,7 +933,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                     {selectedLog.action_details.mosque_data && (
                                         <div className="mb-3 sm:mb-4">
                                             <h4 className="font-semibold text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Mosque Information</h4>
-                                            <div className="space-y-1 text-xs sm:text-sm">
+                                            <div className="space-y-1 text-sm sm:text-base">
                                                 {(selectedLog.action_details.mosque_data as { name?: string }).name && (
                                                     <p><span className="font-medium">Name:</span> {String((selectedLog.action_details.mosque_data as { name?: string }).name)}</p>
                                                 )}
@@ -947,7 +947,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                     {selectedLog.action_details.admin_data && (
                                         <div className="mb-3 sm:mb-4">
                                             <h4 className="font-semibold text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Admin Information</h4>
-                                            <div className="space-y-1 text-xs sm:text-sm">
+                                            <div className="space-y-1 text-sm sm:text-base">
                                                 {(selectedLog.action_details.admin_data as { name?: string }).name && (
                                                     <p><span className="font-medium">Name:</span> {String((selectedLog.action_details.admin_data as { name?: string }).name)}</p>
                                                 )}
@@ -964,7 +964,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                     {(selectedLog.action_details.reason || selectedLog.action_details.notes) && (
                                         <div className="mb-3 sm:mb-4">
                                             <h4 className="font-semibold text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Additional Information</h4>
-                                            <p className="text-xs sm:text-sm">
+                                            <p className="text-sm sm:text-base">
                                                 {selectedLog.action_details.reason || selectedLog.action_details.notes}
                                             </p>
                                         </div>
@@ -972,7 +972,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
 
                                     <div className="border-t pt-2 sm:pt-3 mt-2 sm:mt-3">
                                         <h4 className="font-semibold text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Technical Details</h4>
-                                        <div className="space-y-1 text-xs sm:text-sm text-gray-600">
+                                        <div className="space-y-1 text-sm sm:text-base text-gray-600">
                                             {selectedLog.action_details.ip_address && (
                                                 <p><span className="font-medium">IP Address:</span> {selectedLog.action_details.ip_address}</p>
                                             )}
@@ -1009,14 +1009,14 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 lg:mb-4">
                                 <FaExclamationTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-orange-600" />
                             </div>
-                            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 mb-1 sm:mb-2">Cleanup All Audit Logs</h3>
+                            <h3 className="text-sm sm:text-base lg:text-xl font-bold text-gray-800 mb-1 sm:mb-2">Cleanup All Audit Logs</h3>
                             <p className="text-xs sm:text-sm lg:text-base text-gray-600">
                                 This will permanently delete ALL audit logs in the system. This action cannot be undone.
                             </p>
                         </div>
 
                         <div className="mb-3 sm:mb-4 lg:mb-6">
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                            <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                 Reason for Cleanup *
                             </label>
                             <textarea
@@ -1027,13 +1027,13 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                 rows={3}
                                 required
                             />
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                            <p className="text-sm sm:text-base text-gray-500 mt-1">
                                 {cleanupReason.length} / 10 characters minimum
                             </p>
                         </div>
 
                         <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
-                            <p className="text-xs sm:text-sm text-orange-800">
+                            <p className="text-sm sm:text-base text-orange-800">
                                 <strong>Warning:</strong> This will delete logs older than 90 days from the database permanently.
                             </p>
                         </div>
@@ -1066,7 +1066,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 lg:mb-4">
                                 <FaExclamationTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-600" />
                             </div>
-                            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 mb-1 sm:mb-2">Delete Selected Audit Logs</h3>
+                            <h3 className="text-sm sm:text-base lg:text-xl font-bold text-gray-800 mb-1 sm:mb-2">Delete Selected Audit Logs</h3>
                             <p className="text-xs sm:text-sm lg:text-base text-gray-600">
                                 This will permanently delete {selectedLogs.length} selected audit log{selectedLogs.length !== 1 ? 's' : ''}.
                                 This action cannot be undone.
@@ -1074,7 +1074,7 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                         </div>
 
                         <div className="mb-3 sm:mb-4 lg:mb-6">
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                            <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                 Reason for Deletion *
                             </label>
                             <textarea
@@ -1085,13 +1085,13 @@ const AuditLogs: React.FC<Props> = ({ onViewDetails, onExportLogs }) => {
                                 rows={3}
                                 required
                             />
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                            <p className="text-sm sm:text-base text-gray-500 mt-1">
                                 {bulkDeleteReason.length} / 10 characters minimum
                             </p>
                         </div>
 
                         <div className="bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
-                            <p className="text-xs sm:text-sm text-red-800">
+                            <p className="text-sm sm:text-base text-red-800">
                                 <strong>Danger:</strong> This will permanently delete the selected logs from the database.
                             </p>
                         </div>

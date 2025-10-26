@@ -164,9 +164,6 @@ const MosqueRegistration: React.FC<Props> = ({ onRegister }) => {
         <div className="space-y-2 sm:space-y-4 lg:space-y-6">
             {/* Header */}
             <div className="text-center">
-                <div className="flex items-center justify-center mb-2 sm:mb-4">
-                    <img src="/images/logo.png" alt="Mosque Finder" className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain mr-2 sm:mr-3" />
-                </div>
                 <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-1 sm:mb-2">
                     Mosque Registration
                 </h1>
@@ -195,51 +192,51 @@ const MosqueRegistration: React.FC<Props> = ({ onRegister }) => {
                                     <div className="bg-white/80 rounded-md sm:rounded-lg p-2 sm:p-3 lg:p-4 backdrop-blur">
                                         <ul className="space-y-1 sm:space-y-2">
                                             {errors.mosque_name && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Mosque:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.mosque_name.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.mosque_name.message}</span>
                                                 </li>
                                             )}
                                             {errors.location && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Location:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.location.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.location.message}</span>
                                                 </li>
                                             )}
                                             {errors.contact_phone && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800 hidden sm:flex">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800 hidden sm:flex">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Contact Phone:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.contact_phone.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.contact_phone.message}</span>
                                                 </li>
                                             )}
                                             {errors.contact_email && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800 hidden sm:flex">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800 hidden sm:flex">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Contact Email:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.contact_email.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.contact_email.message}</span>
                                                 </li>
                                             )}
                                             {errors.admin_name && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Admin:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.admin_name.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.admin_name.message}</span>
                                                 </li>
                                             )}
                                             {errors.admin_email && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Email:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.admin_email.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.admin_email.message}</span>
                                                 </li>
                                             )}
                                             {errors.admin_phone && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Phone:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.admin_phone.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.admin_phone.message}</span>
                                                 </li>
                                             )}
                                             {errors.admin_password && (
-                                                <li className="flex items-start text-xs sm:text-sm text-red-800">
+                                                <li className="flex items-start text-sm sm:text-base text-red-800">
                                                     <span className="font-semibold mr-1 sm:mr-2 text-red-600">Password:</span>
-                                                    <span className="text-xs sm:text-sm">{errors.admin_password.message}</span>
+                                                    <span className="text-sm sm:text-base">{errors.admin_password.message}</span>
                                                 </li>
                                             )}
                                             {errors.confirm_password && (

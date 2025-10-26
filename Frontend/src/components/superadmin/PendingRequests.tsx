@@ -286,13 +286,13 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                 <span className="hidden sm:inline">Pending Requests</span>
                                 <span className="sm:hidden">Pending</span>
                             </h1>
-                            <p className="text-gray-600 text-xs sm:text-sm lg:text-base hidden sm:block">Review and manage mosque registration requests</p>
+                            <p className="text-gray-600 text-sm sm:text-base hidden sm:block">Review and manage mosque registration requests</p>
                         </div>
 
                         <div className="flex items-center">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-md sm:rounded-lg lg:rounded-xl blur-sm sm:blur-md opacity-30"></div>
-                                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-md sm:rounded-lg lg:rounded-xl font-semibold text-xs sm:text-sm shadow-lg">
+                                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-md sm:rounded-lg lg:rounded-xl font-semibold text-sm sm:text-base shadow-lg">
                                     <div className="flex items-center space-x-1 sm:space-x-2">
                                         <FaClock className="w-3 h-3 sm:w-4 sm:h-4" />
                                         <span>{filteredAndSortedRequests.length} <span className="hidden sm:inline">Pending</span></span>
@@ -326,7 +326,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                         placeholder="Search mosque, admin, location..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-7 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm bg-transparent border-0 rounded-md sm:rounded-lg lg:rounded-xl focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400"
+                                        className="w-full pl-7 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base bg-transparent border-0 rounded-md sm:rounded-lg lg:rounded-xl focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400"
                                     />
                                     {searchTerm && (
                                         <button
@@ -344,7 +344,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                             {/* Sort Filter */}
                             <div className="relative group">
-                                <label className="block text-xs font-semibold text-gray-700 mb-1 hidden sm:block">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 hidden sm:block">
                                     <FaFilter className="w-3 h-3 inline mr-1 text-purple-600" />
                                     Sort By
                                 </label>
@@ -352,7 +352,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'mosque_name')}
-                                        className="w-full pl-2 sm:pl-3 pr-6 sm:pr-8 py-1.5 sm:py-2.5 text-xs sm:text-sm bg-gray-50/80 backdrop-blur-sm border-2 border-gray-200 rounded-md sm:rounded-lg lg:rounded-xl focus:border-purple-400 focus:bg-white focus:ring-1 focus:ring-purple-200 transition-all duration-300 text-gray-700 appearance-none cursor-pointer"
+                                        className="w-full pl-2 sm:pl-3 pr-6 sm:pr-8 py-1.5 sm:py-2.5 text-sm sm:text-base bg-gray-50/80 backdrop-blur-sm border-2 border-gray-200 rounded-md sm:rounded-lg lg:rounded-xl focus:border-purple-400 focus:bg-white focus:ring-1 focus:ring-purple-200 transition-all duration-300 text-gray-700 appearance-none cursor-pointer"
                                     >
                                         <option value="newest">Newest</option>
                                         <option value="oldest">Oldest</option>
@@ -368,22 +368,22 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
 
                             {/* Status Display */}
                             <div className="relative group">
-                                <label className="block text-xs font-semibold text-gray-700 mb-1 hidden sm:block">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 hidden sm:block">
                                     <FaClock className="w-3 h-3 inline mr-1 text-yellow-600" />
                                     Status
                                 </label>
-                                <div className="w-full pl-2 sm:pl-3 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-md sm:rounded-lg lg:rounded-xl">
+                                <div className="w-full pl-2 sm:pl-3 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-md sm:rounded-lg lg:rounded-xl">
                                     <span className="text-yellow-800 font-medium">Pending</span>
                                 </div>
                             </div>
 
                             {/* Results Count */}
                             <div className="relative group col-span-2 sm:col-span-1">
-                                <label className="block text-xs font-semibold text-gray-700 mb-1 hidden sm:block">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 hidden sm:block">
                                     <BarChart className="w-3 h-3 inline mr-1 text-green-600" />
                                     Results
                                 </label>
-                                <div className="w-full pl-2 sm:pl-3 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-md sm:rounded-lg lg:rounded-xl">
+                                <div className="w-full pl-2 sm:pl-3 pr-2 sm:pr-3 py-1.5 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-md sm:rounded-lg lg:rounded-xl">
                                     <span className="text-green-800 font-medium">
                                         {filteredAndSortedRequests.length} Request{filteredAndSortedRequests.length !== 1 ? 's' : ''}
                                     </span>
@@ -394,12 +394,12 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                         {/* Quick Actions */}
                         {searchTerm && (
                             <div className="flex items-center justify-between p-2 sm:p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-md sm:rounded-lg lg:rounded-xl">
-                                <span className="text-blue-800 font-medium text-xs sm:text-sm truncate mr-2">
+                                <span className="text-blue-800 font-medium text-sm sm:text-base truncate mr-2">
                                     <span className="hidden sm:inline">Searching: </span>"{searchTerm}"
                                 </span>
                                 <button
                                     onClick={() => setSearchTerm('')}
-                                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md sm:rounded-lg transition-colors duration-200 flex-shrink-0"
+                                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md sm:rounded-lg transition-colors duration-200 flex-shrink-0"
                                 >
                                     Clear
                                 </button>
@@ -416,7 +416,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                             <div className="relative z-10 flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                                 <div className="flex items-center space-x-1.5 sm:space-x-2">
                                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-md sm:rounded-lg flex items-center justify-center shadow-md">
-                                        <span className="text-white font-bold text-xs">{selectedRequests.length}</span>
+                                        <span className="text-white font-bold text-sm sm:text-base">{selectedRequests.length}</span>
                                     </div>
                                     <span className="text-sm sm:text-base lg:text-lg font-semibold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">
                                         <span className="hidden sm:inline">{selectedRequests.length} request{selectedRequests.length !== 1 ? 's' : ''} selected</span>
@@ -431,7 +431,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                     >
                                         <div className="flex items-center justify-center">
                                             <FaCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-200" />
-                                            <span className="text-xs sm:text-sm">
+                                            <span className="text-sm sm:text-base">
                                                 <span className="sm:hidden">Approve</span>
                                                 <span className="hidden sm:inline">Approve All</span>
                                             </span>
@@ -445,7 +445,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                     >
                                         <div className="flex items-center justify-center">
                                             <FaTimes className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-200" />
-                                            <span className="text-xs sm:text-sm">
+                                            <span className="text-sm sm:text-base">
                                                 <span className="sm:hidden">Reject</span>
                                                 <span className="hidden sm:inline">Reject All</span>
                                             </span>
@@ -526,10 +526,10 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                     <div className="absolute inset-0 bg-blue-500/10 rounded scale-0 hover:scale-110 transition-transform duration-200"></div>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
-                                                    <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-xl text-xs font-semibold shadow-md">
+                                                    <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-xl text-sm sm:text-base font-semibold shadow-md">
                                                         {request.registration_code}
                                                     </span>
-                                                    <span className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-2 py-1 rounded-lg text-xs font-medium">
+                                                    <span className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-2 py-1 rounded-lg text-sm sm:text-base font-medium">
                                                         PENDING
                                                     </span>
                                                 </div>
@@ -540,7 +540,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                 <h3 className="text-lg font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-1 group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
                                                     {request.mosque_name}
                                                 </h3>
-                                                <div className="flex items-center text-gray-500 text-xs">
+                                                <div className="flex items-center text-gray-500 text-sm sm:text-base">
                                                     <FaClock className="w-3 h-3 mr-1" />
                                                     <span>Registered {formatDate(request.created_at)}</span>
                                                 </div>
@@ -554,7 +554,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                             <FaUser className="w-3 h-3 text-white" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Admin</p>
+                                                            <p className="text-sm sm:text-base text-gray-500">Admin</p>
                                                             <p className="font-semibold text-gray-800 text-sm">{request.admin_name}</p>
                                                         </div>
                                                     </div>
@@ -566,8 +566,8 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                             <FaEnvelope className="w-3 h-3 text-white" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Email</p>
-                                                            <p className="font-semibold text-gray-800 text-xs break-all">{request.admin_email}</p>
+                                                            <p className="text-sm sm:text-base text-gray-500">Email</p>
+                                                            <p className="font-semibold text-gray-800 text-sm sm:text-base break-all">{request.admin_email}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -578,7 +578,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                             <FaPhone className="w-3 h-3 text-white" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Phone</p>
+                                                            <p className="text-sm sm:text-base text-gray-500">Phone</p>
                                                             <p className="font-semibold text-gray-800 text-sm">{request.admin_phone}</p>
                                                         </div>
                                                     </div>
@@ -590,8 +590,8 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                             <FaMapMarkerAlt className="w-3 h-3 text-white" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-xs text-gray-500">Location</p>
-                                                            <p className="font-semibold text-gray-800 text-xs">{request.location}</p>
+                                                            <p className="text-sm sm:text-base text-gray-500">Location</p>
+                                                            <p className="font-semibold text-gray-800 text-sm sm:text-base">{request.location}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -746,12 +746,12 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                             rows={4}
                                         />
                                         <div className="flex items-center justify-between mt-2">
-                                            <p className={`text-xs transition-colors duration-200 ${rejectionReason.length >= 10 ? 'text-green-600' : 'text-red-500'
+                                            <p className={`text-sm sm:text-base transition-colors duration-200 ${rejectionReason.length >= 10 ? 'text-green-600' : 'text-red-500'
                                                 }`}>
                                                 {rejectionReason.length} / 10 characters minimum
                                             </p>
                                             {rejectionReason.length >= 10 && (
-                                                <span className="text-green-600 text-xs font-semibold flex items-center">
+                                                <span className="text-green-600 text-sm sm:text-base font-semibold flex items-center">
                                                     <CheckCircle className="w-3 h-3 mr-1" /> Valid
                                                 </span>
                                             )}
@@ -762,11 +762,11 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                     <div className="relative bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-3 shadow-sm">
                                         <div className="flex items-start space-x-2">
                                             <div className="w-6 h-6 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-md flex items-center justify-center flex-shrink-0">
-                                                <span className="text-white font-bold text-xs">!</span>
+                                                <span className="text-white font-bold text-sm sm:text-base">!</span>
                                             </div>
                                             <div>
-                                                <p className="text-xs font-semibold text-yellow-800 mb-1">Important Notice</p>
-                                                <p className="text-xs text-yellow-700">
+                                                <p className="text-sm sm:text-base font-semibold text-yellow-800 mb-1">Important Notice</p>
+                                                <p className="text-sm sm:text-base text-yellow-700">
                                                     The admin account will be marked as rejected but NOT deleted.
                                                     They can only reapply if you allow them to do so later.
                                                 </p>
@@ -850,12 +850,12 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                             rows={3}
                                         />
                                         <div className="flex items-center justify-between mt-2">
-                                            <p className={`text-xs transition-colors duration-200 ${bulkRejectionReason.length >= 10 ? 'text-green-600' : 'text-red-500'
+                                            <p className={`text-sm sm:text-base transition-colors duration-200 ${bulkRejectionReason.length >= 10 ? 'text-green-600' : 'text-red-500'
                                                 }`}>
                                                 {bulkRejectionReason.length} / 10 characters minimum
                                             </p>
                                             {bulkRejectionReason.length >= 10 && (
-                                                <span className="text-green-600 text-xs font-semibold flex items-center">
+                                                <span className="text-green-600 text-sm sm:text-base font-semibold flex items-center">
                                                     <CheckCircle className="w-3 h-3 mr-1" /> Valid
                                                 </span>
                                             )}
@@ -866,11 +866,11 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                     <div className="relative bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-3 shadow-sm">
                                         <div className="flex items-start space-x-2">
                                             <div className="w-6 h-6 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-md flex items-center justify-center flex-shrink-0">
-                                                <span className="text-white font-bold text-xs">!</span>
+                                                <span className="text-white font-bold text-sm sm:text-base">!</span>
                                             </div>
                                             <div>
-                                                <p className="text-xs font-semibold text-yellow-800 mb-1">Important Notice</p>
-                                                <p className="text-xs text-yellow-700">
+                                                <p className="text-sm sm:text-base font-semibold text-yellow-800 mb-1">Important Notice</p>
+                                                <p className="text-sm sm:text-base text-yellow-700">
                                                     All {selectedRequests.length} selected admin accounts will be marked as rejected but NOT deleted.
                                                     They can only reapply if you allow them to do so later.
                                                 </p>
@@ -952,7 +952,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                 <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[60vh] overflow-y-auto">
                                     {/* Basic Information */}
                                     <div>
-                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
+                                        <h4 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
                                             Basic Information
                                         </h4>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -962,7 +962,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <span className="text-white font-bold text-sm">🕌</span>
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-purple-700">Mosque Name</p>
+                                                        <p className="text-sm sm:text-base font-medium text-purple-700">Mosque Name</p>
                                                         <p className="font-semibold text-gray-800 text-sm">{selectedRequestForView.mosque_name}</p>
                                                     </div>
                                                 </div>
@@ -974,7 +974,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaMapMarkerAlt className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-red-700">Location</p>
+                                                        <p className="text-sm sm:text-base font-medium text-red-700">Location</p>
                                                         <p className="font-semibold text-gray-800 text-sm">{selectedRequestForView.location}</p>
                                                     </div>
                                                 </div>
@@ -986,7 +986,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <span className="text-white font-bold text-sm">#</span>
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-orange-700">Registration Code</p>
+                                                        <p className="text-sm sm:text-base font-medium text-orange-700">Registration Code</p>
                                                         <p className="font-semibold text-gray-800 text-sm">{selectedRequestForView.registration_code}</p>
                                                     </div>
                                                 </div>
@@ -998,7 +998,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaClock className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-green-700">Registration Date</p>
+                                                        <p className="text-sm sm:text-base font-medium text-green-700">Registration Date</p>
                                                         <p className="font-semibold text-gray-800 text-sm">{formatDate(selectedRequestForView.created_at)}</p>
                                                     </div>
                                                 </div>
@@ -1008,7 +1008,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
 
                                     {/* Admin Information */}
                                     <div>
-                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
+                                        <h4 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
                                             Admin Information
                                         </h4>
                                         <div className="space-y-3">
@@ -1018,7 +1018,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaUser className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-blue-700">Admin Name</p>
+                                                        <p className="text-sm sm:text-base font-medium text-blue-700">Admin Name</p>
                                                         <p className="font-semibold text-gray-800 text-sm">{selectedRequestForView.admin_name}</p>
                                                     </div>
                                                 </div>
@@ -1030,7 +1030,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaEnvelope className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-purple-700">Admin Email</p>
+                                                        <p className="text-sm sm:text-base font-medium text-purple-700">Admin Email</p>
                                                         <p className="font-semibold text-gray-800 text-sm break-all">{selectedRequestForView.admin_email}</p>
                                                     </div>
                                                 </div>
@@ -1042,7 +1042,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaPhone className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-green-700">Admin Phone</p>
+                                                        <p className="text-sm sm:text-base font-medium text-green-700">Admin Phone</p>
                                                         <p className="font-semibold text-gray-800 text-sm">{selectedRequestForView.admin_phone}</p>
                                                     </div>
                                                 </div>
@@ -1052,7 +1052,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
 
                                     {/* Mosque Management Contact */}
                                     <div>
-                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-indigo-100 px-3 py-1 rounded-lg inline-block">
+                                        <h4 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 bg-indigo-100 px-3 py-1 rounded-lg inline-block">
                                             Mosque Management Contact
                                         </h4>
                                         <div className="space-y-3">
@@ -1062,7 +1062,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaEnvelope className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-indigo-700">Mosque Management Email</p>
+                                                        <p className="text-sm sm:text-base font-medium text-indigo-700">Mosque Management Email</p>
                                                         <p className="font-semibold text-gray-800 text-sm break-all">
                                                             {selectedRequestForView.admin_email || 'contact@mosque.org'}
                                                         </p>
@@ -1076,7 +1076,7 @@ const PendingRequests: React.FC<Props> = ({ onApprove, onReject }) => {
                                                         <FaPhone className="w-4 h-4 text-white" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-medium text-teal-700">Management Phone</p>
+                                                        <p className="text-sm sm:text-base font-medium text-teal-700">Management Phone</p>
                                                         <p className="font-semibold text-gray-800 text-sm">
                                                             {selectedRequestForView.admin_phone || 'Not provided'}
                                                         </p>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,6 @@ import {
     Lock,
     Shield,
     FileText,
-    CheckCircle,
     Eye,
     EyeOff,
     AlertTriangle,
@@ -53,9 +52,9 @@ interface MosqueContactInfo {
 
 const AdminApplicationPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [mode, setMode] = useState<'register' | 'login'>('register');
     const [mosqueInfo, setMosqueInfo] = useState<MosqueContactInfo | null>(null);
-    const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -148,8 +147,13 @@ const AdminApplicationPage: React.FC = () => {
                 application_notes: data.application_notes,
             });
 
-            setApplicationStatus('pending');
-            registerForm.reset();
+            // Redirect to email verification page with user data
+            navigate('/email-verification', {
+                state: {
+                    email: data.email,
+                    userType: 'admin'
+                }
+            });
         } catch (err) {
             console.log('Registration error:', err);
             const errorMessage = getErrorMessage(err);
@@ -307,69 +311,6 @@ const AdminApplicationPage: React.FC = () => {
         }
     };
 
-    if (applicationStatus === 'pending') {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
-                {/* Modern Islamic 3D Background Effects */}
-                <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-br from-green-300/40 via-emerald-400/30 to-teal-300/20 rounded-full filter blur-3xl transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-                    <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-80 sm:h-80 bg-gradient-to-br from-emerald-300/30 via-teal-400/25 to-green-300/20 rounded-full filter blur-2xl transform translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    <div className="absolute top-1/2 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-teal-200/20 to-green-200/15 rounded-full filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-                </div>
-
-                <div className="relative z-10 container mx-auto px-2 sm:px-4 py-8 sm:py-16">
-                    <div className="max-w-sm sm:max-w-lg mx-auto">
-                        <div className="relative bg-gradient-to-br from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-2 border-white/40 rounded-xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 text-center overflow-hidden">
-                            {/* 3D Background Effects */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-60 rounded-xl sm:rounded-3xl"></div>
-                            <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg sm:blur-xl"></div>
-                            <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-md sm:blur-lg"></div>
-
-                            <div className="relative z-10">
-                                <div className="relative mb-4 sm:mb-6">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-lg opacity-30"></div>
-                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
-                                        <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                                    </div>
-                                </div>
-                                <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 sm:mb-3">
-                                    <span className="hidden sm:inline">Application Submitted Successfully!</span>
-                                    <span className="sm:hidden">Application Submitted!</span>
-                                </h2>
-                                <p className="text-xs sm:text-base text-gray-600 mb-4 sm:mb-8 leading-relaxed px-2">
-                                    <span className="hidden sm:inline">Your application is pending review by the super admin. You will be notified once it's approved or Login within 24 hours.</span>
-                                    <span className="sm:hidden">Application pending review. Check back in 24 hours.</span>
-                                </p>
-                                <div className="space-y-2 sm:space-y-3">
-                                    <Link
-                                        to={`/mosques/${id}`}
-                                        className="group relative block w-full bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-600 hover:via-emerald-700 hover:to-teal-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl overflow-hidden"
-                                    >
-                                        <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-                                        <span className="relative text-sm sm:text-base">
-                                            <span className="hidden sm:inline">Back to Mosque</span>
-                                            <span className="sm:hidden">Back to Mosque</span>
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        to="/mosques"
-                                        className="group relative block w-full bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:from-gray-600 hover:via-gray-700 hover:to-gray-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl overflow-hidden"
-                                    >
-                                        <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-                                        <span className="relative text-sm sm:text-base">
-                                            <span className="hidden sm:inline">Browse Other Mosques</span>
-                                            <span className="sm:hidden">Browse Mosques</span>
-                                        </span>
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20 relative overflow-hidden">
             {/* Modern Islamic 3D Background Effects */}
@@ -410,7 +351,7 @@ const AdminApplicationPage: React.FC = () => {
                                     <span className="hidden sm:inline">Mosque Admin Access</span>
                                     <span className="sm:hidden">Admin Access</span>
                                 </h1>
-                                <p className="text-sm sm:text-lg lg:text-xl text-gray-600 max-w-md sm:max-w-2xl mx-auto leading-relaxed px-2">
+                                <p className="text-base sm:text-sm lg:text-xl text-gray-600 max-w-md sm:max-w-2xl mx-auto leading-relaxed px-2">
                                     <span className="hidden sm:inline">Login or register to manage mosque prayer times and information</span>
                                     <span className="sm:hidden">Manage mosque prayer times</span>
                                 </p>
@@ -435,22 +376,22 @@ const AdminApplicationPage: React.FC = () => {
                                                 <Phone className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                                             </div>
                                         </div>
-                                        <h3 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                        <h3 className="text-base sm:text-sm lg:text-xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                             <span className="hidden sm:inline">Need Verification Code?</span>
                                             <span className="sm:hidden">Verification Code?</span>
                                         </h3>
                                     </div>
                                     <div className="space-y-3 sm:space-y-4">
                                         <div className="bg-gradient-to-r from-green-50/50 to-emerald-50/30 border border-green-100/50 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
-                                            <span className="font-semibold text-gray-800 block mb-1 text-sm sm:text-base">Mosque:</span>
-                                            <p className="text-gray-700 font-medium text-sm sm:text-base break-words">{mosqueInfo.name}</p>
+                                            <span className="font-semibold text-gray-800 block mb-1 text-base">Mosque:</span>
+                                            <p className="text-gray-700 font-medium text-base break-words">{mosqueInfo.name}</p>
                                         </div>
                                         <div className="bg-gradient-to-r from-green-50/50 to-emerald-50/30 border border-green-100/50 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
-                                            <span className="font-semibold text-gray-800 block mb-1 text-sm sm:text-base">Location:</span>
-                                            <p className="text-gray-700 text-sm sm:text-base break-words leading-relaxed">{mosqueInfo.location}</p>
+                                            <span className="font-semibold text-gray-800 block mb-1 text-base">Location:</span>
+                                            <p className="text-gray-700 text-base break-words leading-relaxed">{mosqueInfo.location}</p>
                                         </div>
                                         <div className="bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-2 border-amber-200/50 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
-                                            <p className="text-amber-800 text-xs sm:text-sm leading-relaxed">
+                                            <p className="text-amber-800 text-sm sm:text-base leading-relaxed">
                                                 {mosqueInfo.admin_instructions}
                                             </p>
                                         </div>
@@ -469,7 +410,7 @@ const AdminApplicationPage: React.FC = () => {
                                 <div className="flex mb-4 sm:mb-6 lg:mb-8 bg-gradient-to-r from-gray-100/80 via-green-50/50 to-emerald-50/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 sm:p-2 border border-white/30">
                                     <button
                                         onClick={() => setMode('register')}
-                                        className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${mode === 'register'
+                                        className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 ${mode === 'register'
                                             ? 'bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 text-white shadow-lg transform scale-105'
                                             : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
                                             }`}
@@ -480,7 +421,7 @@ const AdminApplicationPage: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={() => setMode('login')}
-                                        className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${mode === 'login'
+                                        className={`flex-1 py-2 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 ${mode === 'login'
                                             ? 'bg-gradient-to-r from-emerald-500 via-green-600 to-teal-600 text-white shadow-lg transform scale-105'
                                             : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
                                             }`}
@@ -496,7 +437,7 @@ const AdminApplicationPage: React.FC = () => {
                                     <div className="bg-gradient-to-r from-red-50/80 via-rose-50/60 to-pink-50/40 border-2 border-red-200/50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm">
                                         <div className="flex items-center">
                                             <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 mr-2 sm:mr-3 flex-shrink-0" />
-                                            <p className="text-red-700 font-medium text-sm sm:text-base leading-relaxed">{error}</p>
+                                            <p className="text-red-700 font-medium text-base leading-relaxed">{error}</p>
                                         </div>
                                     </div>
                                 )}
@@ -505,7 +446,7 @@ const AdminApplicationPage: React.FC = () => {
                                 {mode === 'register' && (
                                     <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4 sm:space-y-6">
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <User className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -516,11 +457,11 @@ const AdminApplicationPage: React.FC = () => {
                                             <input
                                                 {...registerForm.register('name')}
                                                 type="text"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                 placeholder="Enter your full name"
                                             />
                                             {registerForm.formState.errors.name && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {registerForm.formState.errors.name.message}
                                                 </p>
@@ -528,7 +469,7 @@ const AdminApplicationPage: React.FC = () => {
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <Mail className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -539,11 +480,11 @@ const AdminApplicationPage: React.FC = () => {
                                             <input
                                                 {...registerForm.register('email')}
                                                 type="email"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                 placeholder="Enter your email"
                                             />
                                             {registerForm.formState.errors.email && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {registerForm.formState.errors.email.message}
                                                 </p>
@@ -551,7 +492,7 @@ const AdminApplicationPage: React.FC = () => {
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -562,7 +503,7 @@ const AdminApplicationPage: React.FC = () => {
                                                 <input
                                                     {...registerForm.register('password')}
                                                     type={showPassword ? 'text' : 'password'}
-                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                     placeholder="Create a password"
                                                 />
                                                 <button
@@ -588,19 +529,19 @@ const AdminApplicationPage: React.FC = () => {
                                                 </div>
                                             )}
                                             {registerForm.formState.errors.password && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {registerForm.formState.errors.password.message}
                                                 </p>
                                             )}
-                                            <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+                                            <p className="mt-1 text-sm text-gray-500 leading-relaxed">
                                                 <span className="hidden sm:inline">Use letters, numbers, special characters, and capital letters for maximum security</span>
                                                 <span className="sm:hidden">Use letters, numbers, symbols for security</span>
                                             </p>
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -612,7 +553,7 @@ const AdminApplicationPage: React.FC = () => {
                                                 <input
                                                     {...registerForm.register('confirm_password')}
                                                     type={showConfirmPassword ? 'text' : 'password'}
-                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                     placeholder="Confirm your password"
                                                 />
                                                 <button
@@ -624,19 +565,19 @@ const AdminApplicationPage: React.FC = () => {
                                                 </button>
                                             </div>
                                             {registerForm.formState.errors.confirm_password && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {registerForm.formState.errors.confirm_password.message}
                                                 </p>
                                             )}
-                                            <p className="mt-1 text-xs text-gray-500">
+                                            <p className="mt-1 text-sm text-gray-500">
                                                 <span className="hidden sm:inline">Must match the password entered above</span>
                                                 <span className="sm:hidden">Must match password above</span>
                                             </p>
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <Phone className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -647,11 +588,11 @@ const AdminApplicationPage: React.FC = () => {
                                             <input
                                                 {...registerForm.register('phone')}
                                                 type="tel"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                 placeholder="+923001234567"
                                             />
                                             {registerForm.formState.errors.phone && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {registerForm.formState.errors.phone.message}
                                                 </p>
@@ -659,7 +600,7 @@ const AdminApplicationPage: React.FC = () => {
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <Shield className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -670,11 +611,11 @@ const AdminApplicationPage: React.FC = () => {
                                             <input
                                                 {...registerForm.register('mosque_verification_code')}
                                                 type="text"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                 placeholder="Enter verification code"
                                             />
                                             {registerForm.formState.errors.mosque_verification_code && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {registerForm.formState.errors.mosque_verification_code.message}
                                                 </p>
@@ -682,7 +623,7 @@ const AdminApplicationPage: React.FC = () => {
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                     <FileText className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -693,7 +634,7 @@ const AdminApplicationPage: React.FC = () => {
                                             <textarea
                                                 {...registerForm.register('application_notes')}
                                                 rows={3}
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm resize-none text-sm sm:text-base"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm resize-none text-base"
                                                 placeholder="Any additional information..."
                                             />
                                         </div>
@@ -717,7 +658,7 @@ const AdminApplicationPage: React.FC = () => {
                                 {mode === 'login' && (
                                     <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4 sm:space-y-6">
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full blur-sm opacity-30"></div>
                                                     <Mail className="relative w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
@@ -728,11 +669,11 @@ const AdminApplicationPage: React.FC = () => {
                                             <input
                                                 {...loginForm.register('email')}
                                                 type="email"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                 placeholder="Enter your email"
                                             />
                                             {loginForm.formState.errors.email && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {loginForm.formState.errors.email.message}
                                                 </p>
@@ -740,7 +681,7 @@ const AdminApplicationPage: React.FC = () => {
                                         </div>
 
                                         <div>
-                                            <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                            <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                                 <div className="relative mr-2">
                                                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full blur-sm opacity-30"></div>
                                                     <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
@@ -752,7 +693,7 @@ const AdminApplicationPage: React.FC = () => {
                                                     {...loginForm.register('password')}
                                                     type={showLoginPassword ? 'text' : 'password'}
                                                     autoComplete={showLoginPassword ? 'off' : 'current-password'}
-                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                                    className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-emerald-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                                     placeholder="Enter your password"
                                                 />
                                                 <button
@@ -765,7 +706,7 @@ const AdminApplicationPage: React.FC = () => {
                                                 </button>
                                             </div>
                                             {loginForm.formState.errors.password && (
-                                                <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                                <p className="text-red-500 text-sm mt-1 sm:mt-2 font-medium flex items-center">
                                                     <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
                                                     {loginForm.formState.errors.password.message}
                                                 </p>

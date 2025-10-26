@@ -640,12 +640,12 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                             <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-800 bg-clip-text text-transparent mb-1 sm:mb-2">
                                 Admin Management
                             </h1>
-                            <p className="text-xs sm:text-sm lg:text-base text-gray-600">Manage mosque administrators and assignments</p>
+                            <p className="text-sm sm:text-base text-gray-600">Manage mosque administrators and assignments</p>
                         </div>
                         <div className="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-100/80 backdrop-blur-sm border border-blue-200 rounded-xl sm:rounded-2xl shadow-lg">
                             <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
                             <FaBuilding className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                            <span className="text-xs sm:text-sm lg:text-base font-semibold text-blue-700">{mosques.length} Total Mosques</span>
+                            <span className="text-sm sm:text-base font-semibold text-blue-700">{mosques.length} Total Mosques</span>
                         </div>
                     </div>
                 </div>
@@ -664,10 +664,10 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 <h3 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2 sm:mb-3">
                                     Mosque Admin Management
                                 </h3>
-                                <p className="text-gray-600 mb-2 sm:mb-3 text-xs sm:text-sm lg:text-base">
+                                <p className="text-gray-600 mb-2 sm:mb-3 text-sm sm:text-base">
                                     Manage mosque administrators efficiently
                                 </p>
-                                <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:gap-2 text-xs sm:text-sm">
+                                <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:gap-2 text-sm sm:text-base">
                                     <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
                                         <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full"></div>
                                         <span>View mosques</span>
@@ -704,7 +704,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     placeholder="Search by mosque or admin details..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="relative w-full pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base placeholder-gray-500 transition-all duration-300"
+                                    className="relative w-full pl-8 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-sm sm:text-base placeholder-gray-500 transition-all duration-300"
                                 />
                             </div>
 
@@ -715,7 +715,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value as 'all' | 'no_admin' | 'admin_removed' | 'admin_inactive')}
-                                    className="relative w-full pl-8 sm:pl-12 pr-8 sm:pr-10 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-xs sm:text-sm lg:text-base appearance-none cursor-pointer transition-all duration-300"
+                                    className="relative w-full pl-8 sm:pl-12 pr-8 sm:pr-10 py-2 sm:py-3 lg:py-4 border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70 backdrop-blur-sm text-sm sm:text-base appearance-none cursor-pointer transition-all duration-300"
                                 >
                                     <option value="all">All Status</option>
                                     <option value="no_admin">No Admin</option>
@@ -732,7 +732,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
                         {/* Admin Status Sorting Buttons */}
                         <div className="mt-3 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                            <span className="text-xs sm:text-sm lg:text-base font-bold text-gray-700">Filter by Admin Status:</span>
+                            <span className="text-sm sm:text-base font-bold text-gray-700">Filter by Admin Status:</span>
                             <div className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3">
                                 <button
                                     onClick={() => setAdminStatusFilter('all')}
@@ -743,8 +743,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 >
                                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                     <span className="relative flex items-center space-x-1 sm:space-x-2">
-                                        <span className="text-xs sm:text-sm lg:text-base">All Mosques</span>
-                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold ${adminStatusFilter === 'all'
+                                        <span className="text-sm sm:text-base">All Mosques</span>
+                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-sm sm:text-base font-bold ${adminStatusFilter === 'all'
                                             ? 'bg-white/20 text-white'
                                             : 'bg-blue-100 text-blue-600'
                                             }`}>
@@ -761,8 +761,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 >
                                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                     <span className="relative flex items-center space-x-1 sm:space-x-2">
-                                        <span className="text-xs sm:text-sm lg:text-base">Has Admin</span>
-                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold ${adminStatusFilter === 'has_admin'
+                                        <span className="text-sm sm:text-base">Has Admin</span>
+                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-sm sm:text-base font-bold ${adminStatusFilter === 'has_admin'
                                             ? 'bg-white/20 text-white'
                                             : 'bg-green-100 text-green-600'
                                             }`}>
@@ -779,8 +779,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 >
                                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                     <span className="relative flex items-center space-x-1 sm:space-x-2">
-                                        <span className="text-xs sm:text-sm lg:text-base">No Admin</span>
-                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-bold ${adminStatusFilter === 'no_admin'
+                                        <span className="text-sm sm:text-base">No Admin</span>
+                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-sm sm:text-base font-bold ${adminStatusFilter === 'no_admin'
                                             ? 'bg-white/20 text-white'
                                             : 'bg-red-100 text-red-600'
                                             }`}>
@@ -799,7 +799,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                                         <div className="flex items-center space-x-2 sm:space-x-3">
                                             <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                                            <span className="text-blue-800 font-bold text-xs sm:text-sm lg:text-base">
+                                            <span className="text-blue-800 font-bold text-sm sm:text-base">
                                                 {selectedMosques.length} mosque(s) selected
                                             </span>
                                         </div>
@@ -811,7 +811,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                                 <span className="relative flex items-center gap-1 sm:gap-2">
                                                     <FaEnvelope className="w-3 h-3 sm:w-4 sm:h-4" />
-                                                    <span className="text-xs sm:text-sm lg:text-base">Send Reminders</span>
+                                                    <span className="text-sm sm:text-base">Send Reminders</span>
                                                 </span>
                                             </button>
                                         </div>
@@ -928,7 +928,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                         <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-12 text-center">
                             <FaBuilding className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-gray-400 mx-auto mb-2 sm:mb-3 lg:mb-4" />
                             <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-1 sm:mb-2">No Mosques Found</h3>
-                            <p className="text-gray-500 text-xs sm:text-sm lg:text-base">
+                            <p className="text-gray-500 text-sm sm:text-base">
                                 {searchTerm
                                     ? `No mosques match your search "${searchTerm}"`
                                     : 'No mosques match the current filters'
@@ -980,20 +980,20 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                     {/* Mosque Header */}
                                                     <div className="flex flex-col gap-1 sm:gap-2 lg:gap-4 mb-2 sm:mb-4 lg:mb-6">
                                                         <div className="flex-1">
-                                                            <h3 className="text-xs sm:text-lg lg:text-2xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-0.5 sm:mb-1 lg:mb-3 flex items-center gap-1 sm:gap-2 lg:gap-3">
+                                                            <h3 className="text-sm sm:text-lg lg:text-2xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-0.5 sm:mb-1 lg:mb-3 flex items-center gap-1 sm:gap-2 lg:gap-3">
                                                                 <div className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg sm:rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
                                                                     <FaBuilding className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                                                                 </div>
-                                                                <span className="truncate text-xs sm:text-sm lg:text-xl">{mosque.mosque_name}</span>
+                                                                <span className="truncate text-sm sm:text-sm lg:text-xl">{mosque.mosque_name}</span>
                                                             </h3>
                                                             <div className="flex flex-wrap items-center gap-1 sm:gap-2 lg:gap-3">
-                                                                <span className={`inline-flex items-center px-1.5 py-0.5 sm:px-3 sm:py-1 lg:px-4 lg:py-2 rounded-lg sm:rounded-lg lg:rounded-2xl text-xs sm:text-xs lg:text-sm font-bold shadow-lg ${getStatusColor(mosque.status)} transition-all duration-300`}>
+                                                                <span className={`inline-flex items-center px-1.5 py-0.5 sm:px-3 sm:py-1 lg:px-4 lg:py-2 rounded-lg sm:rounded-lg lg:rounded-2xl text-sm sm:text-base lg:text-sm font-bold shadow-lg ${getStatusColor(mosque.status)} transition-all duration-300`}>
                                                                     {getStatusIcon(mosque.status)}
                                                                     <span className="ml-1 sm:ml-1 lg:ml-2">{getStatusLabel(mosque.status)}</span>
                                                                 </span>
                                                                 <div className="hidden sm:flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 rounded-lg sm:rounded-xl">
                                                                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full"></div>
-                                                                    <span className="text-xs sm:text-sm text-gray-600 font-medium">ID: {mosque.registration_code}</span>
+                                                                    <span className="text-sm sm:text-base text-gray-600 font-medium">ID: {mosque.registration_code}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1007,8 +1007,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                 <FaMapMarkerAlt className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                                                             </div>
                                                             <div className="min-w-0 flex-1">
-                                                                <p className="text-xs text-gray-500 font-medium hidden sm:block">Location</p>
-                                                                <p className="text-xs sm:text-xs lg:text-sm font-semibold text-gray-700 truncate">{mosque.location}</p>
+                                                                <p className="text-sm sm:text-base text-gray-500 font-medium hidden sm:block">Location</p>
+                                                                <p className="text-sm sm:text-base lg:text-sm font-semibold text-gray-700 truncate">{mosque.location}</p>
                                                             </div>
                                                         </div>
 
@@ -1018,8 +1018,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                 <FaCalendarAlt className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-500 font-medium">Created</p>
-                                                                <p className="text-xs lg:text-sm font-semibold text-gray-700">{formatDate(mosque.created_at)}</p>
+                                                                <p className="text-sm sm:text-base text-gray-500 font-medium">Created</p>
+                                                                <p className="text-sm sm:text-base lg:text-sm font-semibold text-gray-700">{formatDate(mosque.created_at)}</p>
                                                             </div>
                                                         </div>
 
@@ -1030,8 +1030,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                     <FaEnvelope className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                                                                 </div>
                                                                 <div className="min-w-0 flex-1">
-                                                                    <p className="text-xs text-gray-500 font-medium">Email</p>
-                                                                    <p className="text-xs lg:text-sm font-semibold text-gray-700 truncate">{mosque.contact_email}</p>
+                                                                    <p className="text-sm sm:text-base text-gray-500 font-medium">Email</p>
+                                                                    <p className="text-sm sm:text-base font-semibold text-gray-700 truncate">{mosque.contact_email}</p>
                                                                 </div>
                                                             </div>
                                                         )}
@@ -1043,8 +1043,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                     <FaPhone className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                                                                 </div>
                                                                 <div>
-                                                                    <p className="text-xs text-gray-500 font-medium">Phone</p>
-                                                                    <p className="text-xs lg:text-sm font-semibold text-gray-700">{mosque.contact_phone}</p>
+                                                                    <p className="text-sm sm:text-base text-gray-500 font-medium">Phone</p>
+                                                                    <p className="text-sm sm:text-base font-semibold text-gray-700">{mosque.contact_phone}</p>
                                                                 </div>
                                                             </div>
                                                         )}
@@ -1059,7 +1059,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                     <div className="w-5 h-5 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg sm:rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
                                                                         <FaUserPlus className="w-2.5 h-2.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white" />
                                                                     </div>
-                                                                    <h4 className="text-xs sm:text-sm lg:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                                                    <h4 className="text-sm sm:text-sm lg:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                                                                         Has Admin
                                                                     </h4>
                                                                 </div>
@@ -1067,22 +1067,22 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                     <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 p-1.5 sm:p-2 lg:p-3 bg-white/70 backdrop-blur-sm border border-green-200/30 rounded-lg sm:rounded-lg lg:rounded-xl">
                                                                         <FaIdCard className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-green-600 flex-shrink-0" />
                                                                         <div className="min-w-0 flex-1">
-                                                                            <p className="text-xs text-gray-500 font-medium hidden sm:block">Name</p>
-                                                                            <p className="text-xs sm:text-xs lg:text-sm font-semibold text-green-700 truncate">{mosque.approved_admin.name}</p>
+                                                                            <p className="text-sm sm:text-base text-gray-500 font-medium hidden sm:block">Name</p>
+                                                                            <p className="text-sm sm:text-base font-semibold text-green-700 truncate">{mosque.approved_admin.name}</p>
                                                                         </div>
                                                                     </div>
                                                                     <div className="hidden sm:flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-white/70 backdrop-blur-sm border border-green-200/30 rounded-lg lg:rounded-xl">
                                                                         <FaEnvelope className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 flex-shrink-0" />
                                                                         <div className="min-w-0 flex-1">
-                                                                            <p className="text-xs text-gray-500 font-medium">Email</p>
-                                                                            <p className="text-xs lg:text-sm font-semibold text-green-700 truncate">{mosque.approved_admin.email}</p>
+                                                                            <p className="text-sm sm:text-base text-gray-500 font-medium">Email</p>
+                                                                            <p className="text-sm sm:text-base font-semibold text-green-700 truncate">{mosque.approved_admin.email}</p>
                                                                         </div>
                                                                     </div>
                                                                     <div className="hidden sm:flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-white/70 backdrop-blur-sm border border-green-200/30 rounded-lg lg:rounded-xl">
                                                                         <FaPhone className="w-3 h-3 lg:w-4 lg:h-4 text-green-600 flex-shrink-0" />
                                                                         <div>
-                                                                            <p className="text-xs text-gray-500 font-medium">Phone</p>
-                                                                            <p className="text-xs lg:text-sm font-semibold text-green-700">{mosque.approved_admin.phone}</p>
+                                                                            <p className="text-sm sm:text-base text-gray-500 font-medium">Phone</p>
+                                                                            <p className="text-sm sm:text-base font-semibold text-green-700">{mosque.approved_admin.phone}</p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1097,10 +1097,10 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                         <FaUserSlash className="w-2.5 h-2.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white" />
                                                                     </div>
                                                                     <div>
-                                                                        <h4 className="text-xs sm:text-sm lg:text-lg font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-0 sm:mb-0 lg:mb-1">
+                                                                        <h4 className="text-sm sm:text-sm lg:text-lg font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-0 sm:mb-0 lg:mb-1">
                                                                             No Admin
                                                                         </h4>
-                                                                        <p className="text-xs sm:text-xs lg:text-sm text-red-600 hidden sm:block">This mosque requires an admin to manage operations</p>
+                                                                        <p className="text-sm sm:text-base text-red-600 hidden sm:block">This mosque requires an admin to manage operations</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1113,8 +1113,8 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                             <FaEnvelope className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-xs text-gray-500 font-medium">Contact Attempts</p>
-                                                            <p className="text-xs lg:text-sm font-semibold text-gray-700">{mosque.contact_attempts} attempts</p>
+                                                            <p className="text-sm sm:text-base text-gray-500 font-medium">Contact Attempts</p>
+                                                            <p className="text-sm sm:text-base font-semibold text-gray-700">{mosque.contact_attempts} attempts</p>
                                                         </div>
                                                     </div>
 
@@ -1131,7 +1131,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                             <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                                             <span className="relative flex items-center gap-0.5 sm:gap-1 lg:gap-2">
                                                                 <FaEye className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
-                                                                <span className="text-xs sm:text-sm lg:text-base">View</span>
+                                                                <span className="text-sm sm:text-base">View</span>
                                                             </span>
                                                         </button>
 
@@ -1145,7 +1145,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                                                 <span className="relative flex items-center gap-0.5 sm:gap-1 lg:gap-2">
                                                                     <FaUserMinus className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
-                                                                    <span className="text-xs sm:text-sm lg:text-base">Remove</span>
+                                                                    <span className="text-sm sm:text-base">Remove</span>
                                                                 </span>
                                                             </button>
                                                         ) : (
@@ -1157,7 +1157,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                                                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
                                                                 <span className="relative flex items-center gap-0.5 sm:gap-1 lg:gap-2">
                                                                     <FaUserPlus className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" />
-                                                                    <span className="text-xs sm:text-sm lg:text-base">Assign</span>
+                                                                    <span className="text-sm sm:text-base">Assign</span>
                                                                 </span>
                                                             </button>
                                                         )}
@@ -1185,7 +1185,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     </div>
                                     <div>
                                         <h3 className="text-lg sm:text-xl font-bold text-gray-800">Assign New Admin</h3>
-                                        <p className="text-xs sm:text-sm text-gray-600">Fill in the admin details</p>
+                                        <p className="text-sm sm:text-base text-gray-600">Fill in the admin details</p>
                                     </div>
                                 </div>
                                 <button
@@ -1217,7 +1217,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                         {assignError && (
                             <div className="mb-3 sm:mb-4 bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 flex items-center gap-2 text-red-700">
                                 <FaExclamationTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
-                                <span className="text-xs sm:text-sm">{assignError}</span>
+                                <span className="text-sm sm:text-base">{assignError}</span>
                             </div>
                         )}
 
@@ -1225,7 +1225,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                         <div className="space-y-3 sm:space-y-4">
                             {/* Admin Name */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Name <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -1235,18 +1235,18 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         value={assignFormData.admin_name}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_name: e.target.value })}
                                         placeholder="Enter admin full name"
-                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
+                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                                         required
                                         minLength={2}
                                         maxLength={50}
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">2-50 characters, letters only</p>
+                                <p className="text-sm sm:text-base text-gray-500 mt-1 hidden sm:block">2-50 characters, letters only</p>
                             </div>
 
                             {/* Admin Email */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Email <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -1256,16 +1256,16 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         value={assignFormData.admin_email}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_email: e.target.value })}
                                         placeholder="admin@gmail.com"
-                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
+                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                                         required
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Use gmail.com, outlook.com, yahoo.com, hotmail.com, icloud.com, or protonmail.com</p>
+                                <p className="text-sm sm:text-base text-gray-500 mt-1 hidden sm:block">Use gmail.com, outlook.com, yahoo.com, hotmail.com, icloud.com, or protonmail.com</p>
                             </div>
 
                             {/* Admin Phone */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Phone <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -1275,17 +1275,17 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         value={assignFormData.admin_phone}
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_phone: e.target.value })}
                                         placeholder="+923001234567"
-                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
+                                        className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                                         required
                                         pattern="^\+923[0-9]{9}$"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Format: +923xxxxxxxxx (Pakistani number)</p>
+                                <p className="text-sm sm:text-base text-gray-500 mt-1 hidden sm:block">Format: +923xxxxxxxxx (Pakistani number)</p>
                             </div>
 
                             {/* Admin Password */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Admin Password <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -1298,7 +1298,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_password: e.target.value })}
                                         onPaste={() => setShowConfirmPassword(false)}
                                         placeholder="Enter secure password"
-                                        className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
+                                        className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                                         required
                                         minLength={8}
                                         maxLength={50}
@@ -1320,12 +1320,12 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         )}
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Min 8 characters, must include uppercase, lowercase, number, and special character (@$!%*?&#)</p>
+                                <p className="text-sm sm:text-base text-gray-500 mt-1 hidden sm:block">Min 8 characters, must include uppercase, lowercase, number, and special character (@$!%*?&#)</p>
                             </div>
 
                             {/* Confirm Admin Password */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Confirm Password <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -1338,7 +1338,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         onChange={(e) => setAssignFormData({ ...assignFormData, admin_confirm_password: e.target.value })}
                                         onPaste={() => setShowPassword(false)}
                                         placeholder="Confirm password"
-                                        className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm"
+                                        className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                                         required
                                         minLength={8}
                                         maxLength={50}
@@ -1360,12 +1360,12 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         )}
                                     </button>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">Re-enter the password to confirm</p>
+                                <p className="text-sm sm:text-base text-gray-500 mt-1 hidden sm:block">Re-enter the password to confirm</p>
                             </div>
 
                             {/* Super Admin Notes (Optional) */}
                             <div>
-                                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                     Notes <span className="text-gray-400">(Optional)</span>
                                 </label>
                                 <textarea
@@ -1374,9 +1374,9 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     placeholder="Add any notes..."
                                     rows={2}
                                     maxLength={500}
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-xs sm:text-sm"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-sm sm:text-base"
                                 />
-                                <p className="text-xs text-gray-500 mt-1 hidden sm:block">{assignFormData.super_admin_notes.length}/500 characters</p>
+                                <p className="text-sm sm:text-base text-gray-500 mt-1 hidden sm:block">{assignFormData.super_admin_notes.length}/500 characters</p>
                             </div>
                         </div>
 
@@ -1399,14 +1399,14 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     setShowConfirmPassword(false);
                                 }}
                                 disabled={assignLoading}
-                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleAssignSubmit}
                                 disabled={assignLoading || !assignFormData.admin_name.trim() || !assignFormData.admin_email.trim() || !assignFormData.admin_phone.trim() || !assignFormData.admin_password.trim() || !assignFormData.admin_confirm_password.trim() || assignFormData.admin_password !== assignFormData.admin_confirm_password}
-                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
                             >
                                 {assignLoading ? (
                                     <>
@@ -1450,7 +1450,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
 
                         {/* Status Badge */}
                         <div className="px-3 sm:px-6 pt-2 sm:pt-4">
-                            <span className={`inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedMosqueForView.status)}`}>
+                            <span className={`inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-sm sm:text-base font-semibold ${getStatusColor(selectedMosqueForView.status)}`}>
                                 {getStatusIcon(selectedMosqueForView.status)}
                                 <span className="ml-1">{getStatusLabel(selectedMosqueForView.status)}</span>
                             </span>
@@ -1468,28 +1468,28 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FaBuilding className="w-3 h-3 text-gray-600" />
-                                            <label className="text-xs font-semibold text-gray-600">Mosque Name</label>
+                                            <label className="text-sm sm:text-base font-semibold text-gray-600">Mosque Name</label>
                                         </div>
                                         <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.mosque_name}</p>
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FaEnvelope className="w-3 h-3 text-gray-600" />
-                                            <label className="text-xs font-semibold text-gray-600">Contact Email</label>
+                                            <label className="text-sm sm:text-base font-semibold text-gray-600">Contact Email</label>
                                         </div>
                                         <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.contact_email || 'Not provided'}</p>
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FaMapMarkerAlt className="w-3 h-3 text-gray-600" />
-                                            <label className="text-xs font-semibold text-gray-600">Location</label>
+                                            <label className="text-sm sm:text-base font-semibold text-gray-600">Location</label>
                                         </div>
                                         <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.location}</p>
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FaPhone className="w-3 h-3 text-gray-600" />
-                                            <label className="text-xs font-semibold text-gray-600">Contact Phone</label>
+                                            <label className="text-sm sm:text-base font-semibold text-gray-600">Contact Phone</label>
                                         </div>
                                         <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.contact_phone || 'Not provided'}</p>
                                     </div>
@@ -1497,7 +1497,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         <div className="col-span-2">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <FaBuilding className="w-3 h-3 text-gray-600" />
-                                                <label className="text-xs font-semibold text-gray-600">Description</label>
+                                                <label className="text-sm sm:text-base font-semibold text-gray-600">Description</label>
                                             </div>
                                             <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.description}</p>
                                         </div>
@@ -1515,20 +1515,20 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-600">Current Verification Code</label>
+                                        <label className="text-sm sm:text-base font-semibold text-gray-600">Current Verification Code</label>
                                         <p className="text-sm text-gray-900 font-mono bg-yellow-100 px-3 py-2 rounded mt-1 border border-yellow-300">
                                             {selectedMosqueForView.registration_code}
                                         </p>
                                     </div>
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-600">Code Status</label>
+                                        <label className="text-sm sm:text-base font-semibold text-gray-600">Code Status</label>
                                         <p className="text-sm text-green-700 font-semibold mt-1 flex items-center gap-2">
                                             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                                             Active
                                         </p>
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="text-xs font-semibold text-gray-600">Code Expires</label>
+                                        <label className="text-sm sm:text-base font-semibold text-gray-600">Code Expires</label>
                                         <p className="text-sm text-green-700 mt-1">
                                             {selectedMosqueForView.verification_code_expires
                                                 ? new Date(selectedMosqueForView.verification_code_expires).toLocaleDateString('en-US', {
@@ -1574,21 +1574,21 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <FaIdCard className="w-3 h-3 text-gray-600" />
-                                                <label className="text-xs font-semibold text-gray-600">Admin Name</label>
+                                                <label className="text-sm sm:text-base font-semibold text-gray-600">Admin Name</label>
                                             </div>
                                             <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.approved_admin.name}</p>
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <FaEnvelope className="w-3 h-3 text-gray-600" />
-                                                <label className="text-xs font-semibold text-gray-600">Admin Email</label>
+                                                <label className="text-sm sm:text-base font-semibold text-gray-600">Admin Email</label>
                                             </div>
                                             <p className="text-sm text-gray-900 ml-5 truncate">{selectedMosqueForView.approved_admin.email}</p>
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <FaPhone className="w-3 h-3 text-gray-600" />
-                                                <label className="text-xs font-semibold text-gray-600">Admin Phone</label>
+                                                <label className="text-sm sm:text-base font-semibold text-gray-600">Admin Phone</label>
                                             </div>
                                             <p className="text-sm text-gray-900 ml-5">{selectedMosqueForView.approved_admin.phone}</p>
                                         </div>
@@ -1617,17 +1617,17 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     <div className="space-y-2">
                                         {selectedMosqueForView.pending_admins.map((admin, index) => (
                                             <div key={index} className="bg-white rounded-lg p-3 border border-yellow-300">
-                                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                                <div className="grid grid-cols-2 gap-4 text-sm mb-2">
                                                     <div>
-                                                        <span className="text-xs text-gray-600">Name:</span>
+                                                        <span className="text-sm sm:text-base text-gray-600">Name:</span>
                                                         <p className="font-medium text-gray-900">{admin.name}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-xs text-gray-600">Email:</span>
+                                                        <span className="text-sm sm:text-base text-gray-600">Email:</span>
                                                         <p className="font-medium text-gray-900 truncate">{admin.email}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-xs text-gray-600">Phone:</span>
+                                                        <span className="text-sm sm:text-base text-gray-600">Phone:</span>
                                                         <p className="font-medium text-gray-900">{admin.phone}</p>
                                                     </div>
                                                 </div>
@@ -1649,15 +1649,15 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                             <div key={index} className="bg-white rounded-lg p-3 border border-gray-300">
                                                 <div className="grid grid-cols-3 gap-4 text-sm">
                                                     <div>
-                                                        <span className="text-xs text-gray-600">Name:</span>
+                                                        <span className="text-sm sm:text-base text-gray-600">Name:</span>
                                                         <p className="font-medium text-gray-900">{admin.name}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-xs text-gray-600">Email:</span>
+                                                        <span className="text-sm sm:text-base text-gray-600">Email:</span>
                                                         <p className="font-medium text-gray-900 truncate">{admin.email}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-xs text-gray-600">Phone:</span>
+                                                        <span className="text-sm sm:text-base text-gray-600">Phone:</span>
                                                         <p className="font-medium text-gray-900">{admin.phone}</p>
                                                     </div>
                                                 </div>
@@ -1675,7 +1675,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     setShowViewModal(false);
                                     setSelectedMosqueForView(null);
                                 }}
-                                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-lg transition-colors text-xs sm:text-sm"
+                                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-lg transition-colors text-sm sm:text-base"
                             >
                                 Close
                             </button>
@@ -1693,20 +1693,20 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 <FaExclamationTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
                             </div>
                             <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2">Confirm Deletion</h3>
-                            <p className="text-xs sm:text-sm text-gray-600">
+                            <p className="text-sm sm:text-base text-gray-600">
                                 Are you sure you want to delete this mosque? This action cannot be undone.
                             </p>
                         </div>
 
                         <div className="mb-4 sm:mb-6">
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                            <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                                 Reason for Deletion *
                             </label>
                             <textarea
                                 value={actionReason}
                                 onChange={(e) => setActionReason(e.target.value)}
                                 placeholder="Please provide a reason for deleting this mosque..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-xs sm:text-sm"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-sm sm:text-base"
                                 rows={3}
                                 required
                             />
@@ -1719,14 +1719,14 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                     setActionReason('');
                                     setTargetMosque(null);
                                 }}
-                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmDelete}
                                 disabled={!actionReason.trim()}
-                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 Delete
                             </button>
@@ -1744,14 +1744,14 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                                 <FaCheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                             </div>
                             <h3 className="text-lg sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Confirm Admin Assignment</h3>
-                            <p className="text-xs sm:text-sm text-gray-600">
+                            <p className="text-sm sm:text-base text-gray-600">
                                 Are you sure you want to assign this admin to the mosque?
                             </p>
                         </div>
 
                         <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 border border-blue-200">
-                            <h4 className="text-xs sm:text-sm font-bold text-gray-800 mb-2 sm:mb-3">Admin Details:</h4>
-                            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                            <h4 className="text-sm sm:text-base font-bold text-gray-800 mb-2 sm:mb-3">Admin Details:</h4>
+                            <div className="space-y-1.5 sm:space-y-2 text-sm sm:text-base">
                                 <div className="flex items-center gap-1.5 sm:gap-2">
                                     <FaIdCard className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
                                     <span className="text-gray-700 truncate"><strong>Name:</strong> {assignFormData.admin_name}</span>
@@ -1778,7 +1778,7 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                         <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 sm:p-4 rounded mb-4 sm:mb-6">
                             <div className="flex items-start">
                                 <FaExclamationTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
-                                <div className="text-xs sm:text-sm text-yellow-800">
+                                <div className="text-sm sm:text-base text-yellow-800">
                                     <p className="font-semibold">Important:</p>
                                     <p className="mt-1">This admin will be immediately approved and can login to manage this mosque.</p>
                                 </div>
@@ -1789,14 +1789,14 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                             <button
                                 onClick={cancelAssignConfirmation}
                                 disabled={assignLoading}
-                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={confirmAssignAdmin}
                                 disabled={assignLoading}
-                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
                             >
                                 {assignLoading ? (
                                     <>
@@ -1835,38 +1835,38 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                         </div>
 
                         <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl">
-                            <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2">
+                            <p className="text-sm sm:text-base text-gray-700 mb-1 sm:mb-2">
                                 <strong>Admin:</strong> {selectedMosqueForRemove.approved_admin.name}
                             </p>
-                            <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2 truncate">
+                            <p className="text-sm sm:text-base text-gray-700 mb-1 sm:mb-2 truncate">
                                 <strong>Email:</strong> {selectedMosqueForRemove.approved_admin.email}
                             </p>
-                            <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2 truncate">
+                            <p className="text-sm sm:text-base text-gray-700 mb-1 sm:mb-2 truncate">
                                 <strong>Mosque:</strong> {selectedMosqueForRemove.mosque_name}
                             </p>
-                            <p className="text-xs sm:text-sm text-gray-700 truncate">
+                            <p className="text-sm sm:text-base text-gray-700 truncate">
                                 <strong>Location:</strong> {selectedMosqueForRemove.location}
                             </p>
                         </div>
 
                         <div className="mb-4 sm:mb-6">
-                            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-2">
                                 Removal Reason *
                             </label>
                             <textarea
                                 value={removalReason}
                                 onChange={(e) => setRemovalReason(e.target.value)}
                                 placeholder="Explain why this admin is being removed (minimum 10 characters)..."
-                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-xs sm:text-sm"
+                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-sm sm:text-base"
                                 rows={3}
                                 disabled={removeLoading}
                             />
                             {removeError && (
                                 <div className="mt-2 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
-                                    <p className="text-xs sm:text-sm text-red-600 font-medium">{removeError}</p>
+                                    <p className="text-sm sm:text-base text-red-600 font-medium">{removeError}</p>
                                 </div>
                             )}
-                            <p className="mt-1 sm:mt-2 text-xs text-gray-500">
+                            <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-500">
                                 The admin's account will be preserved with 'admin_removed' status and they can reapply for a different mosque.
                             </p>
                         </div>
@@ -1875,14 +1875,14 @@ const AdminManagement: React.FC<Props> = ({ onDelete, onSendReminder }) => {
                             <button
                                 onClick={closeRemoveAdminModal}
                                 disabled={removeLoading}
-                                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg sm:rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+                                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg sm:rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleRemoveAdmin}
                                 disabled={removeLoading || !removalReason.trim() || removalReason.trim().length < 10}
-                                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg sm:rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg sm:rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
                             >
                                 {removeLoading ? (
                                     <>

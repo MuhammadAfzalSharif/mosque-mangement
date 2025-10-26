@@ -119,11 +119,11 @@ const MosqueDetailPage: React.FC = () => {
 
                             {/* Loading Content */}
                             <div>
-                                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
+                                <h3 className="text-base sm:text-sm lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
                                     <span className="hidden sm:inline">Loading Mosque Details</span>
                                     <span className="sm:hidden">Loading Details</span>
                                 </h3>
-                                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
                                     <span className="hidden sm:inline">Please wait while we fetch the information...</span>
                                     <span className="sm:hidden">Please wait...</span>
                                 </p>
@@ -163,7 +163,7 @@ const MosqueDetailPage: React.FC = () => {
                                                 <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
                                             </div>
                                         </div>
-                                        <h3 className="text-sm sm:text-base lg:text-xl font-bold text-white">
+                                        <h3 className="text-base sm:text-sm lg:text-2xl font-bold text-white">
                                             <span className="hidden sm:inline">Unable to Load Mosque</span>
                                             <span className="sm:hidden">Loading Error</span>
                                         </h3>
@@ -172,7 +172,7 @@ const MosqueDetailPage: React.FC = () => {
 
                                 {/* Error Content */}
                                 <div className="p-3 sm:p-4 lg:p-6">
-                                    <p className="text-xs sm:text-sm lg:text-base text-gray-600 mb-3 sm:mb-4 lg:mb-6 leading-relaxed">
+                                    <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-3 sm:mb-4 lg:mb-6 leading-relaxed">
                                         <span className="hidden sm:inline">{error}</span>
                                         <span className="sm:hidden">Could not load mosque details. Please try again.</span>
                                     </p>
@@ -180,7 +180,7 @@ const MosqueDetailPage: React.FC = () => {
                                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                                         <Link
                                             to="/mosques"
-                                            className="flex-1 group relative bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center"
+                                            className="flex-1 group relative bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center"
                                         >
                                             <ArrowLeft className="mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
                                             <span>Back</span>
@@ -309,12 +309,12 @@ const MosqueDetailPage: React.FC = () => {
                                 </div>
 
                                 {/* Mosque Name */}
-                                <h1 className="text-lg sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 leading-tight px-2">
+                                <h1 className="text-xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 leading-tight px-2">
                                     {mosque.name}
                                 </h1>
 
                                 {/* Location */}
-                                <div className="flex items-center justify-center text-xs sm:text-sm lg:text-base xl:text-lg text-gray-600 px-2">
+                                <div className="flex items-center justify-center text-sm sm:text-base lg:text-lg xl:text-xl text-gray-600 px-2">
                                     <div className="relative mr-2 sm:mr-3">
                                         <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                         <div className="relative bg-gray-100 rounded-full p-1.5 sm:p-2 shadow-sm">
@@ -328,7 +328,7 @@ const MosqueDetailPage: React.FC = () => {
                                 <div className="mt-2 sm:mt-3 lg:mt-4">
                                     <div className="inline-flex items-center bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm">
                                         <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse mr-1 sm:mr-2"></div>
-                                        <span className="text-xs sm:text-sm text-green-700 font-medium">
+                                        <span className="text-sm sm:text-base text-green-700 font-medium">
                                             <span className="hidden sm:inline">Active Community</span>
                                             <span className="sm:hidden">Active</span>
                                         </span>
@@ -357,7 +357,7 @@ const MosqueDetailPage: React.FC = () => {
                                                     <Clock className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                                                 </div>
                                             </div>
-                                            <h2 className="text-sm sm:text-base lg:text-xl font-bold text-white">
+                                            <h2 className="text-base sm:text-sm lg:text-2xl font-bold text-white">
                                                 <span className="hidden sm:inline">Prayer Times</span>
                                                 <span className="sm:hidden">Prayers</span>
                                             </h2>
@@ -382,7 +382,7 @@ const MosqueDetailPage: React.FC = () => {
                                 <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-6 h-6 sm:w-12 sm:h-12 bg-gradient-to-tr from-emerald-200/20 to-transparent rounded-full blur-sm sm:blur-md"></div>
 
                                 <div className="relative z-10 p-3 sm:p-4 lg:p-6">
-                                    <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 flex items-center">
+                                    <h3 className="text-base sm:text-sm lg:text-xl font-bold text-gray-900 mb-2 sm:mb-3 lg:mb-4 flex items-center">
                                         <div className="relative mr-1.5 sm:mr-2">
                                             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full blur-sm opacity-30"></div>
                                             <Star className="relative w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-yellow-500" />
@@ -395,7 +395,7 @@ const MosqueDetailPage: React.FC = () => {
 
                                     <div className="space-y-2 sm:space-y-3">
                                         {/* Get Directions */}
-                                        <button className="group relative w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center">
+                                        <button className="group relative w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-medium text-sm sm:text-base lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center">
                                             <Navigation className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-200" />
                                             <span className="hidden sm:inline">Get Directions</span>
                                             <span className="sm:hidden">Directions</span>
@@ -408,7 +408,7 @@ const MosqueDetailPage: React.FC = () => {
                                             className={`group relative w-full ${isFavorited
                                                 ? 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700'
                                                 : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'
-                                                } text-white px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center`}
+                                                } text-white px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-medium text-sm sm:text-base lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center`}
                                         >
                                             <Heart className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-200 ${isFavorited ? 'fill-current' : ''}`} />
                                             <span className="hidden sm:inline">{isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}</span>
@@ -419,7 +419,7 @@ const MosqueDetailPage: React.FC = () => {
                                         {/* Become Admin */}
                                         <Link
                                             to={`/mosques/${mosque.id}/apply`}
-                                            className="group relative w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center text-center"
+                                            className="group relative w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-medium text-sm sm:text-base lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center text-center"
                                         >
                                             <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-200" />
                                             <span className="hidden sm:inline">Become an Admin</span>
@@ -448,12 +448,12 @@ const MosqueDetailPage: React.FC = () => {
                                             <Info className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                                         </div>
                                     </div>
-                                    <h2 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold text-gray-900">
+                                    <h2 className="text-base sm:text-sm lg:text-2xl xl:text-3xl font-bold text-gray-900">
                                         <span className="hidden sm:inline">About This Mosque</span>
                                         <span className="sm:hidden">About</span>
                                     </h2>
                                 </div>
-                                <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-gray-700 leading-relaxed">{mosque.description}</p>
+                                <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-700 leading-relaxed">{mosque.description}</p>
                             </div>
                         </div>
                     )}

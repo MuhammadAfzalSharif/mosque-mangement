@@ -86,7 +86,7 @@ const AdminStatusPage: React.FC = () => {
                         {/* Spinning arc (top border colored) */}
                         <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-green-600 animate-spin"></div>
                     </div>
-                    <p className="text-gray-600 font-medium">Loading your status...</p>
+                    <p className="text-gray-600 font-medium text-base">Loading your status...</p>
                 </div>
             </div>
         );
@@ -112,7 +112,7 @@ const AdminStatusPage: React.FC = () => {
                         <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-3">
                             Account Status Check
                         </h2>
-                        <p className="text-gray-600 mb-6 text-sm sm:text-base px-2">
+                        <p className="text-gray-600 mb-6 text-base sm:text-sm px-2">
                             {error || 'Unable to load your account status'}
                         </p>
                         <button
@@ -162,7 +162,7 @@ const AdminStatusPage: React.FC = () => {
                             <h1 className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${gradientFrom.replace('from-', 'from-').replace('/20', '-600')} ${gradientTo.replace('to-', 'to-').replace('/20', '-600')} bg-clip-text text-transparent text-center mb-3`}>
                                 {title}
                             </h1>
-                            <p className="text-gray-600 text-center mb-6 sm:mb-8 text-sm sm:text-base px-2">
+                            <p className="text-gray-600 text-center mb-6 sm:mb-8 text-base sm:text-sm px-2">
                                 {description}
                             </p>
 

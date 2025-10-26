@@ -302,7 +302,7 @@ const CodeRegeneration: React.FC = () => {
                             <h1 className="text-lg sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-800 bg-clip-text text-transparent mb-1 sm:mb-2">
                                 Code Regeneration
                             </h1>
-                            <p className="text-gray-600 text-xs sm:text-sm lg:text-base">Manage and regenerate mosque verification codes</p>
+                            <p className="text-gray-600 text-sm sm:text-base">Manage and regenerate mosque verification codes</p>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 lg:gap-3">
                             <button
@@ -341,7 +341,7 @@ const CodeRegeneration: React.FC = () => {
                             <div className="flex items-center justify-center space-x-1 sm:space-x-2 lg:space-x-3 px-2 sm:px-3 lg:px-4 py-1 sm:py-2 bg-purple-100/80 backdrop-blur-sm border border-purple-200 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg w-full sm:w-auto">
                                 <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-pulse"></div>
                                 <Key className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-purple-600" />
-                                <span className="text-purple-700 font-semibold text-xs sm:text-sm lg:text-base">
+                                <span className="text-purple-700 font-semibold text-sm sm:text-base">
                                     {mosques.length} Mosque{mosques.length !== 1 ? 's' : ''}
                                 </span>
                             </div>
@@ -417,7 +417,7 @@ const CodeRegeneration: React.FC = () => {
                                     placeholder="Search mosques..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 lg:py-3 border border-gray-200/60 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 text-xs sm:text-sm lg:text-base"
+                                    className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 lg:py-3 border border-gray-200/60 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 text-sm sm:text-base"
                                 />
                             </div>
 
@@ -427,7 +427,7 @@ const CodeRegeneration: React.FC = () => {
                                 <select
                                     value={expiryFilter}
                                     onChange={(e) => setExpiryFilter(e.target.value)}
-                                    className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 lg:py-3 border border-gray-200/60 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 text-xs sm:text-sm lg:text-base appearance-none cursor-pointer"
+                                    className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 lg:py-3 border border-gray-200/60 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 text-sm sm:text-base appearance-none cursor-pointer"
                                 >
                                     <option value="all">All Codes</option>
                                     <option value="expired">Expired</option>

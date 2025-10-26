@@ -759,7 +759,7 @@ const SuperAdminDashboard: React.FC = () => {
                             {/* Status Text */}
                             <div className="flex items-center space-x-2">
                                 <div className={`w-2.5 h-2.5 rounded-full ${isRefreshing ? 'bg-yellow-400 animate-pulse' : isAutoRefreshEnabled ? 'bg-green-400' : 'bg-gray-400'}`}></div>
-                                <span className="text-sm font-medium text-gray-600">
+                                <span className="text-base font-medium text-gray-600">
                                     {isRefreshing ? 'Updating Dashboard...' : isAutoRefreshEnabled ? 'Auto Refresh ON' : 'Auto Refresh OFF'}
                                 </span>
                             </div>
@@ -793,14 +793,14 @@ const SuperAdminDashboard: React.FC = () => {
                                     <div className="flex items-center min-w-0 flex-1">
                                         <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2 sm:mr-3 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-500'
                                             }`} />
-                                        <span className={`font-medium text-xs sm:text-sm lg:text-base truncate ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'
+                                        <span className={`font-medium text-sm sm:text-base lg:text-base truncate ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'
                                             }`}>
                                             {tab.label}
                                         </span>
                                     </div>
                                     {tab.count !== null && tab.count > 0 && (
                                         <span className={`
-                                            ml-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-bold flex-shrink-0
+                                            ml-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-sm font-bold flex-shrink-0
                                             ${isActive
                                                 ? 'bg-white/20 text-white'
                                                 : 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'
@@ -892,7 +892,7 @@ const SuperAdminDashboard: React.FC = () => {
                                 <div className="space-y-4 sm:space-y-6">
                                     {/* Basic Information */}
                                     <div>
-                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
+                                        <h4 className="text-base sm:text-sm font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
                                             Basic Information
                                         </h4>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -919,7 +919,7 @@ const SuperAdminDashboard: React.FC = () => {
 
                                     {/* Admin Information */}
                                     <div>
-                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
+                                        <h4 className="text-base sm:text-sm font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
                                             Admin Information
                                         </h4>
                                         <div className="space-y-3">
@@ -940,7 +940,7 @@ const SuperAdminDashboard: React.FC = () => {
 
                                     {/* Mosque Management Contact */}
                                     <div>
-                                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-indigo-100 px-3 py-1 rounded-lg inline-block">
+                                        <h4 className="text-base sm:text-sm font-semibold text-gray-800 mb-3 bg-indigo-100 px-3 py-1 rounded-lg inline-block">
                                             Mosque Management Contact
                                         </h4>
                                         <div className="space-y-3">
@@ -960,7 +960,7 @@ const SuperAdminDashboard: React.FC = () => {
                                             <div className="absolute -top-3 -right-3 w-16 h-16 bg-gradient-to-br from-green-200/20 to-transparent rounded-full blur-lg"></div>
 
                                             <div className="relative z-10">
-                                                <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 bg-green-100 px-3 py-2 rounded-lg inline-block">
+                                                <h3 className="text-base sm:text-sm font-bold text-gray-800 mb-4 bg-green-100 px-3 py-2 rounded-lg inline-block">
                                                     <span className="text-lg mr-2">🕌</span>
                                                     Mosque Verification Details
                                                 </h3>
@@ -1178,7 +1178,7 @@ const SuperAdminDashboard: React.FC = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                                 {/* Basic Information */}
                                 <div className="space-y-4">
-                                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
+                                    <h3 className="text-base sm:text-sm font-semibold text-gray-800 mb-3 bg-blue-100 px-3 py-1 rounded-lg inline-block">
                                         Basic Information
                                     </h3>
 
@@ -1251,7 +1251,7 @@ const SuperAdminDashboard: React.FC = () => {
 
                                 {/* Prayer Times */}
                                 <div className="space-y-4">
-                                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
+                                    <h3 className="text-base sm:text-sm font-semibold text-gray-800 mb-3 bg-green-100 px-3 py-1 rounded-lg inline-block">
                                         Prayer Times
                                     </h3>
 

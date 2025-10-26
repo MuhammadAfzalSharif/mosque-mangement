@@ -210,13 +210,13 @@ const RejectedAdmins: React.FC = () => {
                             <h1 className="text-lg sm:text-3xl font-bold bg-gradient-to-r from-gray-800 via-red-600 to-pink-600 bg-clip-text text-transparent mb-1">
                                 Rejected Admins
                             </h1>
-                            <p className="text-gray-600 text-xs sm:text-base hidden sm:block">Manage rejected applications and allow reapplication</p>
+                            <p className="text-gray-600 text-sm sm:text-base hidden sm:block">Manage rejected applications and allow reapplication</p>
                         </div>
 
                         <div className="flex items-center">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-500 rounded-lg sm:rounded-xl blur-md opacity-30"></div>
-                                <div className="relative bg-gradient-to-r from-red-400 to-pink-500 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm shadow-lg">
+                                <div className="relative bg-gradient-to-r from-red-400 to-pink-500 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg">
                                     <div className="flex items-center space-x-1 sm:space-x-2">
                                         <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                                         <span className="hidden sm:inline">{totalCount} Rejected</span>
@@ -256,7 +256,7 @@ const RejectedAdmins: React.FC = () => {
                                                 setCurrentPage(1);
                                             }}
                                             placeholder="Search by name, email, phone..."
-                                            className="w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 text-xs sm:text-sm bg-transparent border-0 rounded-lg sm:rounded-xl focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400"
+                                            className="w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 text-sm sm:text-base bg-transparent border-0 rounded-lg sm:rounded-xl focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400"
                                         />
                                         {searchQuery && (
                                             <button
@@ -445,13 +445,13 @@ const RejectedAdmins: React.FC = () => {
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="text-sm sm:text-lg font-bold text-gray-900 truncate">{admin.name}</h3>
                                                     <div className="flex flex-wrap gap-1 sm:gap-2 mt-1">
-                                                        <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2.5 rounded-full text-xs font-medium bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200">
+                                                        <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2.5 rounded-full text-sm sm:text-base font-medium bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200">
                                                             <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 mr-1 sm:mr-1.5 rounded-full bg-current"></span>
                                                             <span className="hidden sm:inline">Rejected</span>
                                                             <span className="sm:hidden">Rej</span>
                                                         </span>
                                                         {admin.can_reapply && (
-                                                            <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2.5 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200">
+                                                            <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2.5 rounded-full text-sm sm:text-base font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200">
                                                                 <CheckCircle size={8} className="mr-1 sm:hidden" />
                                                                 <CheckCircle size={12} className="mr-1 hidden sm:inline" />
                                                                 <span className="hidden sm:inline">Can Reapply</span>
@@ -459,7 +459,7 @@ const RejectedAdmins: React.FC = () => {
                                                             </span>
                                                         )}
                                                         {uniqueMosqueCount > 0 && (
-                                                            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
+                                                            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-sm sm:text-base font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
                                                                 <Calendar size={12} className="mr-1" />
                                                                 {uniqueMosqueCount} Mosque{uniqueMosqueCount !== 1 ? 's' : ''}
                                                             </span>
@@ -472,7 +472,7 @@ const RejectedAdmins: React.FC = () => {
                                                 <button
                                                     onClick={() => handleAllowReapplicationClick(admin.id, admin.name)}
                                                     disabled={processingId === admin.id}
-                                                    className="group relative bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-1 px-2 sm:py-2 sm:px-3 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg text-xs sm:text-sm flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2"
+                                                    className="group relative bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-1 px-2 sm:py-2 sm:px-3 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg text-sm sm:text-base flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2"
                                                 >
                                                     {processingId === admin.id ? (
                                                         <>
@@ -507,31 +507,31 @@ const RejectedAdmins: React.FC = () => {
 
                                         {/* Modern Rejection Details */}
                                         <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-lg sm:rounded-xl p-2 sm:p-4 mb-3 sm:mb-4">
-                                            <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                                            <p className="text-sm sm:text-base font-semibold text-gray-800 mb-2 flex items-center">
                                                 <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-red-600" />
                                                 <span className="hidden sm:inline">Rejection Reason:</span>
                                                 <span className="sm:hidden">Reason:</span>
                                             </p>
-                                            <p className="text-gray-700 mb-2 sm:mb-3 italic text-xs sm:text-sm line-clamp-2 sm:line-clamp-none">{admin.rejection_reason}</p>
+                                            <p className="text-gray-700 mb-2 sm:mb-3 italic text-sm sm:text-base line-clamp-2 sm:line-clamp-none">{admin.rejection_reason}</p>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-red-200">
                                                 <div className="bg-white/60 backdrop-blur-sm rounded-lg p-1.5 sm:p-2">
-                                                    <p className="text-xs text-gray-600 mb-1 hidden sm:block">Rejection Date</p>
-                                                    <p className="text-xs sm:text-sm font-semibold text-gray-800 flex items-center gap-1">
+                                                    <p className="text-sm sm:text-base text-gray-600 mb-1 hidden sm:block">Rejection Date</p>
+                                                    <p className="text-sm sm:text-base font-semibold text-gray-800 flex items-center gap-1">
                                                         <Calendar size={10} className="text-red-500 sm:hidden" />
                                                         <Calendar size={12} className="text-red-500 hidden sm:inline" />
-                                                        <span className="text-xs sm:text-sm">{new Date(admin.rejection_date).toLocaleDateString()}</span>
+                                                        <span className="text-sm sm:text-base">{new Date(admin.rejection_date).toLocaleDateString()}</span>
                                                     </p>
                                                 </div>
                                                 <div className="bg-white/60 backdrop-blur-sm rounded-lg p-1.5 sm:p-2">
-                                                    <p className="text-xs text-gray-600 mb-1 hidden sm:block">Rejection Count</p>
-                                                    <p className="text-xs sm:text-sm font-semibold text-gray-800 flex items-center gap-1">
+                                                    <p className="text-sm sm:text-base text-gray-600 mb-1 hidden sm:block">Rejection Count</p>
+                                                    <p className="text-sm sm:text-base font-semibold text-gray-800 flex items-center gap-1">
                                                         <AlertTriangle size={10} className="text-orange-500 sm:hidden" />
                                                         <AlertTriangle size={12} className="text-orange-500 hidden sm:inline" />
-                                                        <span className="text-xs sm:text-sm">{admin.rejection_count}x</span>
+                                                        <span className="text-sm sm:text-base">{admin.rejection_count}x</span>
                                                     </p>
                                                 </div>
                                                 <div className="hidden sm:block bg-white/60 backdrop-blur-sm rounded-lg p-2">
-                                                    <p className="text-xs text-gray-600 mb-1">Rejected By</p>
+                                                    <p className="text-sm sm:text-base text-gray-600 mb-1">Rejected By</p>
                                                     <p className="text-sm font-semibold text-gray-800 flex items-center gap-1">
                                                         <User size={12} className="text-purple-500" />
                                                         {admin.rejected_by ? admin.rejected_by.name : 'System'}
@@ -554,17 +554,17 @@ const RejectedAdmins: React.FC = () => {
                                                                 <p className="font-semibold text-gray-800">
                                                                     {prev.mosque ? prev.mosque.name : 'Unknown Mosque'}
                                                                 </p>
-                                                                <p className="text-xs text-gray-500 bg-blue-100 px-2 py-1 rounded-full">
+                                                                <p className="text-sm sm:text-base text-gray-500 bg-blue-100 px-2 py-1 rounded-full">
                                                                     {new Date(prev.rejected_at).toLocaleDateString()}
                                                                 </p>
                                                             </div>
                                                             {prev.mosque && (
-                                                                <p className="text-gray-600 text-xs mb-1 flex items-center">
+                                                                <p className="text-sm sm:text-base text-gray-600 mb-1 flex items-center">
                                                                     <MapPin size={10} className="mr-1 text-blue-500" />
                                                                     {prev.mosque.location}
                                                                 </p>
                                                             )}
-                                                            <p className="text-gray-700 text-xs italic bg-gray-50 p-2 rounded">"{prev.rejection_reason}"</p>
+                                                            <p className="text-sm sm:text-base text-gray-700 italic bg-gray-50 p-2 rounded">"{prev.rejection_reason}"</p>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -579,11 +579,11 @@ const RejectedAdmins: React.FC = () => {
                                                     <AlertTriangle className="text-white hidden sm:inline" size={20} />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-orange-800 mb-1 flex items-center text-xs sm:text-sm">
+                                                    <p className="font-bold text-orange-800 mb-1 flex items-center text-sm sm:text-base">
                                                         🚫 <span className="hidden sm:inline">Auto-Banned</span>
                                                         <span className="sm:hidden">Banned</span>
                                                     </p>
-                                                    <p className="text-xs sm:text-sm text-orange-700">
+                                                    <p className="text-sm sm:text-base text-orange-700">
                                                         <span className="hidden sm:inline">This admin has been rejected {admin.rejection_count} times and is automatically banned from reapplying.</span>
                                                         <span className="sm:hidden">Rejected {admin.rejection_count}x - Auto-banned</span>
                                                     </p>
@@ -613,7 +613,7 @@ const RejectedAdmins: React.FC = () => {
                         </button>
 
                         <div className="bg-white backdrop-blur-xl border-2 border-gray-200 rounded-lg sm:rounded-xl px-2 py-1 sm:px-4 sm:py-2 shadow-md">
-                            <span className="text-gray-700 font-medium text-xs sm:text-sm">
+                            <span className="text-gray-700 font-medium text-sm sm:text-base">
                                 <span className="hidden sm:inline">Page {currentPage} of {totalPages}</span>
                                 <span className="sm:hidden">{currentPage}/{totalPages}</span>
                             </span>

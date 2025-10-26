@@ -190,6 +190,13 @@ export const authApi = {
     confirmPassword: string;
   }) => api.post("/reset-password", data),
 
+  // Email verification for registration
+  verifyRegistrationCode: (data: {
+    email: string;
+    code: string;
+    userType: "admin" | "superadmin";
+  }) => api.post("/verify-registration-code", data),
+
   // Logout
   logout: () => api.post("/logout"),
 };

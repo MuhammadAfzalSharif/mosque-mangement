@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -24,10 +24,36 @@ const ForgotPasswordPage: React.FC = () => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'error' | 'warning' | 'success'>('error');
+    const [countdown, setCountdown] = useState(5);
 
     const form = useForm<ForgotPasswordFormData>({
         resolver: zodResolver(forgotPasswordSchema),
     });
+
+    const handleBackToLogin = () => {
+        navigate(userType === 'admin' ? '/admin/login' : '/superadmin/login');
+    };
+
+    const handleProceedToVerify = useCallback(() => {
+        navigate(`/reset-password/${userType}`, {
+            state: {
+                email: emailSent,
+                fromForgotPassword: true
+            }
+        });
+    }, [navigate, userType, emailSent]);
+
+    // Countdown effect for auto-redirect
+    useEffect(() => {
+        if (success && countdown > 0) {
+            const timer = setTimeout(() => {
+                setCountdown(countdown - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        } else if (success && countdown === 0) {
+            handleProceedToVerify();
+        }
+    }, [success, countdown, handleProceedToVerify]);
 
     const handleSubmit = async (data: ForgotPasswordFormData) => {
         if (!userType || !['admin', 'superadmin'].includes(userType)) {
@@ -46,6 +72,7 @@ const ForgotPasswordPage: React.FC = () => {
 
             setEmailSent(data.email);
             setSuccess(true);
+            setCountdown(5); // Reset countdown for auto-redirect
 
             // Show success toast for email sent
             setToastType('success');
@@ -67,19 +94,6 @@ const ForgotPasswordPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleBackToLogin = () => {
-        navigate(userType === 'admin' ? '/admin/login' : '/superadmin/login');
-    };
-
-    const handleProceedToVerify = () => {
-        navigate(`/reset-password/${userType}`, {
-            state: {
-                email: emailSent,
-                fromForgotPassword: true
-            }
-        });
     };
 
     const isAdmin = userType === 'admin';
@@ -131,7 +145,7 @@ const ForgotPasswordPage: React.FC = () => {
                         <h1 className="text-lg sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 sm:mb-4 tracking-tight">
                             Forgot Password
                         </h1>
-                        <p className="text-gray-600 text-xs sm:text-lg leading-relaxed max-w-md mx-auto px-2">
+                        <p className="text-gray-600 text-base sm:text-sm leading-relaxed max-w-md mx-auto px-2">
                             {success
                                 ? "Check your email for the reset code"
                                 : `Enter your ${title.toLowerCase()} email address and we'll send you a password reset code`
@@ -159,17 +173,17 @@ const ForgotPasswordPage: React.FC = () => {
                                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                                     <div className="flex items-center justify-center mb-2">
                                         <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2" />
-                                        <span className="text-green-800 font-medium text-xs sm:text-sm">Email sent to:</span>
+                                        <span className="text-green-800 font-medium text-sm sm:text-base">Email sent to:</span>
                                     </div>
-                                    <p className="text-green-700 font-mono text-xs sm:text-sm break-all">{emailSent}</p>
+                                    <p className="text-green-700 font-mono text-sm sm:text-base break-all">{emailSent}</p>
                                 </div>
 
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-6 sm:mb-8">
                                     <div className="flex items-start">
                                         <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" />
                                         <div className="text-left">
-                                            <p className="text-blue-800 font-medium text-xs sm:text-sm mb-1">Important:</p>
-                                            <ul className="text-blue-700 text-xs sm:text-sm space-y-1">
+                                            <p className="text-blue-800 font-medium text-sm sm:text-base mb-1">Important:</p>
+                                            <ul className="text-blue-700 text-sm sm:text-base space-y-1">
                                                 <li>• Code expires in 15 minutes</li>
                                                 <li>• Check your spam folder if not received</li>
                                                 <li>• You can only request one reset per hour</li>
@@ -178,11 +192,23 @@ const ForgotPasswordPage: React.FC = () => {
                                     </div>
                                 </div>
 
+                                <div className="mb-4 sm:mb-6">
+                                    <p className="text-gray-600 text-sm sm:text-base mb-2">
+                                        Auto-redirecting in <span className="font-bold text-green-600">{countdown}</span> seconds...
+                                    </p>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full transition-all duration-1000 ease-linear"
+                                            style={{ width: `${(countdown / 5) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+
                                 <button
                                     onClick={handleProceedToVerify}
                                     className="w-full bg-gradient-to-r from-green-700 via-emerald-800 to-teal-900 hover:from-green-800 hover:via-emerald-900 hover:to-teal-950 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-sm sm:text-base"
                                 >
-                                    Enter Reset Code
+                                    Enter Reset Code Now
                                 </button>
                             </div>
                         </div>
@@ -200,7 +226,7 @@ const ForgotPasswordPage: React.FC = () => {
                                     <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                                         <div className="flex items-center">
                                             <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 mr-2 flex-shrink-0" />
-                                            <p className="text-red-700 font-medium text-xs sm:text-sm">{error}</p>
+                                            <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>
                                         </div>
                                     </div>
                                 )}
@@ -210,8 +236,8 @@ const ForgotPasswordPage: React.FC = () => {
                                     <div className="flex items-start">
                                         <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
                                         <div className="text-left">
-                                            <p className="text-amber-800 font-medium text-xs sm:text-sm mb-1">Security Notice:</p>
-                                            <p className="text-amber-700 text-xs sm:text-sm">
+                                            <p className="text-amber-800 font-medium text-sm sm:text-base mb-1">Security Notice:</p>
+                                            <p className="text-amber-700 text-sm sm:text-base">
                                                 For security reasons, we'll only send a reset code if your email exists in our system.
                                                 You can only request one reset per hour.
                                             </p>
@@ -221,7 +247,7 @@ const ForgotPasswordPage: React.FC = () => {
 
                                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
                                     <div>
-                                        <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                        <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                             <div className="relative mr-2">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                 <Mail className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -232,11 +258,11 @@ const ForgotPasswordPage: React.FC = () => {
                                             {...form.register('email')}
                                             type="email"
                                             autoComplete="email"
-                                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-sm sm:text-base"
+                                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gray-50/80 to-green-50/40 border-2 border-gray-200/50 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-400/50 transition-all duration-300 hover:bg-gray-100/80 backdrop-blur-sm text-base"
                                             placeholder={`Enter your ${title.toLowerCase()} email`}
                                         />
                                         {form.formState.errors.email && (
-                                            <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
+                                            <p className="text-red-500 text-sm sm:text-base mt-1 sm:mt-2 font-medium">
                                                 {form.formState.errors.email.message}
                                             </p>
                                         )}
@@ -245,7 +271,7 @@ const ForgotPasswordPage: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="w-full bg-gradient-to-r from-green-700 via-emerald-800 to-teal-900 hover:from-green-800 hover:via-emerald-900 hover:to-teal-950 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none shadow-lg text-sm sm:text-base"
+                                        className="w-full bg-gradient-to-r from-green-700 via-emerald-800 to-teal-900 hover:from-green-800 hover:via-emerald-900 hover:to-teal-950 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none shadow-lg text-base"
                                     >
                                         {loading ? (
                                             <div className="flex items-center justify-center">
@@ -263,7 +289,7 @@ const ForgotPasswordPage: React.FC = () => {
                                 </form>
 
                                 <div className="mt-4 sm:mt-6 text-center">
-                                    <p className="text-xs sm:text-sm text-gray-600">
+                                    <p className="text-sm sm:text-base text-gray-600">
                                         Remember your password?{' '}
                                         <button
                                             onClick={handleBackToLogin}

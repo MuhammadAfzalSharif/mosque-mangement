@@ -98,7 +98,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                     <span className="hidden sm:inline">Super Admin Login</span>
                                     <span className="sm:hidden">Super Admin</span>
                                 </h1>
-                                <p className="text-sm sm:text-lg lg:text-xl text-gray-600 leading-relaxed px-2">
+                                <p className="text-base sm:text-sm lg:text-xl text-gray-600 leading-relaxed px-2">
                                     <span className="hidden sm:inline">Access the mosque management system</span>
                                     <span className="sm:hidden">System Access</span>
                                 </p>
@@ -125,7 +125,7 @@ const SuperAdminLoginPage: React.FC = () => {
 
                             <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4 sm:space-y-6">
                                 <div>
-                                    <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                    <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                         <div className="relative mr-2">
                                             <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                             <Mail className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -140,7 +140,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                         placeholder="Enter your email"
                                     />
                                     {form.formState.errors.email && (
-                                        <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                        <p className="text-red-500 text-sm sm:text-base mt-1 sm:mt-2 font-medium flex items-center">
                                             <div className="w-3 h-3 mr-1 flex-shrink-0"></div>
                                             {form.formState.errors.email.message}
                                         </p>
@@ -148,7 +148,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                    <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                         <div className="relative mr-2">
                                             <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                             <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -173,7 +173,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                         </button>
                                     </div>
                                     {form.formState.errors.password && (
-                                        <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium flex items-center">
+                                        <p className="text-red-500 text-sm sm:text-base mt-1 sm:mt-2 font-medium flex items-center">
                                             <div className="w-3 h-3 mr-1 flex-shrink-0"></div>
                                             {form.formState.errors.password.message}
                                         </p>
@@ -183,7 +183,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                     <div className="text-right mt-2">
                                         <Link
                                             to="/forgot-password/superadmin"
-                                            className="text-xs sm:text-sm text-green-600 hover:text-emerald-700 font-medium transition-colors hover:underline"
+                                            className="text-sm sm:text-base text-green-600 hover:text-emerald-700 font-medium transition-colors hover:underline"
                                         >
                                             Forgot Password?
                                         </Link>

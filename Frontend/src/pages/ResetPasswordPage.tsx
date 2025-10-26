@@ -171,7 +171,7 @@ const ResetPasswordPage: React.FC = () => {
                         <h1 className="text-lg sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2 sm:mb-4 tracking-tight">
                             {step === 'verify' ? 'Enter Reset Code' : 'Set New Password'}
                         </h1>
-                        <p className="text-gray-600 text-xs sm:text-lg leading-relaxed max-w-md mx-auto px-2">
+                        <p className="text-gray-600 text-base sm:text-sm leading-relaxed max-w-md mx-auto px-2">
                             {step === 'verify'
                                 ? `Enter the 6-digit code sent to ${email}`
                                 : 'Enter your new password'
@@ -192,7 +192,7 @@ const ResetPasswordPage: React.FC = () => {
                                 <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                                     <div className="flex items-center">
                                         <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 mr-2 flex-shrink-0" />
-                                        <p className="text-red-700 font-medium text-xs sm:text-sm">{error}</p>
+                                        <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>
                                     </div>
                                 </div>
                             )}
@@ -201,7 +201,7 @@ const ResetPasswordPage: React.FC = () => {
                                 /* Verify Code Form */
                                 <form onSubmit={verifyForm.handleSubmit(handleVerifyCode)} className="space-y-4 sm:space-y-6">
                                     <div>
-                                        <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                        <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                             <div className="relative mr-2">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                 <Key className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -218,7 +218,7 @@ const ResetPasswordPage: React.FC = () => {
                                             placeholder="000000"
                                         />
                                         {verifyForm.formState.errors.code && (
-                                            <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
+                                            <p className="text-red-500 text-sm sm:text-base mt-1 sm:mt-2 font-medium">
                                                 {verifyForm.formState.errors.code.message}
                                             </p>
                                         )}
@@ -247,7 +247,7 @@ const ResetPasswordPage: React.FC = () => {
                                 /* Reset Password Form */
                                 <form onSubmit={resetForm.handleSubmit(handleResetPassword)} className="space-y-4 sm:space-y-6">
                                     <div>
-                                        <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                        <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                             <div className="relative mr-2">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                 <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -272,14 +272,14 @@ const ResetPasswordPage: React.FC = () => {
                                             </button>
                                         </div>
                                         {resetForm.formState.errors.newPassword && (
-                                            <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
+                                            <p className="text-red-500 text-sm sm:text-base mt-1 sm:mt-2 font-medium">
                                                 {resetForm.formState.errors.newPassword.message}
                                             </p>
                                         )}
                                     </div>
 
                                     <div>
-                                        <label className="flex items-center text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
+                                        <label className="flex items-center text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-3">
                                             <div className="relative mr-2">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-sm opacity-30"></div>
                                                 <Lock className="relative w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -304,7 +304,7 @@ const ResetPasswordPage: React.FC = () => {
                                             </button>
                                         </div>
                                         {resetForm.formState.errors.confirmPassword && (
-                                            <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2 font-medium">
+                                            <p className="text-red-500 text-sm sm:text-base mt-1 sm:mt-2 font-medium">
                                                 {resetForm.formState.errors.confirmPassword.message}
                                             </p>
                                         )}
@@ -332,7 +332,7 @@ const ResetPasswordPage: React.FC = () => {
                             )}
 
                             <div className="mt-4 sm:mt-6 text-center">
-                                <p className="text-xs sm:text-sm text-gray-600">
+                                <p className="text-sm sm:text-base text-gray-600">
                                     Remember your password?{' '}
                                     <button
                                         onClick={handleBackToLogin}

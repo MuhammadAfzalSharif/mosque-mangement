@@ -343,7 +343,7 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                 <button
                     onClick={handleRefresh}
                     disabled={loading}
-                    className="flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-md sm:rounded-lg lg:rounded-xl transition-all duration-300 transform sm:hover:scale-105 shadow-md sm:hover:shadow-lg disabled:opacity-50 text-[10px] sm:text-xs lg:text-sm"
+                    className="flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-md sm:rounded-lg lg:rounded-xl transition-all duration-300 transform sm:hover:scale-105 shadow-md sm:hover:shadow-lg disabled:opacity-50 text-sm sm:text-base"
                 >
                     <Activity className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 ${loading ? 'animate-spin' : ''}`} />
                     {loading ? 'Refreshing...' : 'Refresh'}
@@ -368,14 +368,14 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                     <div className={`w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 bg-gradient-to-r ${card.color} rounded sm:rounded-md lg:rounded-lg flex items-center justify-center shadow-sm sm:group-hover:scale-110 transition-transform duration-300`}>
                                         <Icon className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
                                     </div>
-                                    <div className={`text-[8px] sm:text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded-full ${card.changeType === 'increase' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                    <div className={`text-sm sm:text-base font-bold px-1 sm:px-1.5 py-0.5 rounded-full ${card.changeType === 'increase' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                         }`}>
                                         <span className="hidden sm:inline">{card.change}</span>
                                         <span className="sm:hidden">{card.change.replace('%', '')}</span>
                                     </div>
                                 </div>
-                                <h3 className="text-[9px] sm:text-xs lg:text-sm font-semibold text-gray-600 mb-0.5 sm:mb-1 line-clamp-2">{card.title}</h3>
-                                <p className="text-xs sm:text-sm lg:text-lg xl:text-xl font-bold text-gray-800 sm:group-hover:scale-110 transition-transform duration-300">
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-600 mb-0.5 sm:mb-1 line-clamp-2">{card.title}</h3>
+                                <p className="text-sm sm:text-base font-bold text-gray-800 sm:group-hover:scale-110 transition-transform duration-300">
                                     {card.value.toLocaleString()}
                                 </p>
                             </div>
@@ -392,11 +392,11 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                             <FaHistory className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xs sm:text-sm lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                            <h2 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                                 <span className="sm:hidden">Audit Stats</span>
                                 <span className="hidden sm:inline">Audit Statistics</span>
                             </h2>
-                            <p className="text-[8px] sm:text-xs text-gray-600 hidden sm:block">System activity monitoring</p>
+                            <p className="text-sm sm:text-base text-gray-600 hidden sm:block">System activity monitoring</p>
                         </div>
                     </div>
                 </div>
@@ -404,12 +404,12 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                     <div className="bg-white/80 backdrop-blur-lg rounded-md sm:rounded-lg lg:rounded-xl p-2 sm:p-3 lg:p-4 shadow-md sm:shadow-lg border border-green-200">
                         <div className="flex items-center justify-between">
                             <div className="min-w-0 flex-1">
-                                <p className="text-[10px] sm:text-xs lg:text-sm text-gray-500 mb-0.5 sm:mb-1">
+                                <p className="text-sm sm:text-base text-gray-500 mb-0.5 sm:mb-1">
                                     <span className="sm:hidden">Success</span>
                                     <span className="hidden sm:inline">Successful Actions</span>
                                 </p>
                                 <h3 className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold text-green-600">{auditStats.successful_actions}</h3>
-                                <p className="text-[8px] sm:text-xs text-green-500 mt-0.5 sm:mt-1">
+                                <p className="text-sm sm:text-base text-green-500 mt-0.5 sm:mt-1">
                                     {auditStats.total_actions > 0
                                         ? Math.round((auditStats.successful_actions / auditStats.total_actions) * 100)
                                         : 0}% success rate
@@ -423,12 +423,12 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                     <div className="bg-white/80 backdrop-blur-lg rounded-md sm:rounded-lg lg:rounded-xl p-2 sm:p-3 lg:p-4 shadow-md sm:shadow-lg border border-red-200">
                         <div className="flex items-center justify-between">
                             <div className="min-w-0 flex-1">
-                                <p className="text-[10px] sm:text-xs lg:text-sm text-gray-500 mb-0.5 sm:mb-1">
+                                <p className="text-sm sm:text-base text-gray-500 mb-0.5 sm:mb-1">
                                     <span className="sm:hidden">Failed</span>
                                     <span className="hidden sm:inline">Failed Actions</span>
                                 </p>
                                 <h3 className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold text-red-600">{auditStats.failed_actions}</h3>
-                                <p className="text-[8px] sm:text-xs text-red-500 mt-0.5 sm:mt-1">
+                                <p className="text-sm sm:text-base text-red-500 mt-0.5 sm:mt-1">
                                     {auditStats.total_actions > 0
                                         ? Math.round((auditStats.failed_actions / auditStats.total_actions) * 100)
                                         : 0}% failure rate
@@ -442,12 +442,12 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                     <div className="bg-white/80 backdrop-blur-lg rounded-md sm:rounded-lg lg:rounded-xl p-2 sm:p-3 lg:p-4 shadow-md sm:shadow-lg border border-blue-200">
                         <div className="flex items-center justify-between">
                             <div className="min-w-0 flex-1">
-                                <p className="text-[10px] sm:text-xs lg:text-sm text-gray-500 mb-0.5 sm:mb-1">
+                                <p className="text-sm sm:text-base text-gray-500 mb-0.5 sm:mb-1">
                                     <span className="sm:hidden">24h</span>
                                     <span className="hidden sm:inline">Last 24 Hours</span>
                                 </p>
                                 <h3 className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-bold text-blue-600">{auditStats.last_24h}</h3>
-                                <p className="text-[8px] sm:text-xs text-blue-500 mt-0.5 sm:mt-1">Recent activity</p>
+                                <p className="text-sm sm:text-base text-blue-500 mt-0.5 sm:mt-1">Recent activity</p>
                             </div>
                             <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-blue-100 rounded sm:rounded-md lg:rounded-lg flex items-center justify-center flex-shrink-0 ml-1 sm:ml-2">
                                 <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-blue-600" />
@@ -468,11 +468,11 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                 <FaHistory className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-xs sm:text-sm lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     <span className="sm:hidden">Weekly Actions</span>
                                     <span className="hidden sm:inline">Weekly Action Types</span>
                                 </h3>
-                                <p className="text-[8px] sm:text-xs lg:text-sm text-gray-600 font-medium hidden sm:block">
+                                <p className="text-sm sm:text-base lg:text-sm text-gray-600 font-medium hidden sm:block">
                                     Last 7 Days - Action Breakdown
                                 </p>
                             </div>
@@ -515,7 +515,7 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
 
                                     {/* Compact Legend */}
                                     <div className="mt-1 sm:mt-2">
-                                        <div className="grid grid-cols-2 gap-1 text-[8px] sm:text-xs">
+                                        <div className="grid grid-cols-2 gap-1 text-sm sm:text-base">
                                             {weeklyAuditData.slice(0, 6).map((item, index) => (
                                                 <div key={index} className="flex items-center space-x-1 p-0.5 rounded">
                                                     <div
@@ -544,8 +544,8 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                 <div className="flex items-center justify-center h-full text-center text-gray-500">
                                     <div>
                                         <FaHistory className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-gray-400" />
-                                        <p className="font-medium text-xs sm:text-sm">No weekly data</p>
-                                        <p className="text-[8px] sm:text-xs mt-0.5">Data will appear here</p>
+                                        <p className="font-medium text-sm sm:text-base">No weekly data</p>
+                                        <p className="text-sm sm:text-base mt-0.5">Data will appear here</p>
                                     </div>
                                 </div>
                             )}
@@ -559,11 +559,11 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                 <Activity className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-xs sm:text-sm lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                     <span className="sm:hidden">Monthly Trends</span>
                                     <span className="hidden sm:inline">Monthly Success/Failure Trends</span>
                                 </h3>
-                                <p className="text-[8px] sm:text-xs lg:text-sm text-gray-600 font-medium hidden sm:block">
+                                <p className="text-sm sm:text-base lg:text-sm text-gray-600 font-medium hidden sm:block">
                                     Last 6 Months - Success vs Failure
                                 </p>
                             </div>
@@ -608,8 +608,8 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                 <div className="flex items-center justify-center h-full text-center text-gray-500">
                                     <div>
                                         <Activity className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-gray-400" />
-                                        <p className="font-medium text-xs sm:text-sm">No monthly data</p>
-                                        <p className="text-[8px] sm:text-xs mt-0.5">Data will appear here</p>
+                                        <p className="font-medium text-sm sm:text-base">No monthly data</p>
+                                        <p className="text-sm sm:text-base mt-0.5">Data will appear here</p>
                                     </div>
                                 </div>
                             )}
@@ -626,11 +626,11 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                             <Activity className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white" />
                         </div>
                         <div>
-                            <h3 className="text-xs sm:text-sm lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                 <span className="sm:hidden">Action Types</span>
                                 <span className="hidden sm:inline">Action Types Overview</span>
                             </h3>
-                            <p className="text-[8px] sm:text-xs text-gray-600 font-medium hidden sm:block">
+                            <p className="text-sm sm:text-base text-gray-600 font-medium hidden sm:block">
                                 System activities breakdown
                             </p>
                         </div>
@@ -707,7 +707,7 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                                 <Icon className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                                             </div>
                                             <div className="flex flex-col items-end space-y-0.5">
-                                                <span className={`text-[8px] sm:text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded-full bg-white/80 text-${actionType.color}-700 shadow-sm`}>
+                                                <span className={`text-sm sm:text-base font-bold px-1 sm:px-1.5 py-0.5 rounded-full bg-white/80 text-${actionType.color}-700 shadow-sm`}>
                                                     {actionType.success_rate}%
                                                 </span>
                                                 {actionType.count_today > 0 && (
@@ -718,27 +718,27 @@ const DashboardOverview: React.FC<Props> = ({ stats, onRefresh }) => {
                                             </div>
                                         </div>
 
-                                        <h4 className="text-[10px] sm:text-xs lg:text-sm font-semibold text-gray-700 mb-1 sm:mb-1.5 sm:group-hover:text-gray-800 transition-colors line-clamp-2">
+                                        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-1 sm:mb-1.5 sm:group-hover:text-gray-800 transition-colors line-clamp-2">
                                             {actionType.label}
                                         </h4>
 
                                         <div className="flex items-baseline justify-between mb-1 sm:mb-1.5">
-                                            <p className="text-xs sm:text-sm lg:text-base font-bold text-gray-800 sm:group-hover:scale-110 transition-transform duration-300">
+                                            <p className="text-sm sm:text-base font-bold text-gray-800 sm:group-hover:scale-110 transition-transform duration-300">
                                                 {actionType.total_count.toLocaleString()}
                                             </p>
                                             {actionType.count_24h > 0 && (
-                                                <span className="text-[8px] sm:text-xs text-gray-500 bg-white/50 px-1 py-0.5 rounded">
+                                                <span className="text-sm sm:text-base text-gray-500 bg-white/50 px-1 py-0.5 rounded">
                                                     {actionType.count_24h}
                                                 </span>
                                             )}
                                         </div>
 
                                         <div className="bg-white/60 backdrop-blur-sm rounded sm:rounded-md p-1 sm:p-1.5 shadow-inner">
-                                            <div className="flex justify-between text-[8px] sm:text-xs text-gray-600 mb-0.5 sm:mb-1">
+                                            <div className="flex justify-between text-sm sm:text-base text-gray-600 mb-0.5 sm:mb-1">
                                                 <span className="font-medium">Success</span>
                                                 <span className="font-medium">Failed</span>
                                             </div>
-                                            <div className="flex justify-between text-[8px] sm:text-xs font-bold">
+                                            <div className="flex justify-between text-sm sm:text-base font-bold">
                                                 <span className="text-green-600 flex items-center">
                                                     <CheckCircle className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5" /> {actionType.success_count}
                                                 </span>

@@ -278,12 +278,12 @@ const DeleteMosques: React.FC = () => {
                             <h1 className="text-lg sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-red-800 bg-clip-text text-transparent mb-1 sm:mb-2">
                                 Delete Mosques
                             </h1>
-                            <p className="text-gray-600 text-xs sm:text-sm lg:text-base hidden sm:block">Permanently remove mosques from the system</p>
+                            <p className="text-gray-600 text-sm sm:text-base hidden sm:block">Permanently remove mosques from the system</p>
                         </div>
                         <div className="flex items-center justify-center sm:justify-start space-x-1 sm:space-x-2 lg:space-x-3 px-2 sm:px-3 lg:px-4 py-1 sm:py-2 bg-red-100/80 backdrop-blur-sm border border-red-200 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg">
                             <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse"></div>
                             <FaExclamationTriangle className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-red-600" />
-                            <span className="text-red-700 font-semibold text-xs sm:text-sm lg:text-base">Danger Zone</span>
+                            <span className="text-red-700 font-semibold text-sm sm:text-base">Danger Zone</span>
                         </div>
                     </div>
                 </div>
@@ -299,10 +299,10 @@ const DeleteMosques: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex-1 text-center sm:text-left">
-                                <h3 className="text-xs sm:text-sm lg:text-base xl:text-lg font-bold text-red-800 mb-0.5 sm:mb-1 lg:mb-2">
+                                <h3 className="text-sm sm:text-base font-bold text-red-800 mb-0.5 sm:mb-1 lg:mb-2">
                                     Critical Warning: Permanent Action
                                 </h3>
-                                <p className="text-red-700 mb-1 sm:mb-2 lg:mb-3 text-xs sm:text-sm leading-relaxed">
+                                <p className="text-red-700 mb-1 sm:mb-2 lg:mb-3 text-sm sm:text-base leading-relaxed">
                                     Deleting mosques will permanently remove them from the system. This action cannot be undone.
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-0.5 sm:gap-1 lg:gap-2">
@@ -408,7 +408,7 @@ const DeleteMosques: React.FC = () => {
                                 <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-gradient-to-br from-gray-400 to-gray-600 rounded-lg sm:rounded-2xl lg:rounded-3xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 shadow-lg">
                                     <FaBuilding className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-white" />
                                 </div>
-                                <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-gray-700 mb-2 sm:mb-3">No Mosques Found</h3>
+                                <h3 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold text-gray-700 mb-2 sm:mb-3">No Mosques Found</h3>
                                 <p className="text-gray-500 text-xs sm:text-sm lg:text-base">No mosques match your current search and filter criteria.</p>
                                 <div className="mt-3 sm:mt-4 lg:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
                                     <button
@@ -619,7 +619,7 @@ const DeleteMosques: React.FC = () => {
                                         <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-lg sm:rounded-2xl lg:rounded-3xl blur-xl"></div>
                                     </div>
 
-                                    <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2 sm:mb-3 lg:mb-4">
+                                    <h3 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2 sm:mb-3 lg:mb-4">
                                         <span className="flex items-center">
                                             <AlertTriangle className="w-4 h-4 mr-2 text-yellow-600" />
                                             Confirm Deletion
