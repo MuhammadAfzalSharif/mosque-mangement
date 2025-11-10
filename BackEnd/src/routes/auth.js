@@ -8,7 +8,8 @@ import { auth, requireSuperAdmin } from '../middleware/auth.js';
 import AuditLogger from '../utils/auditLogger.js';
 import crypto from 'crypto';
 import PasswordReset from '../../models/PasswordReset.js';
-import { sendPasswordResetEmail } from '../../services/mailService.js';
+import { sendPasswordResetEmail, sendRegistrationEmail } from '../../services/mailService.js';
+import PendingVerification from '../../models/PendingVerification.js';
 import fs from 'fs';
 
 const router = express.Router();
@@ -499,36 +500,72 @@ router.post('/admin/register', async (req, res) => {
             });
         }
 
+        // Generate 6-digit verification code
+        const verificationCode = crypto.randomInt(100000, 999999).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const admin = new Admin({
-            name: name.trim(),
+        // Clean up any existing pending verification records for this email/userType
+        await PendingVerification.deleteMany({
+            email: email.toLowerCase().trim(),
+            userType: 'admin'
+        });
+
+        // Save to pending verification collection
+        const pendingVerification = new PendingVerification({
             email: email.trim().toLowerCase(),
-            password: hashedPassword,
+            userType: 'admin',
+            name: name.trim(),
             phone: phone.trim(),
-            mosque_id,
-            status: 'pending',
-            verification_code_used: verification_code,
+            password: hashedPassword,
+            mosque_id: mosque_id,
+            mosque_verification_code: verification_code,
+            verification_code: verificationCode,
+            expiresAt: expiresAt,
             application_notes: application_notes ? application_notes.trim() : ''
         });
 
-        await admin.save();
-        await admin.populate('mosque_id', 'name location');
+        await pendingVerification.save();
 
-        // Log the admin registration
+        // Send verification email
+        try {
+            await sendRegistrationEmail(
+                email.trim().toLowerCase(),
+                name.trim(),
+                verificationCode,
+                'admin'
+            );
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            // Clean up the pending verification record if email fails
+            await PendingVerification.findByIdAndDelete(pendingVerification._id);
+            return res.status(500).json({
+                error: 'Failed to send verification email. Please try again.',
+                code: 'EMAIL_SEND_FAILED'
+            });
+        }
+
+        // Log the registration attempt
         const auditLogger = new AuditLogger(req);
-        await auditLogger.logAdminRegistered(admin, mosque);
-
-        res.status(201).json({
-            message: 'Registration successful. Waiting for super admin approval.',
-            admin: {
-                id: admin._id,
-                name: admin.name,
-                email: admin.email,
-                phone: admin.phone,
-                status: admin.status,
-                mosque: admin.mosque_id
+        await auditLogger.log({
+            action: 'admin_registration_started',
+            targetModel: 'pending_verification',
+            targetId: pendingVerification._id,
+            details: {
+                email: email.trim().toLowerCase(),
+                mosque_id: mosque_id,
+                mosque_name: mosque.name
             }
+        });
+
+        res.status(200).json({
+            message: 'Verification code sent to your email. Please check your email and enter the code to complete registration.',
+            email: email.trim().toLowerCase(),
+            userType: 'admin',
+            expiresIn: 15, // minutes
+            nextStep: '/email-verification'
         });
     } catch (err) {
         console.error('Registration error:', err);
@@ -683,29 +720,72 @@ router.post('/superadmin/register', async (req, res) => {
         const existingSuperAdmin = await SuperAdmin.findOne({ email });
         if (existingSuperAdmin) return res.status(400).json({ error: 'Email already exists' });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const superAdmin = new SuperAdmin({ name: name.trim(), email, password: hashedPassword });
-        await superAdmin.save();
+        // Generate 6-digit verification code
+        const verificationCode = crypto.randomInt(100000, 999999).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-        // Log the super admin creation
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Clean up any existing pending verification records for this email/userType
+        await PendingVerification.deleteMany({
+            email: email.toLowerCase().trim(),
+            userType: 'superadmin'
+        });
+
+        // Save to pending verification collection
+        const pendingVerification = new PendingVerification({
+            email: email.trim().toLowerCase(),
+            userType: 'superadmin',
+            name: name.trim(),
+            password: hashedPassword,
+            verification_code: verificationCode,
+            expiresAt: expiresAt
+        });
+
+        await pendingVerification.save();
+
+        // Send verification email
+        try {
+            await sendRegistrationEmail(
+                email.trim().toLowerCase(),
+                name.trim(),
+                verificationCode,
+                'superadmin'
+            );
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            // Clean up the pending verification record if email fails
+            await PendingVerification.findByIdAndDelete(pendingVerification._id);
+            return res.status(500).json({
+                error: 'Failed to send verification email. Please try again.',
+                code: 'EMAIL_SEND_FAILED'
+            });
+        }
+
+        // Log the registration attempt
         try {
             const auditLogger = new AuditLogger(req);
             await auditLogger.log({
-                action: 'super_admin_created',
-                targetModel: 'super_admin',
-                targetId: superAdmin._id,
+                action: 'superadmin_registration_started',
+                targetModel: 'pending_verification',
+                targetId: pendingVerification._id,
                 details: {
-                    super_admin_name: superAdmin.name,
-                    super_admin_email: superAdmin.email,
+                    email: email.trim().toLowerCase(),
                     created_by: req.user ? 'existing_super_admin' : 'initial_setup'
                 }
             });
         } catch (auditError) {
-            console.error('Failed to log super admin creation:', auditError);
-            // Don't fail the request if audit logging fails
+            console.error('Failed to log superadmin registration attempt:', auditError);
         }
 
-        res.status(201).json({ message: 'Super admin registered', super_admin: { id: superAdmin._id, name: superAdmin.name, email } });
+        res.status(200).json({
+            message: 'Verification code sent to your email. Please check your email and enter the code to complete registration.',
+            email: email.trim().toLowerCase(),
+            userType: 'superadmin',
+            expiresIn: 15, // minutes
+            nextStep: '/email-verification'
+        });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -1345,6 +1425,187 @@ router.post('/reset-password', async (req, res) => {
 
         res.status(500).json({
             error: 'Server error occurred while resetting password',
+            code: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Email Verification for Registration
+router.post('/verify-registration-code', async (req, res) => {
+    try {
+        const { email, code, userType } = req.body;
+
+        // Validate input
+        if (!email || !code || !userType) {
+            return res.status(400).json({
+                error: 'Email, code, and user type are required',
+                code: 'MISSING_FIELDS'
+            });
+        }
+
+        if (!['admin', 'superadmin'].includes(userType)) {
+            return res.status(400).json({
+                error: 'Invalid user type',
+                code: 'INVALID_USER_TYPE'
+            });
+        }
+
+        // Validate code format (6 digits)
+        if (!/^\d{6}$/.test(code)) {
+            return res.status(400).json({
+                error: 'Invalid code format. Code must be 6 digits.',
+                code: 'INVALID_CODE_FORMAT'
+            });
+        }
+
+        // Find the most recent pending verification record
+        const pendingRecord = await PendingVerification.findOne({
+            email: email.toLowerCase().trim(),
+            userType,
+            expiresAt: { $gt: new Date() }
+        }).sort({ createdAt: -1 }); // Get the most recent record
+
+        if (!pendingRecord) {
+            return res.status(400).json({
+                error: 'Invalid or expired verification code',
+                code: 'INVALID_CODE'
+            });
+        }
+
+        // Verify code
+        const isValidCode = await pendingRecord.verifyCode(code);
+
+        if (!isValidCode) {
+            return res.status(400).json({
+                error: 'Invalid verification code',
+                code: 'INVALID_CODE'
+            });
+        }
+
+        // Code is valid - create the actual user account
+        if (userType === 'admin') {
+            // Double-check mosque code and email uniqueness before creating admin
+            const mosque = await Mosque.findById(pendingRecord.mosque_id);
+            if (!mosque) {
+                return res.status(404).json({
+                    error: 'Mosque not found',
+                    code: 'MOSQUE_NOT_FOUND'
+                });
+            }
+
+            // Final check for existing admin
+            const existingAdmin = await Admin.findOne({
+                $or: [
+                    { email: pendingRecord.email },
+                    { phone: pendingRecord.phone }
+                ]
+            });
+
+            if (existingAdmin) {
+                return res.status(409).json({
+                    error: 'An admin with this email or phone already exists',
+                    code: 'DUPLICATE_ENTRY'
+                });
+            }
+
+            // Check mosque still available
+            const existingMosqueAdmin = await Admin.findOne({
+                mosque_id: pendingRecord.mosque_id,
+                status: { $in: ['approved', 'pending'] }
+            });
+
+            if (existingMosqueAdmin) {
+                return res.status(400).json({
+                    error: 'This mosque already has an admin or a pending admin request',
+                    code: 'ADMIN_ALREADY_EXISTS'
+                });
+            }
+
+            // Create admin
+            const admin = new Admin({
+                name: pendingRecord.name,
+                email: pendingRecord.email,
+                password: pendingRecord.password,
+                phone: pendingRecord.phone,
+                mosque_id: pendingRecord.mosque_id,
+                status: 'pending',
+                verification_code_used: pendingRecord.mosque_verification_code,
+                application_notes: pendingRecord.application_notes
+            });
+
+            await admin.save();
+            await admin.populate('mosque_id', 'name location');
+
+            // Log the admin registration
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.logAdminRegistered(admin, mosque);
+
+            // Clean up pending verification
+            await PendingVerification.findByIdAndDelete(pendingRecord._id);
+
+            res.status(201).json({
+                message: 'Registration completed successfully. Waiting for super admin approval.',
+                userType: 'admin',
+                admin: {
+                    id: admin._id,
+                    name: admin.name,
+                    email: admin.email,
+                    phone: admin.phone,
+                    status: admin.status,
+                    mosque: admin.mosque_id
+                }
+            });
+
+        } else if (userType === 'superadmin') {
+            // Check for existing superadmin
+            const existingSuperAdmin = await SuperAdmin.findOne({ email: pendingRecord.email });
+            if (existingSuperAdmin) {
+                return res.status(409).json({
+                    error: 'A super admin with this email already exists',
+                    code: 'DUPLICATE_EMAIL'
+                });
+            }
+
+            // Create superadmin
+            const superAdmin = new SuperAdmin({
+                name: pendingRecord.name,
+                email: pendingRecord.email,
+                password: pendingRecord.password
+            });
+
+            await superAdmin.save();
+
+            // Log the super admin creation
+            const auditLogger = new AuditLogger(req);
+            await auditLogger.log({
+                action: 'super_admin_created',
+                targetModel: 'super_admin',
+                targetId: superAdmin._id,
+                details: {
+                    super_admin_name: superAdmin.name,
+                    super_admin_email: superAdmin.email,
+                    created_by: 'email_verification'
+                }
+            });
+
+            // Clean up pending verification
+            await PendingVerification.findByIdAndDelete(pendingRecord._id);
+
+            res.status(201).json({
+                message: 'Super admin registration completed successfully.',
+                userType: 'superadmin',
+                super_admin: {
+                    id: superAdmin._id,
+                    name: superAdmin.name,
+                    email: superAdmin.email
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500).json({
+            error: 'Server error occurred while verifying code',
             code: 'SERVER_ERROR'
         });
     }

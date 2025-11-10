@@ -10,87 +10,93 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Mosque-Themed Email Template
-const generateResetEmailTemplate = (code, name, userType) => `
+// Registration Verification Email Template
+const generateRegistrationEmailTemplate = (code, name, userType) => `
   <!DOCTYPE html>
   <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Reset - Mosque Management System</title>
+    <title>Email Verification - Mosque Management System</title>
+    <style>
+      @media only screen and (max-width: 600px) {
+        .container { width: 100% !important; padding: 10px !important; }
+        .header { padding: 20px !important; }
+        .content { padding: 20px !important; }
+        .code-box { font-size: 28px !important; padding: 12px !important; }
+        .footer { padding: 15px !important; }
+      }
+    </style>
   </head>
-  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #d1fae5 100%); padding: 40px 20px; min-height: 100vh;">
-      <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); overflow: hidden;">
-        
+  <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #d1fae5 100%); padding: 20px; min-height: 100vh;">
+      <div class="container" style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden;">
+
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%); padding: 30px; text-align: center;">
-          <div style="font-size: 48px; margin-bottom: 10px;">🕌</div>
-          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">
+        <div class="header" style="background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">
             Mosque Management System
           </h1>
-          <p style="color: rgba(255, 255, 255, 0.9); margin: 5px 0 0 0; font-size: 16px;">
-            Password Reset Request
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0; font-size: 16px; font-weight: 400;">
+            Email Verification
           </p>
         </div>
 
         <!-- Content -->
-        <div style="padding: 40px 30px;">
+        <div class="content" style="padding: 40px 30px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="color: #065f46; margin: 0 0 10px 0; font-size: 22px;">
-              Assalamu Alaikum ${name}
+            <h2 style="color: #065f46; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">
+              Welcome ${name}
             </h2>
-            <p style="color: #6b7280; margin: 0; font-size: 16px;">
-              We received a request to reset your ${userType} password
+            <p style="color: #64748b; margin: 0; font-size: 16px; line-height: 1.5;">
+              Please verify your email address to complete your ${userType} registration
             </p>
           </div>
 
-          <!-- Reset Code Box -->
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 2px solid #059669; border-radius: 15px; padding: 30px; text-align: center; margin: 30px 0;">
-            <p style="color: #065f46; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">
-              Your Password Reset Code:
+          <!-- Verification Code Box -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 2px solid #059669; border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+            <p style="color: #065f46; margin: 0 0 20px 0; font-size: 16px; font-weight: 600;">
+              Your Verification Code:
             </p>
-            <div style="font-size: 36px; font-weight: bold; color: #059669; letter-spacing: 8px; font-family: 'Courier New', monospace; background: white; padding: 15px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);">
+            <div class="code-box" style="font-size: 36px; font-weight: 700; color: #059669; letter-spacing: 8px; font-family: 'Courier New', monospace; background: white; padding: 15px 20px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15); border: 1px solid #d1fae5;">
               ${code}
             </div>
           </div>
 
           <!-- Instructions -->
-          <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 10px; padding: 20px; margin: 20px 0;">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-              <span style="font-size: 20px; margin-right: 10px;">⏰</span>
-              <strong style="color: #92400e; font-size: 16px;">Important Instructions:</strong>
-            </div>
-            <ul style="color: #92400e; margin: 0; padding-left: 20px; font-size: 14px;">
-              <li style="margin-bottom: 5px;">This code expires in <strong>15 minutes</strong></li>
-              <li style="margin-bottom: 5px;">Use this code to reset your password</li>
-              <li style="margin-bottom: 5px;">If you didn't request this, ignore this email</li>
-              <li>You can only request one reset per hour</li>
+          <div style="background: #fefce8; border: 1px solid #eab308; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h3 style="color: #92400e; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">
+              Important Instructions:
+            </h3>
+            <ul style="color: #92400e; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+              <li style="margin-bottom: 6px;">This code expires in <strong>15 minutes</strong></li>
+              <li style="margin-bottom: 6px;">Enter this code on the verification page to complete registration</li>
+              <li style="margin-bottom: 6px;">The code is valid only for this registration attempt</li>
+              <li>If you did not request this registration, please ignore this email</li>
             </ul>
           </div>
 
           <!-- Security Notice -->
-          <div style="background: #fef2f2; border: 1px solid #ef4444; border-radius: 10px; padding: 15px; margin: 20px 0;">
-            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 18px; margin-right: 8px;">🔐</span>
-              <strong style="color: #dc2626; font-size: 14px;">Security Notice:</strong>
-            </div>
-            <p style="color: #dc2626; margin: 0; font-size: 13px;">
-              Never share this code with anyone. Our team will never ask for your password or reset code.
+          <div style="background: #fef2f2; border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin: 20px 0;">
+            <h4 style="color: #dc2626; margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
+              Security Notice:
+            </h4>
+            <p style="color: #dc2626; margin: 0; font-size: 13px; line-height: 1.4;">
+              Never share this verification code with anyone. Our team will never ask for your verification code.
             </p>
           </div>
         </div>
 
         <!-- Footer -->
-        <div style="background: #f9fafb; padding: 25px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #065f46; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">
-            Jazakallah Khair 🤲
+        <div class="footer" style="background: #f8fafc; padding: 25px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+          <p style="color: #065f46; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">
+            Thank you for registering
           </p>
-          <p style="color: #6b7280; margin: 0; font-size: 14px;">
+          <p style="color: #64748b; margin: 0; font-size: 14px;">
             Mosque Management System Team
           </p>
-          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <p style="color: #94a3b8; margin: 0; font-size: 12px;">
               This is an automated message. Please do not reply to this email.
             </p>
           </div>
@@ -101,13 +107,129 @@ const generateResetEmailTemplate = (code, name, userType) => `
   </html>
 `;
 
+// Password Reset Email Template
+const generateResetEmailTemplate = (code, name, userType) => `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset - Mosque Management System</title>
+    <style>
+      @media only screen and (max-width: 600px) {
+        .container { width: 100% !important; padding: 10px !important; }
+        .header { padding: 20px !important; }
+        .content { padding: 20px !important; }
+        .code-box { font-size: 28px !important; padding: 12px !important; }
+        .footer { padding: 15px !important; }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
+    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #d1fae5 100%); padding: 20px; min-height: 100vh;">
+      <div class="container" style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden;">
+
+        <!-- Header -->
+        <div class="header" style="background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">
+            Mosque Management System
+          </h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0; font-size: 16px; font-weight: 400;">
+            Password Reset
+          </p>
+        </div>
+
+        <!-- Content -->
+        <div class="content" style="padding: 40px 30px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #065f46; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">
+              Hello ${name}
+            </h2>
+            <p style="color: #64748b; margin: 0; font-size: 16px; line-height: 1.5;">
+              We received a request to reset your ${userType} password
+            </p>
+          </div>
+
+          <!-- Reset Code Box -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 2px solid #059669; border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+            <p style="color: #065f46; margin: 0 0 20px 0; font-size: 16px; font-weight: 600;">
+              Your Password Reset Code:
+            </p>
+            <div class="code-box" style="font-size: 36px; font-weight: 700; color: #059669; letter-spacing: 8px; font-family: 'Courier New', monospace; background: white; padding: 15px 20px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15); border: 1px solid #d1fae5;">
+              ${code}
+            </div>
+          </div>
+
+          <!-- Instructions -->
+          <div style="background: #fefce8; border: 1px solid #eab308; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h3 style="color: #92400e; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">
+              Important Instructions:
+            </h3>
+            <ul style="color: #92400e; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+              <li style="margin-bottom: 6px;">This code expires in <strong>15 minutes</strong></li>
+              <li style="margin-bottom: 6px;">Use this code to reset your password</li>
+              <li style="margin-bottom: 6px;">If you didn't request this reset, ignore this email</li>
+              <li>You can only request one reset per hour</li>
+            </ul>
+          </div>
+
+          <!-- Security Notice -->
+          <div style="background: #fef2f2; border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin: 20px 0;">
+            <h4 style="color: #dc2626; margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
+              Security Notice:
+            </h4>
+            <p style="color: #dc2626; margin: 0; font-size: 13px; line-height: 1.4;">
+              Never share this reset code with anyone. Our team will never ask for your password or reset code.
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer" style="background: #f8fafc; padding: 25px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+          <p style="color: #065f46; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">
+            Thank you
+          </p>
+          <p style="color: #64748b; margin: 0; font-size: 14px;">
+            Mosque Management System Team
+          </p>
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <p style="color: #94a3b8; margin: 0; font-size: 12px;">
+              This is an automated message. Please do not reply to this email.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>
+`;
+
+// Send Registration Verification Email
+const sendRegistrationEmail = async (email, name, code, userType) => {
+  try {
+    const mailOptions = {
+      from: `"Mosque Management System" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: `Email Verification - ${userType === 'admin' ? 'Admin' : 'Super Admin'} Registration`,
+      html: generateRegistrationEmailTemplate(code, name, userType),
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Registration verification email sent to ${email}. Message ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Email send error:', error);
+    throw new Error('Failed to send verification email. Please try again later.');
+  }
+};
+
 // Send Reset Email
 const sendPasswordResetEmail = async (email, name, code, userType) => {
   try {
     const mailOptions = {
-      from: `"🕌 Mosque Management System" <${process.env.GMAIL_USER}>`,
+      from: `"Mosque Management System" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: `🕌 Password Reset Code - ${userType === 'admin' ? 'Admin' : 'Super Admin'} Portal`,
+      subject: `Password Reset Code - ${userType === 'admin' ? 'Admin' : 'Super Admin'} Portal`,
       html: generateResetEmailTemplate(code, name, userType),
     };
 
@@ -134,5 +256,6 @@ const verifyConnection = async () => {
 
 export {
   sendPasswordResetEmail,
+  sendRegistrationEmail,
   verifyConnection
 };
