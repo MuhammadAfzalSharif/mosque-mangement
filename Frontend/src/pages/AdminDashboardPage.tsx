@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { mosqueApi, authApi } from '../lib/api';
+import { useAdminMosque, mosqueQueryKeys } from '../lib/queries';
+import { getErrorMessage } from '../lib/types';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     Search, AlertTriangle, BarChart, Home, Bell, TrendingUp, Settings,
     Zap, Users, Clock, MapPin, FileText, Shield, LogOut, Upload,
@@ -118,22 +121,6 @@ interface AdminUser {
     mosque_id: string;
 }
 
-interface MosqueData {
-    id: string;
-    name: string;
-    location: string;
-    description: string;
-    verification_code: string;
-    prayer_times: {
-        fajr: string;
-        dhuhr: string;
-        asr: string;
-        maghrib: string;
-        isha: string;
-        jummah: string;
-    };
-}
-
 // Utility functions for time conversion
 const convertTo12Hour = (time24: string): string => {
     if (!time24) return '';
@@ -168,9 +155,8 @@ const convertTo24Hour = (time12: string): string => {
 
 const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [user, setUser] = useState<AdminUser | null>(null);
-    const [mosque, setMosque] = useState<MosqueData | null>(null);
-    const [loading, setLoading] = useState(true);
     const [updateLoading, setUpdateLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -185,6 +171,20 @@ const AdminDashboardPage: React.FC = () => {
     const mosqueInfoForm = useForm<MosqueInfoFormData>({
         resolver: zodResolver(mosqueInfoSchema),
     });
+
+    // Use React Query for fetching mosque data
+    const {
+        data: mosque,
+        isLoading: loading,
+        error: queryError
+    } = useAdminMosque(user?.mosque_id || '');
+
+    // Handle query errors
+    useEffect(() => {
+        if (queryError) {
+            setError(getErrorMessage(queryError));
+        }
+    }, [queryError]);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -206,57 +206,33 @@ const AdminDashboardPage: React.FC = () => {
         checkAuth();
     }, [navigate]);
 
+    // Handle query errors
     useEffect(() => {
-        const fetchMosqueData = async () => {
-            if (!user?.mosque_id) {
-                console.log('No user or mosque_id found:', user);
-                return;
-            }
-
-            try {
-                setLoading(true);
-                console.log('Fetching mosque data for ID:', user.mosque_id);
-                const response = await mosqueApi.getMosque(user.mosque_id);
-                console.log('API response:', response);
-                const mosqueData = response.data.mosque;
-                console.log('Mosque data:', mosqueData);
-
-                setMosque(mosqueData);
-
-                // Pre-fill forms with existing data (convert to 12-hour format for display)
-                prayerTimesForm.reset({
-                    fajr: convertTo12Hour(mosqueData.prayer_times?.fajr || ''),
-                    dhuhr: convertTo12Hour(mosqueData.prayer_times?.dhuhr || ''),
-                    asr: convertTo12Hour(mosqueData.prayer_times?.asr || ''),
-                    maghrib: convertTo12Hour(mosqueData.prayer_times?.maghrib || ''),
-                    isha: convertTo12Hour(mosqueData.prayer_times?.isha || ''),
-                    jummah: convertTo12Hour(mosqueData.prayer_times?.jummah || ''),
-                });
-
-                mosqueInfoForm.reset({
-                    name: mosqueData.name || '',
-                    location: mosqueData.location || '',
-                    description: mosqueData.description || '',
-                });
-            } catch (err) {
-                console.log('Error fetching mosque data:', err);
-                const errorMessage = err instanceof Error && 'response' in err &&
-                    typeof err.response === 'object' && err.response !== null &&
-                    'data' in err.response && typeof err.response.data === 'object' &&
-                    err.response.data !== null && 'error' in err.response.data
-                    ? String(err.response.data.error)
-                    : 'Failed to fetch mosque data';
-                console.log('Error message:', errorMessage);
-                setError(errorMessage);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (user) {
-            fetchMosqueData();
+        if (queryError) {
+            setError(getErrorMessage(queryError));
         }
-    }, [user, prayerTimesForm, mosqueInfoForm]);
+    }, [queryError]);
+
+    // Pre-fill forms when mosque data is available
+    useEffect(() => {
+        if (mosque) {
+            // Pre-fill forms with existing data (convert to 12-hour format for display)
+            prayerTimesForm.reset({
+                fajr: convertTo12Hour(mosque.prayer_times?.fajr || ''),
+                dhuhr: convertTo12Hour(mosque.prayer_times?.dhuhr || ''),
+                asr: convertTo12Hour(mosque.prayer_times?.asr || ''),
+                maghrib: convertTo12Hour(mosque.prayer_times?.maghrib || ''),
+                isha: convertTo12Hour(mosque.prayer_times?.isha || ''),
+                jummah: convertTo12Hour(mosque.prayer_times?.jummah || ''),
+            });
+
+            mosqueInfoForm.reset({
+                name: mosque.name || '',
+                location: mosque.location || '',
+                description: mosque.description || '',
+            });
+        }
+    }, [mosque, prayerTimesForm, mosqueInfoForm]);
 
     const handleLogout = async () => {
         setLogoutLoading(true);
@@ -297,13 +273,10 @@ const AdminDashboardPage: React.FC = () => {
             // Auto-hide success message after 5 seconds
             setTimeout(() => setSuccessMessage(null), 5000);
 
-            // Update local state with 24-hour format
-            if (mosque) {
-                setMosque({
-                    ...mosque,
-                    prayer_times: convertedData
-                });
-            }
+            // Invalidate all related caches to ensure data freshness across the app
+            queryClient.invalidateQueries({ queryKey: mosqueQueryKeys.detail(user.mosque_id) });
+            queryClient.invalidateQueries({ queryKey: mosqueQueryKeys.prayerTimes(user.mosque_id) });
+            queryClient.invalidateQueries({ queryKey: mosqueQueryKeys.lists() }); // Invalidate list cache
         } catch (err) {
             const errorMessage = err instanceof Error && 'response' in err &&
                 typeof err.response === 'object' && err.response !== null &&
@@ -331,13 +304,10 @@ const AdminDashboardPage: React.FC = () => {
             // Auto-hide success message after 5 seconds
             setTimeout(() => setSuccessMessage(null), 5000);
 
-            // Update local state
-            if (mosque) {
-                setMosque({
-                    ...mosque,
-                    ...data
-                });
-            }
+            // Invalidate all related caches to ensure data freshness across the app
+            queryClient.invalidateQueries({ queryKey: mosqueQueryKeys.detail(user.mosque_id) });
+            queryClient.invalidateQueries({ queryKey: mosqueQueryKeys.prayerTimes(user.mosque_id) });
+            queryClient.invalidateQueries({ queryKey: mosqueQueryKeys.lists() }); // Invalidate list cache
         } catch (err) {
             const errorMessage = err instanceof Error && 'response' in err &&
                 typeof err.response === 'object' && err.response !== null &&

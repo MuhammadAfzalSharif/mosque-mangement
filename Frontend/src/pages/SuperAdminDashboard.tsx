@@ -193,7 +193,12 @@ const SuperAdminDashboard: React.FC = () => {
             console.log('Fetching dashboard stats...');
             const response = await superAdminApi.getDashboardStats();
             console.log('Dashboard stats response:', response.data);
-            setStats(response.data.stats);
+            setStats({
+                ...response.data.stats,
+                mosque_deleted_admins: 0,
+                admin_removed_admins: 0,
+                code_regenerated_admins: 0,
+            });
         } catch (err) {
             console.error('Failed to fetch stats:', err);
             // Only set error on initial load, not background updates

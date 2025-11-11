@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mosqueApi } from '../lib/api';
+import { useMosque, usePrayerTimes } from '../lib/queries';
+import { getErrorMessage } from '../lib/types';
 import PrayerClock from '../components/PrayerClock';
 import {
     ArrowLeft,
@@ -16,62 +17,47 @@ import {
     RefreshCw
 } from 'react-feather';
 
-interface MosqueDetails {
-    id: string;
-    name: string;
-    location: string;
-    description: string;
-    prayer_times: {
-        fajr: string | null;
-        dhuhr: string | null;
-        asr: string | null;
-        maghrib: string | null;
-        isha: string | null;
-        jummah: string | null;
-    };
-}
-
 const MosqueDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [mosque, setMosque] = useState<MosqueDetails | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [isFavorited, setIsFavorited] = useState(false);
 
-    useEffect(() => {
-        const fetchMosqueDetails = async () => {
-            if (!id) return;
+    // Use React Query for fetching mosque details and prayer times
+    const {
+        data: mosqueData,
+        isLoading: mosqueLoading,
+        error: mosqueError,
+        refetch: refetchMosque
+    } = useMosque(id!);
 
-            try {
-                setLoading(true);
-                setError(null);
+    const {
+        data: prayerTimesData,
+        isLoading: prayerTimesLoading,
+        error: prayerTimesError,
+        refetch: refetchPrayerTimes
+    } = usePrayerTimes(id!);
 
-                // Fetch mosque details
-                const response = await mosqueApi.getPrayerTimes(id);
-                console.log('API Response:', response.data); // Debug log
-                setMosque({
-                    id: response.data.mosque.id,
-                    name: response.data.mosque.name,
-                    location: response.data.mosque.location,
-                    description: '', // No description available from prayer times endpoint
-                    prayer_times: response.data.prayer_times || {
-                        fajr: null,
-                        dhuhr: null,
-                        asr: null,
-                        maghrib: null,
-                        isha: null,
-                        jummah: null
-                    }
-                });
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to fetch mosque details');
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Combine loading and error states
+    const loading = mosqueLoading || prayerTimesLoading;
+    const error = mosqueError ? getErrorMessage(mosqueError) :
+        prayerTimesError ? getErrorMessage(prayerTimesError) : null;
 
-        fetchMosqueDetails();
-    }, [id]);
+    // Combined refetch function
+    const refetch = async () => {
+        await Promise.all([refetchMosque(), refetchPrayerTimes()]);
+    };
+
+    // Combine mosque data with prayer times
+    const mosque = mosqueData && prayerTimesData ? {
+        ...mosqueData,
+        prayer_times: prayerTimesData.prayer_times || {
+            fajr: null,
+            dhuhr: null,
+            asr: null,
+            maghrib: null,
+            isha: null,
+            jummah: null
+        }
+    } : null;
 
     useEffect(() => {
         // Check if this mosque is in favorites
@@ -187,7 +173,7 @@ const MosqueDetailPage: React.FC = () => {
                                             <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                                         </Link>
                                         <button
-                                            onClick={() => window.location.reload()}
+                                            onClick={() => refetch()}
                                             className="flex-1 group relative bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm lg:text-base transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105"
                                         >
                                             <RefreshCw className="mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4 group-hover:rotate-180 transition-transform duration-500" />

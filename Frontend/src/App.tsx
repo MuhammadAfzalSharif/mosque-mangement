@@ -1,5 +1,6 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Import pages
 import MosqueFinderPage from './pages/MosqueFinderPage';
@@ -16,40 +17,52 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<MosqueFinderPage />} />
-          <Route path="/mosques" element={<MosqueFinderPage />} />
-          <Route path="/mosques/:id" element={<MosqueDetailPage />} />
-          <Route path="/mosques/:id/apply" element={<AdminApplicationPage />} />
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <div className="App">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<MosqueFinderPage />} />
+            <Route path="/mosques" element={<Navigate to="/" replace />} />
+            <Route path="/mosques/:id" element={<MosqueDetailPage />} />
+            <Route path="/mosques/:id/apply" element={<AdminApplicationPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/admin/status" element={<AdminStatusPage />} />
-          <Route path="/admin/reapply" element={<AdminReapplicationPage />} />
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/status" element={<AdminStatusPage />} />
+            <Route path="/admin/reapply" element={<AdminReapplicationPage />} />
 
-          {/* Super Admin Routes */}
-          <Route path="/superadmin/register" element={<SuperAdminRegisterPage />} />
-          <Route path="/superadmin/login" element={<SuperAdminLoginPage />} />
-          <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+            {/* Super Admin Routes */}
+            <Route path="/superadmin/register" element={<SuperAdminRegisterPage />} />
+            <Route path="/superadmin/login" element={<SuperAdminLoginPage />} />
+            <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
 
-          {/* Password Reset Routes */}
-          <Route path="/forgot-password/:userType" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password/:userType" element={<ResetPasswordPage />} />
+            {/* Password Reset Routes */}
+            <Route path="/forgot-password/:userType" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:userType" element={<ResetPasswordPage />} />
 
-          {/* Email Verification Route */}
-          <Route path="/email-verification" element={<EmailVerificationPage />} />
+            {/* Email Verification Route */}
+            <Route path="/email-verification" element={<EmailVerificationPage />} />
 
-          {/* Catch all route - redirect to home */}
-          <Route path="*" element={<MosqueFinderPage />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Catch all route - redirect to home */}
+            <Route path="*" element={<MosqueFinderPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </QueryClientProvider>
   );
 }
 

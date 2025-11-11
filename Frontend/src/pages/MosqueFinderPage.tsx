@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { mosqueApi } from '../lib/api';
+import { useMosques } from '../lib/queries';
 import { getErrorMessage } from '../lib/types';
 import MosqueCard from '../components/MosqueCard';
 import InstallButton from '../components/InstallButton';
@@ -24,76 +24,38 @@ import {
     Flag
 } from 'react-feather';
 
-interface Mosque {
-    id: string;
-    name: string;
-    location: string;
-    description?: string;
-}
-
-interface PaginationInfo {
-    page: number;
-    limit: number;
-    total: number;
-}
-
 const MosqueFinderPage: React.FC = () => {
-    const [mosques, setMosques] = useState<Mosque[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [favorites, setFavorites] = useState<string[]>([]);
-    const [pagination, setPagination] = useState<PaginationInfo>({
-        page: 1,
-        limit: 10,
-        total: 0
-    });
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchMosques = useCallback(async (search: string = '', page: number = 1) => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await mosqueApi.getMosques({
-                search: search || undefined,
-                page,
-                limit: 6
-            });
-
-            // Sort favorites to the top
-            const sortedMosques = response.data.mosques.sort((a: Mosque, b: Mosque) => {
-                const aIsFav = favorites.includes(a.id);
-                const bIsFav = favorites.includes(b.id);
-                if (aIsFav && !bIsFav) return -1;
-                if (!aIsFav && bIsFav) return 1;
-                return 0;
-            });
-
-            setMosques(sortedMosques);
-            setPagination({
-                page: response.data.pagination.page,
-                limit: response.data.pagination.limit,
-                total: response.data.pagination.total
-            });
-        } catch (err) {
-            setError(getErrorMessage(err));
-            setMosques([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [favorites]);
-
-    useEffect(() => {
-        fetchMosques();
-    }, [fetchMosques]);
-
+    // Debounce search term
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            fetchMosques(searchTerm, 1);
+            setDebouncedSearchTerm(searchTerm);
+            setCurrentPage(1); // Reset to first page when search changes
         }, 500);
 
         return () => clearTimeout(timeoutId);
-    }, [searchTerm, fetchMosques]);
+    }, [searchTerm]);
+
+    // Use React Query for fetching mosques
+    const {
+        data: mosquesData,
+        isLoading: loading,
+        error: queryError,
+        refetch
+    } = useMosques({
+        search: debouncedSearchTerm || undefined,
+        page: currentPage,
+        limit: 6
+    });
+
+    // Extract data from query response
+    const mosques = mosquesData?.mosques || [];
+    const pagination = mosquesData?.pagination || { page: 1, limit: 6, total: 0 };
+    const error = queryError ? getErrorMessage(queryError) : null;
 
     useEffect(() => {
         // Load favorites from localStorage
@@ -108,27 +70,43 @@ const MosqueFinderPage: React.FC = () => {
 
         setFavorites(updatedFavorites);
         localStorage.setItem('favoriteMosques', JSON.stringify(updatedFavorites));
-
-        // Re-sort mosques to put favorites at the top
-        setMosques(prevMosques => {
-            return [...prevMosques].sort((a, b) => {
-                const aIsFav = updatedFavorites.includes(a.id);
-                const bIsFav = updatedFavorites.includes(b.id);
-                if (aIsFav && !bIsFav) return -1;
-                if (!aIsFav && bIsFav) return 1;
-                return 0;
-            });
-        });
     };
 
     const handlePageChange = (newPage: number) => {
-        fetchMosques(searchTerm, newPage);
+        setCurrentPage(newPage);
     };
+
+    // Sort mosques to put favorites at the top
+    const sortedMosques = [...mosques].sort((a, b) => {
+        const aIsFav = favorites.includes(a.id);
+        const bIsFav = favorites.includes(b.id);
+        if (aIsFav && !bIsFav) return -1;
+        if (!aIsFav && bIsFav) return 1;
+        return 0;
+    });
 
     const totalPages = Math.ceil(pagination.total / pagination.limit);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/20">
+            {/* CSS Animation Styles */}
+            <style>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .staggered-card {
+                    animation: fadeInUp 0.5s ease-out forwards;
+                    opacity: 0;
+                }
+            `}</style>
+
             {/* Modern Islamic Navigation Header */}
             <nav className="bg-gradient-to-r from-white via-green-50/50 to-emerald-50/30 backdrop-blur-xl border-b border-white/40 shadow-xl sticky top-0 z-50">
                 {/* 3D Background Effects */}
@@ -342,7 +320,7 @@ const MosqueFinderPage: React.FC = () => {
                                     <span className="sm:hidden">Please try again</span>
                                 </p>
                                 <button
-                                    onClick={() => fetchMosques(searchTerm, pagination.page)}
+                                    onClick={() => refetch()}
                                     className="group relative bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-semibold px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base lg:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                                 >
                                     <div className="flex items-center">
@@ -420,16 +398,23 @@ const MosqueFinderPage: React.FC = () => {
 
                                 {/* Mosques Grid */}
                                 <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
-                                    {mosques.map((mosque) => (
-                                        <MosqueCard
+                                    {sortedMosques.map((mosque, index) => (
+                                        <div
                                             key={mosque.id}
-                                            id={mosque.id}
-                                            name={mosque.name}
-                                            location={mosque.location}
-                                            description={mosque.description}
-                                            isFavorited={favorites.includes(mosque.id)}
-                                            onToggleFavorite={toggleFavorite}
-                                        />
+                                            className="staggered-card"
+                                            style={{
+                                                animationDelay: `${Math.min(index * 0.1, 2)}s`,
+                                            }}
+                                        >
+                                            <MosqueCard
+                                                id={mosque.id}
+                                                name={mosque.name}
+                                                location={mosque.location}
+                                                description={mosque.description}
+                                                isFavorited={favorites.includes(mosque.id)}
+                                                onToggleFavorite={toggleFavorite}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
 
