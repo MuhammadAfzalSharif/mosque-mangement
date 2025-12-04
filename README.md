@@ -57,20 +57,20 @@ Below is a visual tour of the application interface, showcasing the flow from th
 
 |                                                       |                                                       |
 | :---------------------------------------------------: | :---------------------------------------------------: |
-| ![Dashboard View 1](<images/Screenshot%20(1567).png>) | ![Dashboard View 2](<images/Screenshot%20(1568).png>) |
-| ![Dashboard View 3](<images/Screenshot%20(1569).png>) | ![Dashboard View 4](<images/Screenshot%20(1570).png>) |
-| ![Dashboard View 5](<images/Screenshot%20(1571).png>) | ![Dashboard View 6](<images/Screenshot%20(1572).png>) |
-| ![Dashboard View 7](<images/Screenshot%20(1573).png>) | ![Dashboard View 8](<images/Screenshot%20(1574).png>) |
-| ![Dashboard View 9](<images/Screenshot%20(1575).png>) |                                                       |
+| ![Dashboard View 1](<images/Screenshot%20(1567).jpg>) | ![Dashboard View 2](<images/Screenshot%20(1568).jpg>) |
+| ![Dashboard View 3](<images/Screenshot%20(1569).jpg>) | ![Dashboard View 4](<images/Screenshot%20(1570).jpg>) |
+| ![Dashboard View 5](<images/Screenshot%20(1571).jpg>) | ![Dashboard View 6](<images/Screenshot%20(1572).jpg>) |
+| ![Dashboard View 7](<images/Screenshot%20(1573).jpg>) | ![Dashboard View 8](<images/Screenshot%20(1574).jpg>) |
+| ![Dashboard View 9](<images/Screenshot%20(1575).jpg>) |                                                       |
 
 #### Core Features & Navigation
 
 |                                                    |                                                    |
 | :------------------------------------------------: | :------------------------------------------------: |
-| ![Feature View 1](<images/Screenshot%20(680).png>) | ![Feature View 2](<images/Screenshot%20(681).png>) |
-| ![Feature View 3](<images/Screenshot%20(682).png>) | ![Feature View 4](<images/Screenshot%20(683).png>) |
-| ![Feature View 5](<images/Screenshot%20(684).png>) | ![Feature View 6](<images/Screenshot%20(686).png>) |
-| ![Feature View 7](<images/Screenshot%20(687).png>) | ![Feature View 8](<images/Screenshot%20(688).png>) |
+| ![Feature View 1](<images/Screenshot%20(680).jpg>) | ![Feature View 2](<images/Screenshot%20(681).jpg>) |
+| ![Feature View 3](<images/Screenshot%20(682).jpg>) | ![Feature View 4](<images/Screenshot%20(683).jpg>) |
+| ![Feature View 5](<images/Screenshot%20(684).jpg>) | ![Feature View 6](<images/Screenshot%20(686).jpg>) |
+| ![Feature View 7](<images/Screenshot%20(687).jpg>) | ![Feature View 8](<images/Screenshot%20(688).jpg>) |
 
 ---
 
